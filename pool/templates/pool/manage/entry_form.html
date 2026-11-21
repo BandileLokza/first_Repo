@@ -1,0 +1,276 @@
+{% extends "pool/manage/base.html" %}
+
+{% block manager_title %}{{ page_title }}{% endblock %}
+
+{% block manager_content %}
+<section class="pool-manager-panel">
+    <h2>{{ page_title }}</h2>
+    {% if has_generated_knockout_bracket %}
+    <p class="pool-manager-help">For a direct singles knockout, an eligible late player can be placed only into a safe open first-round BYE. Existing entrants stay in their drawn positions; random-draw opponents are chosen server-side.</p>
+    {% endif %}
+    <form method="post" class="pool-manager-form" novalidate>
+        {% csrf_token %}
+        {% if player_picker %}
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger" role="alert">{{ form.non_field_errors }}</div>
+            {% endif %}
+            {% for hidden in form.hidden_fields %}
+                {{ hidden }}
+                {% for error in hidden.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+            {% endfor %}
+            <div
+                class="mb-3"
+                id="pool-player-picker"
+                data-search-url="{{ player_search_url }}"
+                data-two-lives="{% if allows_two_lives %}true{% else %}false{% endif %}"
+            >
+                <label class="form-label" for="pool-player-search">Existing players</label>
+                <input
+                    class="form-control"
+                    id="pool-player-search"
+                    type="search"
+                    autocomplete="off"
+                    placeholder="Search by full name or nickname"
+                    aria-describedby="pool-player-search-help"
+                >
+                <div id="pool-player-search-help" class="form-text">Search for active players, then add one or more people to this entry basket.</div>
+                <label class="form-label mt-2" for="pool-player-region">Region filter</label>
+                <input
+                    class="form-control"
+                    id="pool-player-region"
+                    type="search"
+                    autocomplete="off"
+                    placeholder="Optional region"
+                >
+                <div id="pool-player-results" class="list-group mt-2" role="listbox" aria-label="Player search results"></div>
+            </div>
+            <section class="mb-3" aria-labelledby="pool-selected-players-title">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                    <h3 id="pool-selected-players-title" class="h5 mb-0">Selected players</h3>
+                    <p id="pool-player-selected-count" class="pool-manager-help mb-0" aria-live="polite">No players selected.</p>
+                </div>
+                <div id="pool-player-selected" class="list-group mt-2"></div>
+                {% for error in form.player_ids.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+            </section>
+        {% else %}
+        {% include "pool/manage/_form_fields.html" with form=form %}
+        {% endif %}
+        <div class="pool-manager-actions">
+            {% if player_picker %}
+            <button class="btn btn-primary" type="submit"><span id="pool-player-submit-label">Add selected players</span></button>
+            {% else %}
+            <button class="btn btn-primary" type="submit">Save entry</button>
+            {% endif %}
+            {% if can_save_and_add_another %}<button class="btn btn-outline-primary" type="submit" name="save_and_add_another" value="1">Save &amp; add another</button>{% endif %}
+            <a class="btn btn-outline-secondary" href="{% url 'pool:manage_competition_entries' competition.slug %}">Cancel</a>
+        </div>
+    </form>
+    {% if player_picker %}
+    <p class="pool-manager-help mt-3 mb-0">Cannot find the person? <a href="{% url 'pool:manage_competition_entry_register_player' competition.slug %}">Register a new player</a>.</p>
+    {% endif %}
+</section>
+{% if player_picker %}
+{{ selected_players|json_script:"pool-selected-players-data" }}
+<script>
+(function () {
+    const picker = document.getElementById("pool-player-picker");
+    if (!picker) {
+        return;
+    }
+    const form = picker.closest("form");
+    const searchInput = document.getElementById("pool-player-search");
+    const regionInput = document.getElementById("pool-player-region");
+    const baseHiddenInput = document.getElementById("{{ form.player_ids.id_for_label }}");
+    const selectedCount = document.getElementById("pool-player-selected-count");
+    const selectedList = document.getElementById("pool-player-selected");
+    const submitLabel = document.getElementById("pool-player-submit-label");
+    const results = document.getElementById("pool-player-results");
+    const allowsTwoLives = picker.dataset.twoLives === "true";
+    const playerIdsFieldName = "{{ form.player_ids.html_name }}";
+    const selectedPlayers = new Map();
+    let debounceTimer;
+    let activeRequest;
+
+    try {
+        const initialPlayers = JSON.parse(
+            document.getElementById("pool-selected-players-data").textContent
+        );
+        initialPlayers.forEach(function (player) {
+            selectedPlayers.set(String(player.id), player);
+        });
+    } catch (error) {
+        // The server remains authoritative; a malformed optional restore
+        // payload should never prevent a manager from searching again.
+    }
+
+    function playerLabel(player) {
+        let label = player.full_name;
+        if (player.nickname) {
+            label += ' ("' + player.nickname + '")';
+        }
+        if (player.region) {
+            label += " - " + player.region;
+        }
+        return label;
+    }
+
+    function clearResults(message) {
+        results.replaceChildren();
+        if (message) {
+            const item = document.createElement("p");
+            item.className = "pool-manager-help mb-0";
+            item.textContent = message;
+            results.appendChild(item);
+        }
+    }
+
+    function updateSubmitLabel(count) {
+        if (!count) {
+            submitLabel.textContent = "Add selected players";
+            return;
+        }
+        submitLabel.textContent = "Add " + count + (count === 1 ? " player" : " players");
+    }
+
+    function syncSelectedPlayers() {
+        form.querySelectorAll("input[data-pool-selected-player-id]").forEach(function (input) {
+            input.remove();
+        });
+        if (baseHiddenInput) {
+            baseHiddenInput.value = "";
+        }
+        selectedList.replaceChildren();
+
+        const players = Array.from(selectedPlayers.values());
+        players.forEach(function (player) {
+            const hiddenInput = document.createElement("input");
+            hiddenInput.type = "hidden";
+            hiddenInput.name = playerIdsFieldName;
+            hiddenInput.value = String(player.id);
+            hiddenInput.dataset.poolSelectedPlayerId = String(player.id);
+            form.appendChild(hiddenInput);
+
+            const item = document.createElement("div");
+            item.className = "list-group-item d-flex flex-wrap align-items-center justify-content-between gap-2";
+            const name = document.createElement("strong");
+            name.textContent = playerLabel(player);
+            item.appendChild(name);
+
+            const actions = document.createElement("div");
+            actions.className = "d-flex align-items-center gap-2";
+            if (allowsTwoLives) {
+                const livesLabel = document.createElement("label");
+                livesLabel.className = "visually-hidden";
+                livesLabel.htmlFor = "pool-player-lives-" + player.id;
+                livesLabel.textContent = "Lives for " + playerLabel(player);
+                const lives = document.createElement("select");
+                lives.className = "form-select form-select-sm";
+                lives.id = livesLabel.htmlFor;
+                lives.name = "player_lives_" + player.id;
+                [["1", "1 life"], ["2", "2 lives"]].forEach(function (choice) {
+                    const option = document.createElement("option");
+                    option.value = choice[0];
+                    option.textContent = choice[1];
+                    lives.appendChild(option);
+                });
+                lives.value = String(player.lives || 1);
+                lives.addEventListener("change", function () {
+                    player.lives = Number(lives.value);
+                });
+                actions.appendChild(livesLabel);
+                actions.appendChild(lives);
+            }
+
+            const remove = document.createElement("button");
+            remove.type = "button";
+            remove.className = "btn btn-sm btn-outline-secondary";
+            remove.textContent = "Remove";
+            remove.addEventListener("click", function () {
+                selectedPlayers.delete(String(player.id));
+                syncSelectedPlayers();
+                showResultsFromCurrentSearch();
+            });
+            actions.appendChild(remove);
+            item.appendChild(actions);
+            selectedList.appendChild(item);
+        });
+
+        selectedCount.textContent = players.length
+            ? players.length + (players.length === 1 ? " player selected." : " players selected.")
+            : "No players selected.";
+        updateSubmitLabel(players.length);
+    }
+
+    function showResults(players) {
+        results.replaceChildren();
+        if (!players.length) {
+            clearResults("No eligible active players matched that search.");
+            return;
+        }
+        players.forEach(function (player) {
+            const button = document.createElement("button");
+            const isSelected = selectedPlayers.has(String(player.id));
+            button.type = "button";
+            button.className = "list-group-item list-group-item-action";
+            button.setAttribute("role", "option");
+            button.textContent = isSelected ? "Added: " + playerLabel(player) : "+ " + playerLabel(player);
+            button.disabled = isSelected;
+            button.addEventListener("click", function () {
+                selectedPlayers.set(String(player.id), Object.assign({lives: 1}, player));
+                syncSelectedPlayers();
+                showResults(players);
+            });
+            results.appendChild(button);
+        });
+    }
+
+    function searchPlayers() {
+        const query = searchInput.value.trim();
+        if (!query) {
+            clearResults("");
+            return;
+        }
+        if (activeRequest) {
+            activeRequest.abort();
+        }
+        activeRequest = new AbortController();
+        const url = new URL(picker.dataset.searchUrl, window.location.origin);
+        url.searchParams.set("q", query);
+        if (regionInput.value.trim()) {
+            url.searchParams.set("region", regionInput.value.trim());
+        }
+        fetch(url, {signal: activeRequest.signal, headers: {"Accept": "application/json"}})
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error("Player search failed.");
+                }
+                return response.json();
+            })
+            .then(function (payload) {
+                showResults(payload.results || []);
+            })
+            .catch(function (error) {
+                if (error.name !== "AbortError") {
+                    clearResults("Player search is temporarily unavailable.");
+                }
+            });
+    }
+
+    function showResultsFromCurrentSearch() {
+        if (searchInput.value.trim()) {
+            searchPlayers();
+        }
+    }
+
+    function queueSearch() {
+        window.clearTimeout(debounceTimer);
+        debounceTimer = window.setTimeout(searchPlayers, 180);
+    }
+
+    searchInput.addEventListener("input", queueSearch);
+    regionInput.addEventListener("input", queueSearch);
+    syncSelectedPlayers();
+}());
+</script>
+{% endif %}
+{% endblock %}

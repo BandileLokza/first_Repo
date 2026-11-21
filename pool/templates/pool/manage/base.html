@@ -1,0 +1,165 @@
+{% extends pool_manager_base_template %}
+{% load static %}
+
+{% block title %}{% block manager_title %}Pool Manager{% endblock %} | EsportsLive{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'pool/css/pool.css' %}">
+{% endblock %}
+
+{% block content %}
+{% if not pool_manager_tab_partial %}
+<main
+    class="pool-page pool-manager-page"
+    {% if manager_tab_shell %}
+    data-pool-manager-tab-shell
+    data-pool-manager-active-tab="{{ manager_active_tab }}"
+    data-pool-manager-partial-url="{{ manager_tab_partial_url }}"
+    {% endif %}
+>
+    <header class="pool-manager-header">
+        <div>
+            <p class="pool-eyebrow">
+                {% if scorer_mode %}
+                    8-Ball Pool scorer
+                {% else %}
+                    8-Ball Pool manager
+                {% endif %}
+            </p>
+            {% if competition %}
+            <h1>{{ competition.name }}</h1>
+            <p>{{ competition.get_participant_mode_display }} · {{ competition.get_format_type_display }}</p>
+            {% else %}
+            <h1>{% block manager_heading %}Pool Manager{% endblock %}</h1>
+            <p>Manage only the pool competitions assigned to your account.</p>
+            {% endif %}
+        </div>
+        <div class="pool-manager-actions">
+            {% if competition and not scorer_mode %}
+            <a
+                class="btn btn-outline-primary"
+                href="{% url 'pool:manage_competition_preview' competition.slug %}"
+            >
+                Preview public page
+            </a>
+            {% endif %}
+        </div>
+    </header>
+
+    {% if competition.is_archived %}
+    <section class="alert alert-secondary" role="status">
+        <strong>Archived season</strong> &mdash; historical data is read-only.
+        {% if request.user.is_superuser %}
+        Existing superuser correction paths remain available for exceptional cases.
+        {% endif %}
+    </section>
+    {% endif %}
+
+    {% if page_navigation_back_url %}
+    {% include "pool/_page_navigation.html" with back_fallback=page_navigation_back_url show_pool_home=page_navigation_show_pool_home %}
+    {% endif %}
+
+    {% if competition and not scorer_mode %}
+        {% if manager_tab_shell %}
+    <nav
+        class="pool-manager-nav"
+        aria-label="Manage {{ competition.name }}"
+        role="tablist"
+        data-pool-manager-tablist
+    >
+        {% for tab in manager_tabs %}
+        <a
+            id="pool-manager-tab-{{ tab.key }}"
+            class="{% if tab.key == manager_active_tab %}is-active{% endif %}"
+            href="{{ tab.url }}"
+            role="tab"
+            data-pool-manager-tab="{{ tab.key }}"
+            aria-controls="pool-manager-panel-{{ tab.key }}"
+            aria-selected="{% if tab.key == manager_active_tab %}true{% else %}false{% endif %}"
+            tabindex="{% if tab.key == manager_active_tab %}0{% else %}-1{% endif %}"
+        >{{ tab.label }}</a>
+        {% endfor %}
+    </nav>
+        {% else %}
+    <nav class="pool-manager-nav" aria-label="Manage {{ competition.name }}">
+        <a class="{% if request.resolver_match.url_name == 'manage_competition_dashboard' %}is-active{% endif %}" href="{% url 'pool:manage_competition_dashboard' competition.slug %}">Overview</a>
+        <a class="{% if request.resolver_match.url_name == 'manage_competition_information' %}is-active{% endif %}" href="{% url 'pool:manage_competition_information' competition.slug %}">Information</a>
+        {% if not competition.is_money_match %}<a class="{% if 'entry' in request.resolver_match.url_name %}is-active{% endif %}" href="{% url 'pool:manage_competition_entries' competition.slug %}">Entries</a>{% endif %}
+        {% if competition.participant_mode == 'TEAMS' and not competition.is_money_match %}
+        <a class="{% if 'team' in request.resolver_match.url_name or 'roster' in request.resolver_match.url_name %}is-active{% endif %}" href="{% url 'pool:manage_competition_teams' competition.slug %}">Teams &amp; rosters</a>
+        {% endif %}
+        {% if not competition.is_money_match %}<a class="{% if 'stage' in request.resolver_match.url_name %}is-active{% endif %}" href="{% url 'pool:manage_competition_stages' competition.slug %}">Stages</a>{% endif %}
+        {% if competition.has_league_or_group_stage %}
+        <a class="{% if 'standing' in request.resolver_match.url_name %}is-active{% endif %}" href="{% url 'pool:manage_competition_standings' competition.slug %}">Standings</a>
+        {% if request.user.is_superuser %}<a class="{% if 'base_standing' in request.resolver_match.url_name %}is-active{% endif %}" href="{% url 'pool:manage_competition_base_standings' competition.slug %}">Base standings</a>{% endif %}
+        <a class="{% if 'fixture_generator' in request.resolver_match.url_name %}is-active{% endif %}" href="{% url 'pool:manage_competition_fixture_generator' competition.slug %}">Fixture generator</a>
+        {% endif %}
+        {% if competition.format_type == 'LEAGUE_KNOCKOUT' %}
+        <a class="{% if 'group' in request.resolver_match.url_name %}is-active{% endif %}" href="{% url 'pool:manage_competition_groups' competition.slug %}">Groups</a>
+        <a class="{% if 'qualification' in request.resolver_match.url_name %}is-active{% endif %}" href="{% url 'pool:manage_competition_qualifications' competition.slug %}">Qualification</a>
+        {% endif %}
+        {% if competition.has_knockout_stage %}
+        <a class="{% if 'round' in request.resolver_match.url_name %}is-active{% endif %}" href="{% url 'pool:manage_competition_knockout_rounds' competition.slug %}">Rounds</a>
+        <a class="{% if 'bracket' in request.resolver_match.url_name %}is-active{% endif %}" href="{% url 'pool:manage_competition_bracket' competition.slug %}">Bracket</a>
+        {% endif %}
+        <a class="{% if 'fixture' in request.resolver_match.url_name or request.resolver_match.url_name == 'manage_match' %}is-active{% endif %}" href="{% url 'pool:manage_competition_fixtures' competition.slug %}">{% if competition.is_money_match %}Money Match{% else %}Fixtures &amp; results{% endif %}</a>
+        {% if is_owner %}
+        <a class="{% if 'admin' in request.resolver_match.url_name %}is-active{% endif %}" href="{% url 'pool:manage_competition_admins' competition.slug %}">Administrators</a>
+        {% endif %}
+    </nav>
+        {% endif %}
+    {% endif %}
+
+    {% if messages %}
+    <section aria-label="Manager messages">
+        {% for message in messages %}
+        <div class="alert {% if message.tags == 'error' %}alert-danger{% elif message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}" role="status">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </section>
+    {% endif %}
+
+    {% if manager_tab_shell %}
+    <div>
+        <section
+            id="pool-manager-panel-{{ manager_active_tab }}"
+            role="tabpanel"
+            aria-labelledby="pool-manager-tab-{{ manager_active_tab }}"
+            data-pool-manager-tab-panel="{{ manager_active_tab }}"
+            data-loaded="true"
+            tabindex="0"
+        >
+    {% endif %}
+{% endif %}
+
+{% block manager_content %}{% endblock %}
+
+{% if not pool_manager_tab_partial %}
+    {% if manager_tab_shell %}
+        </section>
+        {% for tab in manager_tabs %}
+            {% if tab.key != manager_active_tab %}
+        <section
+            id="pool-manager-panel-{{ tab.key }}"
+            role="tabpanel"
+            aria-labelledby="pool-manager-tab-{{ tab.key }}"
+            data-pool-manager-tab-panel="{{ tab.key }}"
+            aria-hidden="true"
+            hidden
+            tabindex="0"
+        ></section>
+            {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+</main>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+{% if manager_tab_shell and not pool_manager_tab_partial %}
+<script src="{% static 'pool/js/manager_tabs.js' %}" defer></script>
+{% endif %}
+{% endblock %}

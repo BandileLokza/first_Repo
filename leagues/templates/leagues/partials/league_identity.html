@@ -1,0 +1,33 @@
+{# Canonical public football league identity: series logo plus its name. #}
+{% if variant == "detail" %}
+    {% if league.series.logo %}<img src="{{ league.series.logo.url }}" alt="{{ league.name }} logo" class="league-detail-logo" decoding="async">{% else %}<span class="league-detail-logo league-detail-logo--fallback" aria-hidden="true">⚽</span>{% endif %}
+    <div class="league-detail-info">
+        <h2>{{ league.name }}</h2>
+        <p class="league-season mb-0">Season: {{ league.season }}</p>
+        {% if season_options %}
+            <div class="mt-2">
+                <label for="season-selector" class="form-label mb-1">Season</label>
+                <select id="season-selector" class="form-select form-select-sm" style="max-width: 220px;" onchange="if (this.value) { window.location.assign(this.value); }">
+                    {% for option in season_options %}
+                        <option value="{{ option.url }}" {% if option.is_current %}selected{% endif %}>{{ option.competition.season }}{% if option.competition.is_archived %} (Archived){% endif %}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        {% endif %}
+    </div>
+{% elif variant == "card" %}
+    <span class="league-card-identity">
+        {% if league.series.logo %}<img src="{{ league.series.logo.url }}" alt="{{ league.name }} logo" class="league-card-logo" loading="lazy" decoding="async">{% else %}<span class="league-card-logo league-card-logo--fallback" aria-hidden="true">⚽</span>{% endif %}
+        <a href="{% url 'league_detail' league.slug %}">{{ league.name }}</a>
+    </span>
+{% elif variant == "row" %}
+    <span class="league-row-identity">
+        {% if league.series.logo %}<img src="{{ league.series.logo.url }}" alt="" class="league-row-logo" loading="lazy" decoding="async">{% else %}<span class="league-row-logo league-row-logo--fallback" aria-hidden="true">⚽</span>{% endif %}
+        <span>{{ league.name }}</span>
+    </span>
+{% else %}
+    <span class="league-inline-identity">
+        {% if league.series.logo %}<img src="{{ league.series.logo.url }}" alt="{{ league.name }} logo" class="league-inline-logo" loading="lazy" decoding="async">{% else %}<span class="league-inline-logo league-inline-logo--fallback" aria-hidden="true">⚽</span>{% endif %}
+        <span>{{ league.name }}</span>
+    </span>
+{% endif %}

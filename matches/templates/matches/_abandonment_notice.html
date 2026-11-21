@@ -1,0 +1,35 @@
+{# Kept outside the three-column scoreboard so notices never squeeze the teams. #}
+{% if match.status == "FINISHED" and match.abandonment_resolution == "AWARDED" %}
+    <div class="match-abandonment-notice alert alert-warning">
+        <strong>Official Result Awarded</strong>
+        <p>Result awarded by league administration. Original match abandoned at {{ match.abandoned_minute }}'.</p>
+        {% if can_manage_abandoned_decision %}<div class="match-abandonment-actions"><a class="btn btn-sm btn-outline-warning" href="{% url 'league_manager:resolve_abandoned_match' match.competition.slug match.id %}">Review / Correct Decision</a></div>{% endif %}
+    </div>
+{% elif match.status == "FINISHED" and match.abandonment_resolution == "CONFIRMED" %}
+    <div class="match-abandonment-notice alert alert-success">
+        <strong>Score Confirmed Following Abandonment</strong>
+        <p>Original match abandoned at {{ match.abandoned_minute }}'.</p>
+        {% if can_manage_abandoned_decision %}<div class="match-abandonment-actions"><a class="btn btn-sm btn-outline-success" href="{% url 'league_manager:resolve_abandoned_match' match.competition.slug match.id %}">Review / Correct Decision</a></div>{% endif %}
+    </div>
+{% elif match.status == "ABANDONED" %}
+    {% if match.abandonment_resolution == "VOID" %}
+        <div class="match-abandonment-notice alert alert-secondary">
+            <strong>Match Voided</strong>
+            <p>No points awarded. {{ match.abandon_reason }}</p>
+            {% if can_manage_abandoned_decision %}<div class="match-abandonment-actions"><a class="btn btn-sm btn-outline-secondary" href="{% url 'league_manager:resolve_abandoned_match' match.competition.slug match.id %}">Review / Correct Decision</a></div>{% endif %}
+        </div>
+    {% elif match.abandonment_resolution == "REPLAY" and current_abandonment_decision.replay_match %}
+        <div class="match-abandonment-notice alert alert-info">
+            <strong>Match Abandoned</strong>
+            <p>A full replay has been ordered.</p>
+            <a href="{% url 'match_detail' current_abandonment_decision.replay_match.id %}">View Replay Fixture</a>
+        </div>
+    {% else %}
+        <div class="match-abandonment-notice alert alert-danger">
+            <strong>Match Abandoned</strong>
+            <p>Abandoned at {{ match.abandoned_minute|default_if_none:match.minute }}'. {{ match.abandon_reason }}</p>
+            <p>This score does not affect league standings.</p>
+            {% if can_resolve_abandoned_match %}<div class="match-abandonment-actions"><a class="btn btn-sm btn-outline-danger" href="{% url 'league_manager:resolve_abandoned_match' match.competition.slug match.id %}">Resolve Abandoned Match</a></div>{% endif %}
+        </div>
+    {% endif %}
+{% endif %}

@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+
+{% block title %}Knockout Rounds - {{ league.name }}{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+
+    <div>
+        <a
+            href="{% url 'league_manager:league_dashboard' league.slug %}"
+            class="back-btn"
+        >
+            ← BACK
+        </a>
+
+        <h2 class="mt-3 mb-1">
+            Manage Knockout Rounds
+        </h2>
+
+        <p class="text-muted mb-0">
+            {{ league.name }}
+        </p>
+    </div>
+
+    {% if existing_rounds %}
+        <a href="{% url 'league_manager:knockout_bracket' league.slug %}" class="btn btn-outline-primary">
+            Manage connected bracket
+        </a>
+    {% endif %}
+
+</div>
+
+
+{% if knockout_matches_exist %}
+    <div class="alert alert-warning">
+        The knockout structure is locked because knockout fixtures or a
+        connected bracket already exist. Existing bracket state must be preserved.
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        Select how many teams will enter the knockout section.
+        The required rounds will be generated automatically.
+    </div>
+{% endif %}
+
+
+<div class="row g-4">
+
+    <div class="col-12 col-lg-5">
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+
+                <h4>
+                    Knockout Setup
+                </h4>
+
+                {% if league.format_type == "GROUP_KNOCKOUT" %}
+                    <p class="text-muted">
+                        Select the number of teams that will advance
+                        from the groups into the knockout section.
+                    </p>
+                {% else %}
+                    <p class="text-muted">
+                        Select the number of teams participating in
+                        the knockout competition.
+                    </p>
+                {% endif %}
+
+
+                {% if not knockout_matches_exist %}
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="generate">
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+
+                            <label
+                                for="{{ form.knockout_size.id_for_label }}"
+                                class="form-label"
+                            >
+                                Teams Entering Knockout Stage
+                            </label>
+
+                            {{ form.knockout_size }}
+
+                            {% for error in form.knockout_size.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+
+                            <div class="form-text">
+                                {{ form.knockout_size.help_text }}
+                            </div>
+
+                        </div>
+
+                        {% if existing_rounds %}
+                            <div class="alert alert-warning">
+                                Saving a different size will replace
+                                the current unused knockout rounds.
+                            </div>
+                        {% endif %}
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                            onclick="return confirm('Generate this knockout round structure?');"
+                        >
+                            Generate Knockout Rounds
+                        </button>
+
+                    </form>
+                {% else %}
+                    <div class="mb-2">
+                        <strong>Configured size:</strong>
+
+                        {% if league.knockout_size %}
+                            {{ league.knockout_size }} teams
+                        {% else %}
+                            Not recorded
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+            </div>
+        </div>
+
+    </div>
+
+
+    <div class="col-12 col-lg-7">
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+
+                <h4 class="mb-3">
+                    Current Rounds
+                </h4>
+
+                {% for stage in existing_rounds %}
+
+                    <div class="border rounded p-3 mb-3">
+
+                        <div class="d-flex justify-content-between align-items-center gap-3">
+
+                            <div>
+                                <strong>
+                                    {{ stage.order }}. {{ stage.name }}
+                                </strong>
+
+                                <div class="small text-muted">
+                                    Knockout round
+                                </div>
+                            </div>
+
+                            {% if stage.fixture_count %}
+                                <span class="badge bg-primary">
+                                    {{ stage.fixture_count }}
+                                    fixture{{ stage.fixture_count|pluralize }}
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary">
+                                    No fixtures
+                                </span>
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                {% empty %}
+
+                    <div class="text-center text-muted py-4">
+                        No knockout rounds have been configured.
+                    </div>
+
+                {% endfor %}
+
+                {% if rule_form_rows %}
+                    <hr class="my-4">
+                    <h5>Football Result Rules</h5>
+                    <p class="text-muted small">
+                        These settings control only football knockout matches.
+                        A round is locked once one of its fixtures has started
+                        or has a recorded result. Existing rounds without rules
+                        must be configured here before their results can be entered.
+                    </p>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="save_rules">
+
+                        {% for row in rule_form_rows %}
+                            <div class="border rounded p-3 mb-3">
+                                <div class="d-flex justify-content-between gap-2 mb-3">
+                                    <strong>{{ row.stage.name }}</strong>
+                                    <div>
+                                        {% if not row.rule_exists %}
+                                            <span class="badge bg-warning text-dark">Needs configuration</span>
+                                        {% endif %}
+                                        {% if row.locked %}
+                                            <span class="badge bg-secondary">Locked</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                {% if row.form.non_field_errors %}
+                                    <div class="alert alert-danger py-2">
+                                        {{ row.form.non_field_errors }}
+                                    </div>
+                                {% endif %}
+
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-5">
+                                        <label class="form-label" for="{{ row.form.number_of_legs.id_for_label }}">
+                                            Legs
+                                        </label>
+                                        {{ row.form.number_of_legs }}
+                                        {{ row.form.number_of_legs.errors }}
+                                    </div>
+                                    <div class="col-12 col-md-7">
+                                        <label class="form-label" for="{{ row.form.decider_policy.id_for_label }}">
+                                            If the tie is level
+                                        </label>
+                                        {{ row.form.decider_policy }}
+                                        {{ row.form.decider_policy.errors }}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+
+                        <button type="submit" class="btn btn-success">
+                            Save Football Rules
+                        </button>
+                    </form>
+                {% endif %}
+
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

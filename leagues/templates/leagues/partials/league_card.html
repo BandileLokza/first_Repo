@@ -1,0 +1,35 @@
+{% with league=item.league %}
+<div class="league-block">
+    <div class="league-header-row">
+        <h4 class="league-title league-card-title">{% include "leagues/partials/league_identity.html" with variant="card" %}</h4>
+        {% if league.predictions_enabled %}
+            <a href="{% url 'league_predictions' league.slug %}" class="prediction-title-btn">Predict</a>
+        {% endif %}
+    </div>
+    {% if item.display_label %}<div class="league-section-label">{{ item.display_label }}</div>{% endif %}
+    {% for match in item.display_matches %}
+    <a href="{% url 'match_detail' match.id %}" class="league-match league-match--compact {% if match.status == 'LIVE' %}live{% endif %}{% if match.status == 'LIVE' or match.status == 'FINISHED' or match.status == 'ABANDONED' %} league-match--has-score{% endif %}">
+        {% if match.status == "LIVE" %}
+            <div class="match-time live-indicator">LIVE {{ match.get_display_minute }}'</div>
+        {% elif match.status == "FINISHED" %}
+            <div class="match-time result-indicator">{{ match.match_date|date:"M d" }} &bull; {{ match.match_date|date:"H:i" }} <span class="status-text">FT</span></div>
+        {% elif match.status == "ABANDONED" %}
+            <div class="match-time result-indicator">{{ match.match_date|date:"M d" }} &bull; {{ match.match_date|date:"H:i" }} <span class="status-text">ABANDONED</span></div>
+        {% else %}
+            <div class="match-time upcoming-indicator">{% if match.match_date %}{{ match.match_date|date:"M d" }} &bull; {{ match.match_date|date:"H:i" }}{% else %}Date: TBA{% endif %} <span class="status-text">UPCOMING</span></div>
+        {% endif %}
+        <div class="match-teams compact-team-column">
+            <div class="team-line"><div class="team-info">{% if match.home_team.logo %}<img src="{{ match.home_team.logo.url }}" class="team-logo" alt="" loading="lazy" decoding="async">{% endif %}<span>{{ match.home_team }}</span></div></div>
+            <div class="team-line"><div class="team-info">{% if match.away_team.logo %}<img src="{{ match.away_team.logo.url }}" class="team-logo" alt="" loading="lazy" decoding="async">{% endif %}<span>{{ match.away_team }}</span></div></div>
+        </div>
+        {% if match.status == "LIVE" or match.status == "FINISHED" or match.status == "ABANDONED" %}
+            <div class="compact-score-column" aria-label="Score: {{ match.home_score }} to {{ match.away_score }}">
+                <span class="compact-score">{{ match.home_score }}</span>
+                <span class="compact-score">{{ match.away_score }}</span>
+            </div>
+        {% endif %}
+    </a>
+    {% empty %}<div class="text-muted small">No matches available.</div>{% endfor %}
+    <div class="see-more-container"><a href="{% url 'league_detail' league.slug %}" class="see-more-btn">See more &rarr;</a></div>
+</div>
+{% endwith %}

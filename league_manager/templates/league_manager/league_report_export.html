@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Export {{ report_kind|title }} - {{ league.name }}{% endblock %}
+{% block content %}
+{% include "league_manager/_report_messages.html" %}
+<a href="{% url 'league_manager:league_dashboard' league.slug %}" class="back-btn">&larr; BACK</a>
+<h2 class="mt-3 mb-1">Export {{ report_kind|title }}</h2>
+<p class="text-muted">{{ league.name }} &middot; Season {{ league.season }}</p>
+{% if stationery_url %}<p><a class="btn btn-outline-primary" href="{{ stationery_url }}">League stationery</a></p>{% endif %}
+{% if warnings %}
+<div class="alert alert-warning"><strong>{% if report_kind == 'FIXTURES' %}Fixture export warning{% else %}Incomplete results warning{% endif %}</strong><ul class="mb-0 mt-2">{% for warning in warnings %}<li>{{ warning }}</li>{% endfor %}</ul>{% if confirm_download %}<p class="mb-0 mt-2">Unfinished fixtures are not included and no score will be invented. Confirm to download the available final results.</p>{% endif %}</div>
+{% endif %}
+<div class="card shadow-sm"><div class="card-body">
+<form method="post" id="league-report-form">
+    {% csrf_token %}
+    {% if report_kind == 'FIXTURES' %}
+    <fieldset class="mb-4"><legend class="form-label">Fixture export scope</legend>
+        {% for value, label, help_text in fixture_scope_options %}
+        <div class="form-check mb-2"><input class="form-check-input" type="radio" name="fixture_scope" id="fixture-scope-{{ value|lower }}" value="{{ value }}" {% if fixture_scope == value %}checked{% endif %}><label class="form-check-label" for="fixture-scope-{{ value|lower }}"><span class="fw-semibold">{{ label }}</span><span class="d-block text-muted small">{{ help_text }}</span></label></div>
+        {% endfor %}
+    </fieldset>
+    <fieldset class="mb-4" data-fixture-gameweek-mode><legend class="form-label">Weekly gameweek selection</legend>
+        <div class="form-check"><input class="form-check-input" type="radio" name="fixture_gameweek_mode" id="fixture-gameweek-mode-automatic" value="AUTOMATIC" {% if fixture_gameweek_mode != 'MANUAL' %}checked{% endif %}><label class="form-check-label" for="fixture-gameweek-mode-automatic"><span class="fw-semibold">Automatic selection</span><span class="d-block text-muted small">Choose the next relevant gameweek from confirmed future fixtures.</span></label></div>
+        <div class="form-check mt-2"><input class="form-check-input" type="radio" name="fixture_gameweek_mode" id="fixture-gameweek-mode-manual" value="MANUAL" {% if fixture_gameweek_mode == 'MANUAL' %}checked{% endif %}><label class="form-check-label" for="fixture-gameweek-mode-manual"><span class="fw-semibold">Select gameweek manually</span><span class="d-block text-muted small">Export every recorded fixture for the selected gameweek, including completed and live matches.</span></label></div>
+    </fieldset>
+    <fieldset class="mb-4 border rounded p-3" data-manual-gameweeks><legend class="form-label px-1">Select gameweek for each league</legend>
+        <p class="form-text mt-0">Leagues may be at different gameweeks. Manual reports retain original dates/times and show each fixture's status.</p>
+        {% for option in manual_gameweek_options %}
+        <div class="mb-3" data-manual-gameweek data-series-id="{{ option.series_id }}">
+            <label class="form-label" for="manual-gameweek-{{ option.competition_id }}">{{ option.competition }}</label>
+            {% if option.gameweeks %}<select class="form-select" id="manual-gameweek-{{ option.competition_id }}" name="manual_gameweek_{{ option.competition_id }}" required><option value="">Select gameweek</option>{% for gameweek in option.gameweeks %}<option value="{{ gameweek }}" {% if option.selected_gameweek == gameweek %}selected{% endif %}>Gameweek {{ gameweek }}</option>{% endfor %}</select>{% else %}<p class="text-muted mb-0">No recorded gameweeks are available for this league.</p>{% endif %}
+        </div>
+        {% empty %}<p class="text-muted mb-0">No active regional leagues are available.</p>{% endfor %}
+    </fieldset>
+    {% endif %}
+    <fieldset class="mb-4"><legend class="form-label">Output format</legend>
+        <div class="form-check"><input class="form-check-input" type="radio" name="output_format" id="docx-format" value="DOCX" {% if preference.output_format == 'DOCX' %}checked{% endif %}><label class="form-check-label" for="docx-format">Word (.docx)</label></div>
+        <div class="form-check"><input class="form-check-input" type="radio" name="output_format" id="pdf-format" value="PDF" {% if preference.output_format == 'PDF' %}checked{% endif %}><label class="form-check-label" for="pdf-format">PDF (.pdf)</label></div>
+    </fieldset>
+    {% include "league_manager/_approved_report_artwork.html" %}
+    {% if confirm_download %}<input type="hidden" name="confirmed" value="1">{% endif %}
+    <div class="d-flex gap-2 flex-wrap"><button name="action" value="download" type="submit" class="btn btn-primary">{% if confirm_download %}Confirm and Download{% else %}Download{% endif %}</button>{% if report_kind != "STANDINGS" %}<button name="action" value="preview" type="submit" class="btn btn-secondary">Preview unsigned PDF</button>{% endif %}</div>
+</form>
+</div></div>
+{% endblock %}
+{% block extra_js %}
+<script>
+(() => {
+ const mode = document.querySelector("[data-fixture-gameweek-mode]");
+ const manual = document.querySelector("[data-manual-gameweeks]");
+ const nextScope = document.querySelector("#fixture-scope-next_upcoming");
+ const update = () => {
+   const isManual = document.querySelector("#fixture-gameweek-mode-manual")?.checked;
+   const isNextScope = !nextScope || nextScope.checked;
+   if (mode) mode.hidden = !isNextScope;
+   if (manual) manual.hidden = !isNextScope || !isManual;
+   document.querySelectorAll("[data-manual-gameweek] select").forEach(select => { select.disabled = !isNextScope || !isManual; });
+ };
+ document.querySelectorAll("input[name='fixture_gameweek_mode'], input[name='fixture_scope']").forEach(input => input.addEventListener("change", update)); update();
+})();
+</script>
+{% endblock %}

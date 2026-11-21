@@ -1,0 +1,710 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Match Detail{% endblock %}
+
+{% block content %}
+{% include "league_manager/_report_messages.html" %}
+
+{% if request.user.is_superuser %}
+<div class="mb-3 text-end">
+    <a href="/admin/" class="btn btn-dark">
+        ⚙️ Admin Panel
+    </a>
+</div>
+{% endif %}
+
+<div class="d-flex justify-content-between align-items-center gap-2 mb-3">
+    {% url 'league_detail' match.competition.slug as league_url %}
+    {% include "includes/history_back.html" with fallback_url=league_url only %}
+
+    <div class="text-muted small">
+
+<div class="competition-info">
+  <strong>{% include "leagues/partials/league_identity.html" with league=match.competition variant="inline" %}</strong>
+  • Season {{ match.competition.season }}
+</div>
+
+
+</div>
+
+</div>
+{% if can_manage %}
+    <hr>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+
+            <h4 class="mb-3">Match Controls</h4>
+
+            <!-- MATCH FLOW -->
+            <h6 class="text-muted mb-2">Match Flow</h6>
+            <div class="admin-flow-buttons">
+
+                {% if control_state.unavailable_reason %}
+                    <div class="alert alert-warning w-100 mb-2">
+                        {{ control_state.unavailable_reason }}
+                    </div>
+                {% endif %}
+
+                {% if control_state.can_start_first_half %}
+                    <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#startMatchConfirmation">
+                        Start 1st Half
+                    </button>
+                {% endif %}
+
+                {% if control_state.can_end_first_half %}
+                    <form method="post" action="{% url 'end_first_half' match.id %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-warning btn-sm">End 1st Half</button>
+                    </form>
+                {% endif %}
+
+                {% if control_state.can_start_second_half %}
+                    <form method="post" action="{% url 'start_second_half' match.id %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success btn-sm">Start 2nd Half</button>
+                    </form>
+                {% endif %}
+
+                {% if control_state.can_end_regulation %}
+                    <form method="post" action="{% url 'end_match' match.id %}" class="d-inline"
+                          onsubmit="return confirm('End regulation time?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">End Regulation</button>
+                    </form>
+                {% endif %}
+
+                {% if control_state.can_finish_match %}
+                    <form method="post" action="{% url 'end_match' match.id %}" class="d-inline"
+                          onsubmit="return confirm('Finish and publish this result?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">Finish Match</button>
+                    </form>
+                {% endif %}
+
+                {% if control_state.can_start_extra_time %}
+                    <form method="post" action="{% url 'start_extra_time' match.id %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary btn-sm">Start Extra Time</button>
+                    </form>
+                {% endif %}
+
+                {% if control_state.can_end_extra_time_first_half %}
+                    <form method="post" action="{% url 'end_extra_time_first_half' match.id %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-warning btn-sm">End ET 1st Half</button>
+                    </form>
+                {% endif %}
+
+                {% if control_state.can_start_extra_time_second_half %}
+                    <form method="post" action="{% url 'start_extra_time_second_half' match.id %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary btn-sm">Start ET 2nd Half</button>
+                    </form>
+                {% endif %}
+
+                {% if control_state.can_end_extra_time %}
+                    <form method="post" action="{% url 'end_extra_time' match.id %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-warning btn-sm">End Extra Time</button>
+                    </form>
+                {% endif %}
+
+                {% if control_state.can_start_penalties %}
+                    <form method="post" action="{% url 'start_penalties' match.id %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-dark btn-sm">Start Penalties</button>
+                    </form>
+                {% endif %}
+
+                {% if control_state.can_abandon %}
+                    <a href="{% url 'abandon_match' match.id %}" class="btn btn-dark btn-sm">Abandon Match</a>
+                {% endif %}
+
+            </div>
+
+            {% if control_state.can_start_first_half %}
+                <div class="modal fade start-match-confirm-modal" id="startMatchConfirmation" tabindex="-1" aria-labelledby="startMatchConfirmationTitle" aria-describedby="startMatchConfirmationDescription">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="startMatchConfirmationTitle">Start this match?</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body" id="startMatchConfirmationDescription">
+                                <p>You are about to start:</p>
+                                <p class="start-match-confirm-teams fw-semibold mb-2">{{ match.home_team.name }} vs {{ match.away_team.name }}</p>
+                                <p class="mb-0">This will mark the match as LIVE and begin the first half.</p>
+                                <div class="mt-3">
+                                    <label for="id_current_minute" class="form-label">Current Match Minute (optional)</label>
+                                    <input id="id_current_minute" name="current_minute" type="text" inputmode="numeric" pattern="[0-9]+(\+[0-9]+)?" class="form-control" form="start-match-form">
+                                    <div class="form-text">Leave empty to start from 0'. If the match has already started, enter its current minute. Use 45+2 for first-half stoppage time.</div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <form id="start-match-form" method="post" action="{% url 'start_first_half' match.id %}" data-start-match-confirm-form>
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-success" data-start-match-confirm-button>Start Match</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <section class="border-top mt-3 pt-3" aria-labelledby="quick-result-heading">
+                <h6 id="quick-result-heading" class="text-muted mb-1">Quick Result</h6>
+                <p class="small text-muted mb-2">Didn't track this match live? Enter the final score here.</p>
+                <form method="post" action="{% url 'save_quick_result' match.id %}" class="row g-2 align-items-end">
+                    {% csrf_token %}
+                    <div class="col-sm-5"><label class="form-label small" for="id_home_score">{{ match.home_team }}</label>{{ quick_result_form.home_score }}</div>
+                    <div class="col-sm-5"><label class="form-label small" for="id_away_score">{{ match.away_team }}</label>{{ quick_result_form.away_score }}</div>
+                    <div class="col-sm-2"><button type="submit" class="btn btn-outline-success w-100">Save Final Result</button></div>
+                </form>
+            </section>
+
+            {% if control_state.can_finish_penalties %}
+                <form method="post" action="{% url 'finish_penalties' match.id %}" class="border rounded p-3 my-3">
+                    {% csrf_token %}
+                    <h6>Penalty Shootout Result</h6>
+                    <div class="row g-2 align-items-end">
+                        <div class="col-5">
+                            <label class="form-label small">{{ match.home_team }}</label>
+                            <input type="number" min="0" name="penalty_home_score" class="form-control" required>
+                        </div>
+                        <div class="col-5">
+                            <label class="form-label small">{{ match.away_team }}</label>
+                            <input type="number" min="0" name="penalty_away_score" class="form-control" required>
+                        </div>
+                        <div class="col-2">
+                            <button type="submit" class="btn btn-danger w-100">Finish</button>
+                        </div>
+                    </div>
+                </form>
+            {% endif %}
+
+            <!-- GOALS -->
+            {% if control_state.can_add_goal %}
+                <h6 class="text-muted mb-2">Goals</h6>
+                <div class="row g-2 mb-3">
+                    <div class="col-md-6">
+                        <a href="{% url 'add_goal' match.id match.home_team.id %}" class="btn btn-success btn-sm w-100">
+                            ⚽ Add Goal ({{ match.home_team }})
+                        </a>
+                    </div>
+                    <div class="col-md-6">
+                        <a href="{% url 'add_goal' match.id match.away_team.id %}" class="btn btn-success btn-sm w-100">
+                            ⚽ Add Goal ({{ match.away_team }})
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- CARDS -->
+            {% if control_state.can_add_goal %}
+            <h6 class="text-muted mb-2">Cards</h6>
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <a href="{% url 'add_yellow_card_control' match.id %}"
+                       class="btn btn-warning btn-sm w-100">
+                        Yellow Card
+                    </a>
+                </div>
+                <div class="col-md-6">
+                    <a href="{% url 'add_red_card' match.id %}"
+                       class="btn btn-danger btn-sm w-100">
+                        Red Card
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+{% endif %}
+
+{% if show_quick_goal_details %}
+    <section class="card shadow-sm mb-4" aria-labelledby="quick-goal-details-heading">
+        <div class="card-body">
+            <h4 id="quick-goal-details-heading" class="mb-1">Add Goal Scorers</h4>
+            <p class="text-muted small">Optional: leave a player blank when the scorer was not recorded. Goal minutes are intentionally left blank.</p>
+            <form method="post" action="{% url 'save_quick_goal_details' match.id %}">
+                {% csrf_token %}
+                {% if quick_home_goal_rows %}
+                    <h6>{{ match.home_team }} — {{ match.home_score }} goal{{ match.home_score|pluralize }}</h6>
+                    {% for _ in quick_home_goal_rows %}
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-6"><select name="home-player-{{ forloop.counter0 }}" class="form-select quick-goal-player" aria-label="Home goal {{ forloop.counter }} scorer"><option value="">Scorer not recorded</option>{% for player in quick_home_players %}<option value="{{ player.id }}" data-goal-side="benefiting">{{ player.name }}</option>{% endfor %}{% for player in quick_away_players %}<option value="{{ player.id }}" data-goal-side="opposing">{{ player.name }} (opposition — own goal)</option>{% endfor %}<option value="__new__">+ Add new player</option></select></div>
+                            <div class="col-md-6"><select name="home-goal-type-{{ forloop.counter0 }}" class="form-select quick-goal-type" aria-label="Home goal {{ forloop.counter }} type"><option value="NORMAL">Normal Goal</option><option value="OWN_GOAL">Own Goal</option></select></div>
+                            <div class="col-12 quick-new-player" hidden><label class="form-label visually-hidden" for="home-new-player-{{ forloop.counter0 }}">New player's name</label><input id="home-new-player-{{ forloop.counter0 }}" name="home-new-player-{{ forloop.counter0 }}" class="form-control" placeholder="New player's name" disabled></div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                {% if quick_away_goal_rows %}
+                    <h6 class="mt-3">{{ match.away_team }} — {{ match.away_score }} goal{{ match.away_score|pluralize }}</h6>
+                    {% for _ in quick_away_goal_rows %}
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-6"><select name="away-player-{{ forloop.counter0 }}" class="form-select quick-goal-player" aria-label="Away goal {{ forloop.counter }} scorer"><option value="">Scorer not recorded</option>{% for player in quick_away_players %}<option value="{{ player.id }}" data-goal-side="benefiting">{{ player.name }}</option>{% endfor %}{% for player in quick_home_players %}<option value="{{ player.id }}" data-goal-side="opposing">{{ player.name }} (opposition — own goal)</option>{% endfor %}<option value="__new__">+ Add new player</option></select></div>
+                            <div class="col-md-6"><select name="away-goal-type-{{ forloop.counter0 }}" class="form-select quick-goal-type" aria-label="Away goal {{ forloop.counter }} type"><option value="NORMAL">Normal Goal</option><option value="OWN_GOAL">Own Goal</option></select></div>
+                            <div class="col-12 quick-new-player" hidden><label class="form-label visually-hidden" for="away-new-player-{{ forloop.counter0 }}">New player's name</label><input id="away-new-player-{{ forloop.counter0 }}" name="away-new-player-{{ forloop.counter0 }}" class="form-control" placeholder="New player's name" disabled></div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                <button type="submit" class="btn btn-success mt-2">Save Goal Details</button>
+            </form>
+        </div>
+    </section>
+{% endif %}
+
+{% if can_manage_home_lineup or can_manage_away_lineup %}
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h4 class="mb-3">Your Team Lineup</h4>
+            <div class="row g-2">
+                {% if can_manage_home_lineup %}
+                    <div class="col-md-6">
+                        <a href="{% url 'add_lineup' match.id match.home_team.id %}"
+                           class="btn btn-outline-primary btn-sm w-100">
+                            {% if match.lineups_locked %}
+                                View {{ match.home_team }} Lineup
+                            {% elif home_lineup %}
+                                Edit {{ match.home_team }} Lineup
+                            {% else %}
+                                Submit {{ match.home_team }} Lineup
+                            {% endif %}
+                        </a>
+                    </div>
+                {% endif %}
+                {% if can_manage_away_lineup %}
+                    <div class="col-md-6">
+                        <a href="{% url 'add_lineup' match.id match.away_team.id %}"
+                           class="btn btn-outline-primary btn-sm w-100">
+                            {% if match.lineups_locked %}
+                                View {{ match.away_team }} Lineup
+                            {% elif away_lineup %}
+                                Edit {{ match.away_team }} Lineup
+                            {% else %}
+                                Submit {{ match.away_team }} Lineup
+                            {% endif %}
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+{% if can_unlock_lineups and match.lineups_locked %}
+    <div class="alert alert-warning d-flex justify-content-between align-items-center gap-3 mb-4">
+        <span>Lineups are locked because this match is LIVE.</span>
+        <form method="post" action="{% url 'unlock_lineups' match.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-warning btn-sm">Unlock Lineups</button>
+        </form>
+    </div>
+{% endif %}
+
+<!-- MATCH HEADER -->
+<div class="football-match-summary text-center mb-4">
+    <div class="match-header">
+        <div class="match-team">
+            {% if team_profiles_available %}<a class="team-identity-link" href="{% url 'team_profile' match.competition.slug match.home_team.id %}">{% endif %}
+                {% if match.home_team.logo %}
+                    <img src="{{ match.home_team.logo.url }}" class="team-logo-large" alt="{{ match.home_team.name }} logo" decoding="async">
+                {% else %}
+                    <span class="team-logo-fallback" aria-label="{{ match.home_team.name }}">{{ match.home_team.name|slice:":1"|upper }}</span>
+                {% endif %}
+                <div class="team-name">{{ match.home_team }}</div>
+            {% if team_profiles_available %}</a>{% endif %}
+
+            {% for goal in home_goals %}
+                {% if not goal.canceled or can_manage %}
+                    <div class="goal-line">
+                        ⚽ {% if goal.player_name == "Unknown Player" or not goal.player_name %}Scorer not recorded{% else %}{{ goal.player_name }}{% endif %}{% if goal.minute != None %} {{ goal.minute }}'{% endif %}
+
+                        {% if goal.goal_type == "PENALTY" %}
+                            <span class="goal-type-marker">(P)</span>
+                        {% elif goal.goal_type == "OWN_GOAL" %}
+                            <span class="goal-type-marker">(OG)</span>
+                        {% endif %}
+
+                        {% if can_manage and match.phase != "PENALTIES" %}
+                            {% if not goal.canceled %}
+                                <a href="{% url 'edit_goal' goal.id %}" class="text-primary ms-2">Edit</a>
+                                <form method="post"
+                                    action="{% url 'cancel_goal' goal.id %}"
+                                    class="d-inline"
+                                    onsubmit="return confirm('Cancel this goal?');">
+                                    {% csrf_token %}
+
+                                    <button
+                                        type="submit"
+                                        class="btn btn-link text-danger p-0 ms-1 align-baseline"
+                                    >
+                                        Cancel
+                                    </button>
+                                </form>
+                            {% else %}
+                                <span class="text-muted">(Canceled)</span>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% empty %}
+            {% endfor %}
+        </div>
+
+        <div class="match-score-block">
+            <h1 class="score-big">
+                {{ match.home_score }} - {{ match.away_score }}
+            </h1>
+
+            {% if match.result_note %}
+                <div class="small text-muted mb-2">{{ match.result_note }}</div>
+            {% endif %}
+            {% if aggregate_summary %}
+                <div class="small text-muted mb-2">
+                    Aggregate: {{ aggregate_summary.team_one }}
+                    {{ aggregate_summary.team_one_score }} - {{ aggregate_summary.team_two_score }}
+                    {{ aggregate_summary.team_two }}
+                </div>
+            {% endif %}
+
+            <div class="match-status">
+                {% if match.status == "LIVE" %}
+                    <span class="badge bg-danger">
+                        LIVE {{ match.get_display_minute }}
+                    </span>
+                {% elif match.status == "FINISHED" %}
+                    {% if match.abandonment_resolution != "AWARDED" and match.abandonment_resolution != "CONFIRMED" %}
+                        <span class="badge bg-secondary">FT</span>
+                    {% endif %}
+                {% elif match.status == "ABANDONED" %}
+                    {# The abandonment notice follows both teams and their scorers below. #}
+                {% else %}
+                    <span class="badge bg-info">
+                        {{ match.match_date|date:"M d H:i" }}
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="match-team">
+            {% if team_profiles_available %}<a class="team-identity-link" href="{% url 'team_profile' match.competition.slug match.away_team.id %}">{% endif %}
+                {% if match.away_team.logo %}
+                    <img src="{{ match.away_team.logo.url }}" class="team-logo-large" alt="{{ match.away_team.name }} logo" decoding="async">
+                {% else %}
+                    <span class="team-logo-fallback" aria-label="{{ match.away_team.name }}">{{ match.away_team.name|slice:":1"|upper }}</span>
+                {% endif %}
+                <div class="team-name">{{ match.away_team }}</div>
+            {% if team_profiles_available %}</a>{% endif %}
+
+            {% for goal in away_goals %}
+                {% if not goal.canceled or can_manage %}
+                    <div class="goal-line">
+                        ⚽ {% if goal.player_name == "Unknown Player" or not goal.player_name %}Scorer not recorded{% else %}{{ goal.player_name }}{% endif %}{% if goal.minute != None %} {{ goal.minute }}'{% endif %}
+
+                        {% if goal.goal_type == "PENALTY" %}
+                            <span class="goal-type-marker">(P)</span>
+                        {% elif goal.goal_type == "OWN_GOAL" %}
+                            <span class="goal-type-marker">(OG)</span>
+                        {% endif %}
+
+                        {% if can_manage and match.phase != "PENALTIES" %}
+                            {% if not goal.canceled %}
+                                <a href="{% url 'edit_goal' goal.id %}" class="text-primary ms-2">Edit</a>
+                                <form method="post"
+                                    action="{% url 'cancel_goal' goal.id %}"
+                                    class="d-inline"
+                                    onsubmit="return confirm('Cancel this goal?');">
+                                    {% csrf_token %}
+
+                                    <button
+                                        type="submit"
+                                        class="btn btn-link text-danger p-0 ms-1 align-baseline"
+                                    >
+                                        Cancel
+                                    </button>
+                                </form>
+                            {% else %}
+                                <span class="text-muted">(Canceled)</span>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% empty %}
+            {% endfor %}
+        </div>
+    </div>
+    {% include "matches/_abandonment_notice.html" %}
+</div>
+
+<!-- TABS -->
+<ul class="nav nav-tabs mb-4" id="matchTabs">
+    <li class="nav-item">
+        <a class="nav-link active" onclick="showTab('info', this)">Info</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" onclick="showTab('lineup', this)">Lineups</a>
+    </li>
+    {% if show_table %}
+        <li class="nav-item">
+            <a
+                class="nav-link"
+                onclick="showTab('table', this)"
+            >
+                Table
+            </a>
+        </li>
+    {% endif %}
+    <li class="nav-item">
+        <a class="nav-link" onclick="showTab('stats', this)">Stats</a>
+    </li>
+</ul>
+
+<!-- INFO TAB -->
+<div id="tab-info" class="match-tab">
+    <div class="card">
+        <div class="card-body">
+            <p><strong>Date:</strong> {{ match.match_date|date:"M d, Y" }}</p>
+            <p><strong>Kickoff:</strong> {{ match.match_date|date:"H:i" }}</p>
+            <p><strong>Location:</strong>
+            {% if match.location %}
+            {{ match.location }}
+            {% else %}
+            Unknown venue
+            {% endif %}
+            </p>
+            <p><strong>Stage:</strong> {{ match.get_stage_label }}</p>
+        </div>
+    </div>
+</div>
+
+<!-- LINEUPS TAB -->
+<div id="tab-lineup" class="match-tab" style="display:none">
+    <div class="row">
+        <div class="col-md-6">
+            <h5 class="text-center">
+                {% if match.home_team.logo %}
+                    <img src="{{ match.home_team.logo.url }}" class="team-logo" loading="lazy" decoding="async">
+                {% endif %}
+                {{ match.home_team }}
+            </h5>
+
+            {% if home_lineup %}
+                <h6>Starting XI</h6>
+                <ul class="list-group mb-3">
+                    {% for entry in home_starting_entries %}
+                        {% include "matches/_lineup_player.html" with player=entry.player %}
+                    {% empty %}
+                        {% for player in home_lineup.players.all %}
+                            {% include "matches/_lineup_player.html" with player=player %}
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+                <h6>Substitutes</h6>
+                <ul class="list-group">
+                    {% for entry in home_substitute_entries %}
+                        {% include "matches/_lineup_player.html" with player=entry.player %}
+                    {% empty %}
+                        <li class="list-group-item text-muted">No substitutes submitted.</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted">Lineup not submitted.</p>
+            {% endif %}
+        </div>
+
+        <div class="col-md-6">
+            <h5 class="text-center">
+                {% if match.away_team.logo %}
+                    <img src="{{ match.away_team.logo.url }}" class="team-logo" loading="lazy" decoding="async">
+                {% endif %}
+                {{ match.away_team }}
+            </h5>
+
+            {% if away_lineup %}
+                <h6>Starting XI</h6>
+                <ul class="list-group mb-3">
+                    {% for entry in away_starting_entries %}
+                        {% include "matches/_lineup_player.html" with player=entry.player %}
+                    {% empty %}
+                        {% for player in away_lineup.players.all %}
+                            {% include "matches/_lineup_player.html" with player=player %}
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+                <h6>Substitutes</h6>
+                <ul class="list-group">
+                    {% for entry in away_substitute_entries %}
+                        {% include "matches/_lineup_player.html" with player=entry.player %}
+                    {% empty %}
+                        <li class="list-group-item text-muted">No substitutes submitted.</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted">Lineup not submitted.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- TABLE TAB -->
+ {% if show_table %}
+    <div id="tab-table" class="match-tab" style="display:none">
+        <div class="match-standings-wrap">
+            <div class="table-responsive">
+                <table class="table table-striped align-middle mb-0 standings-table">
+                    <thead class="table-dark">
+                        <tr>
+                            <th class="sticky-col col-pos">#</th>
+                            <th class="sticky-col col-team">Team</th>
+                            <th>P</th>
+                            <th>W</th>
+                            <th>D</th>
+                            <th>L</th>
+                            <th>GF</th>
+                            <th>GA</th>
+                            <th>GD</th>
+                            <th class="sticky-col col-pts">Pts</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in standings %}
+                            <tr {% if row.team == match.home_team or row.team == match.away_team %}class="team-highlight"{% endif %}>
+                                <td class="sticky-col col-pos">{{ forloop.counter }}</td>
+                                <td class="sticky-col col-team">
+                                    <div class="table-team-wrapper">
+                                        {% if row.team.logo %}
+                                            <img src="{{ row.team.logo.url }}" class="team-logo" alt="{{ row.team.name }}" loading="lazy" decoding="async">
+                                        {% endif %}
+                                        <span class="team-name-text">{{ row.team.name }}</span>
+                                    </div>
+                                </td>
+                                <td>{{ row.total_played }}</td>
+                                <td>{{ row.total_won }}</td>
+                                <td>{{ row.total_drawn }}</td>
+                                <td>{{ row.total_lost }}</td>
+                                <td>{{ row.total_goals_for }}</td>
+                                <td>{{ row.total_goals_against }}</td>
+                                <td>{{ row.total_goal_difference }}</td>
+                                <td class="sticky-col col-pts"><strong>{{ row.total_points }}</strong></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+<!-- STATS TAB -->
+<div id="tab-stats" class="match-tab" style="display:none">
+
+<h5 class="mb-3">Match Statistics</h5>
+
+<div class="card">
+<div class="card-body">
+
+<h6>Cards</h6>
+
+<div class="table-responsive">
+<table class="table table-striped">
+<thead>
+<tr>
+<th>Minute</th>
+<th>Player</th>
+<th>Team</th>
+<th></th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for card in cards %}
+<tr>
+<td>{% if card.card_type == "DIRECT_RED" %}🟥{% elif card.card_type == "SECOND_YELLOW_RED" %}🟨🟥{% else %}🟨{% endif %} {{ card.minute }}'</td>
+<td>{{ card.player.name }}{% if card.card_type == "SECOND_YELLOW_RED" %} <span class="text-muted">— Second Yellow</span>{% endif %}{% if card.canceled %} <span class="text-muted">(Canceled)</span>{% endif %}</td>
+<td class="team-inline">
+
+{% if card.team.logo %}
+<img src="{{ card.team.logo.url }}" class="team-logo" loading="lazy" decoding="async">
+{% endif %}
+
+{{ card.team.name }}
+
+</td>
+<td class="text-end">{% if can_manage and not card.canceled %}<a href="{% url 'edit_card' card.id %}" class="text-primary me-2">Edit</a><form method="post" action="{% url 'cancel_card' card.id %}" class="d-inline" onsubmit="return confirm('Cancel this card?');">{% csrf_token %}<button class="btn btn-link text-danger p-0">Cancel</button></form>{% endif %}</td>
+</tr>
+{% empty %}
+<tr>
+<td colspan="4" class="text-muted">No cards</td>
+</tr>
+{% endfor %}
+
+</tbody>
+</table>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<script>
+    function showTab(tab, clickedLink) {
+        document.querySelectorAll(".match-tab").forEach(t => {
+            t.style.display = "none";
+        });
+
+        document.querySelectorAll("#matchTabs .nav-link").forEach(t => {
+            t.classList.remove("active");
+        });
+
+        document.getElementById("tab-" + tab).style.display = "block";
+
+        if (clickedLink) {
+            clickedLink.classList.add("active");
+        }
+    }
+
+    document.querySelectorAll(".quick-goal-type").forEach(typeSelect => {
+        const row = typeSelect.closest(".row");
+        const playerSelect = row.querySelector(".quick-goal-player");
+        const newPlayer = row.querySelector(".quick-new-player");
+        const newPlayerInput = newPlayer && newPlayer.querySelector("input");
+        const updatePlayers = () => {
+            const allowedSide = typeSelect.value === "OWN_GOAL" ? "opposing" : "benefiting";
+            Array.from(playerSelect.options).forEach(option => {
+                if (!option.dataset.goalSide) return;
+                option.hidden = option.dataset.goalSide !== allowedSide;
+                option.disabled = option.dataset.goalSide !== allowedSide;
+            });
+            if (playerSelect.selectedOptions[0] && playerSelect.selectedOptions[0].disabled) {
+                playerSelect.value = "";
+            }
+            const adding = playerSelect.value === "__new__";
+            newPlayer.hidden = !adding;
+            newPlayerInput.disabled = !adding;
+        };
+        typeSelect.addEventListener("change", updatePlayers);
+        playerSelect.addEventListener("change", updatePlayers);
+        updatePlayers();
+    });
+
+    document.querySelectorAll("[data-start-match-confirm-form]").forEach(form => {
+        form.addEventListener("submit", () => {
+            const button = form.querySelector("[data-start-match-confirm-button]");
+            if (button) {
+                button.disabled = true;
+                button.textContent = "Starting...";
+            }
+        });
+    });
+</script>
+
+{% endblock %}
+
+

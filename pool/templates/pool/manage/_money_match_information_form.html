@@ -1,0 +1,23 @@
+<section class="pool-manager-panel">
+    <h2>{{ page_title }}</h2>
+    {% if configuration_error %}
+    <div class="alert alert-danger" role="alert">{{ configuration_error }}</div>
+    {% endif %}
+    {% if pool_match %}
+    <p class="pool-manager-help">{{ pool_match.home_participant_display_name }} vs {{ pool_match.away_participant_display_name }}. Opponents, match details, and the optional scorer can be changed until play begins.</p>
+    {% else %}
+    <p class="pool-manager-help">Choose Player 1 and Player 2. A single protected fixture will be created with the normal Pool scoring and scorer permissions.</p>
+    {% endif %}
+    <form method="post" class="pool-manager-form" novalidate>
+        {% csrf_token %}
+        {% include "pool/manage/_form_fields.html" with form=form %}
+        <div class="pool-manager-actions">
+            <button class="btn btn-primary" type="submit">{% if pool_match %}Save Money Match{% else %}Configure opponents{% endif %}</button>
+            {% if competition %}
+            <a class="btn btn-outline-secondary" href="{% url 'pool:manage_competition_dashboard' competition.slug %}">Cancel</a>
+            {% else %}
+            <a class="btn btn-outline-secondary" href="{% url 'pool:manage_dashboard' %}">Cancel</a>
+            {% endif %}
+        </div>
+    </form>
+</section>

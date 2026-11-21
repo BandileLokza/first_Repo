@@ -1,0 +1,386 @@
+{% extends "base.html" %}
+
+{% block title %}Manage {{ league.name }}{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+
+    <div>
+        <a
+            href="{% url 'league_manager:dashboard' %}"
+            class="back-btn"
+        >
+            ← BACK
+        </a>
+
+        <h2 class="mt-3 mb-1">
+            {{ league.name }}
+        </h2>
+
+        <p class="text-muted mb-0">
+            Season {{ league.season }}
+        </p>
+    </div>
+
+    <a
+        href="{% url 'league_detail' league.slug %}"
+        class="btn btn-outline-primary"
+    >
+        View Public Page
+    </a>
+
+</div>
+
+{% if can_export_reports %}
+<div class="d-flex gap-2 flex-wrap mb-4">
+    <a class="btn btn-outline-primary" href="{% url 'league_manager:league_report_export' league.slug 'fixtures' %}">Export Fixtures</a>
+    <a class="btn btn-outline-primary" href="{% url 'league_manager:league_report_export' league.slug 'results' %}">Export Results</a>
+</div>
+{% endif %}
+
+{% if league.is_archived %}
+    <div class="alert alert-secondary d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <div>
+            <strong>Archived</strong><br>
+            Historical season — read-only.
+        </div>
+
+        {% if can_create_next_season %}
+            <a
+                href="{% url 'league_manager:create_next_season' league.slug %}"
+                class="btn btn-primary"
+            >
+                Create Next Season
+            </a>
+        {% endif %}
+    </div>
+{% elif can_archive_season %}
+    <div class="alert alert-info d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <span>This completed Table Only season can be archived.</span>
+        <form method="post" action="{% url 'league_manager:archive_season' league.slug %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-danger">Archive Season</button>
+        </form>
+    </div>
+{% endif %}
+
+{% if user.is_superuser %}
+<div class="card shadow-sm mb-4"><div class="card-body">
+    <h4 class="mb-2">Football Section</h4>
+    <p class="text-muted small">Only a platform superuser can move a permanent league between administrative scopes. Assign the destination organisation administrator first where needed.</p>
+    <form method="post" action="{% url 'league_manager:update_league_region' league.slug %}" class="row g-2 align-items-end">
+        {% csrf_token %}<div class="col-12 col-md-4">{{ region_form.league_type }}</div>
+        <div class="col-12 col-md-4 region-selector">{{ region_form.region }}</div>
+        <div class="col-12 col-md-4"><div class="form-check mb-2"><input class="form-check-input" type="checkbox" value="1" id="confirmScopeChange" name="confirm_scope_change"><label class="form-check-label small" for="confirmScopeChange">I confirm any scope move and administrator reassignment.</label></div><button class="btn btn-outline-primary" type="submit">Save</button></div>
+    </form>
+</div></div>
+{% endif %}
+{% if is_owner or user.is_superuser %}
+<div class="card shadow-sm mb-4"><div class="card-body">
+    <h4 class="mb-2">League Branding</h4>
+    {% if league.series.league_type == 'ZONAL' %}<p><a class="btn btn-outline-primary btn-sm" href="{% url 'league_manager:zonal_fixture_letterhead' league.series.id %}">Report stationery</a></p>{% endif %}
+    <p class="text-muted small">The league logo is shared by every season. Sponsor details apply only to this season.</p>
+    <form method="post" enctype="multipart/form-data" action="{% url 'league_manager:update_league_branding' league.slug %}" class="row g-3 align-items-end">
+        {% csrf_token %}
+        <div class="col-12 col-md-4">
+            {% if league.series.logo %}<img src="{{ league.series.logo.url }}" alt="{{ league.name }} logo" class="management-brand-preview mb-2">{% endif %}
+            {{ branding_form.league_logo.label_tag }}{{ branding_form.league_logo }}
+        </div>
+        <div class="col-12 col-md-4">
+            {{ branding_form.sponsor_name.label_tag }}{{ branding_form.sponsor_name }}
+            {% if league.sponsor_logo %}<img src="{{ league.sponsor_logo.url }}" alt="{{ league.sponsor_name|default:'Sponsor' }} logo" class="management-brand-preview mt-2">{% endif %}
+            <div class="mt-2">{{ branding_form.sponsor_logo.label_tag }}{{ branding_form.sponsor_logo }}</div>
+        </div>
+        <div class="col-12 col-md-4"><button class="btn btn-outline-primary" type="submit">Save Branding</button></div>
+    </form>
+</div></div>
+{% endif %}
+
+
+<div class="row g-3 mb-4">
+
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <h3>{{ team_count }}</h3>
+                <small class="text-muted">Teams</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <h3>{{ player_count }}</h3>
+                <small class="text-muted">Players</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <h3>{{ match_count }}</h3>
+                <small class="text-muted">Matches</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <h3>{{ upcoming_count }}</h3>
+                <small class="text-muted">Upcoming</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <h3>{{ live_count }}</h3>
+                <small class="text-muted">Live</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <h3>{{ finished_count }}</h3>
+                <small class="text-muted">Finished</small>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<div class="row g-3 mb-4">
+    {% if is_owner %}
+        <div class="col-12 col-md-6">
+            <a
+                href="{% url 'league_manager:staff_list' league.slug %}"
+                class="card shadow-sm text-decoration-none h-100"
+            >
+                <div class="card-body">
+                    <h4>🛡️ League Administrators</h4>
+
+                    <p class="text-muted mb-0">
+                        Add administrators and control their access to this league.
+                    </p>
+                </div>
+            </a>
+        </div>
+    {% endif %}
+
+    <div class="col-12 col-md-6">
+        <a
+            href="{% url 'league_manager:fixture_list' league.slug %}"
+            class="card shadow-sm text-decoration-none h-100"
+        >
+            <div class="card-body">
+                <h4>📅 Manage Fixtures</h4>
+
+                <p class="text-muted mb-0">
+                    Create fixtures, edit upcoming matches and view league matches.
+                </p>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-12 col-md-6">
+        <a
+            href="{% url 'league_manager:agent_list' league.slug %}"
+            class="card shadow-sm text-decoration-none h-100"
+        >
+            <div class="card-body">
+                <h4>🎧 Match Agents</h4>
+
+                <p class="text-muted mb-0">
+                    Register match agents and assign them to league matches.
+                </p>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-12 col-md-6">
+        <a
+            href="{% url 'league_manager:team_list' league.slug %}"
+            class="card shadow-sm text-decoration-none h-100"
+        >
+            <div class="card-body">
+                <h4>⚽ Manage Teams</h4>
+                <p class="text-muted mb-0">
+                    Add teams, edit team names and update team logos.
+                </p>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-12 col-md-6">
+        <a
+            href="{% url 'league_manager:player_list' league.slug %}"
+            class="card shadow-sm text-decoration-none h-100"
+        >
+            <div class="card-body">
+                <h4>👤 Manage Players</h4>
+                <p class="text-muted mb-0">
+                    Add players and update their teams, jersey numbers and starting goals.
+                </p>
+            </div>
+        </a>
+    </div>
+    {% if league.format_type == "GROUP_KNOCKOUT" %}
+
+        <div class="col-12 col-md-6">
+            <a
+                href="{% url 'league_manager:group_list' league.slug %}"
+                class="card shadow-sm text-decoration-none h-100"
+            >
+                <div class="card-body">
+
+                    <h4>🗂️ Manage Groups</h4>
+
+                    <p class="text-muted mb-0">
+                        Create groups and assign teams to their group-stage sections.
+                    </p>
+
+                </div>
+            </a>
+        </div>
+
+    {% endif %}
+
+    {% if league.format_type == "GROUP_KNOCKOUT" or league.format_type == "KNOCKOUT" %}
+
+        <div class="col-12 col-md-6">
+            <a
+                href="{% url 'league_manager:knockout_rounds' league.slug %}"
+                class="card shadow-sm text-decoration-none h-100"
+            >
+                <div class="card-body">
+
+                    <h4>🏆 Knockout Rounds</h4>
+
+                    <p class="text-muted mb-0">
+                        Configure quarter-finals, semi-finals and the final.
+                    </p>
+
+                </div>
+            </a>
+        </div>
+
+        <div class="col-12 col-md-6">
+            <a
+                href="{% url 'league_manager:knockout_bracket' league.slug %}"
+                class="card shadow-sm text-decoration-none h-100"
+            >
+                <div class="card-body">
+
+                    <h4>Connected Bracket</h4>
+
+                    <p class="text-muted mb-0">
+                        Seed teams, manage winner links and generate knockout fixtures safely.
+                    </p>
+
+                </div>
+            </a>
+        </div>
+
+    {% endif %}
+    <div class="col-12 col-md-6">
+        <a
+            href="{% url 'league_manager:activity_list' league.slug %}"
+            class="card shadow-sm text-decoration-none h-100"
+        >
+            <div class="card-body">
+                <h4>📋 Activity History</h4>
+
+                <p class="text-muted mb-0">
+                    Review changes made by league owners, administrators and match agents.
+                </p>
+            </div>
+        </a>
+    </div>
+
+</div>
+
+
+<div class="card shadow-sm">
+    <div class="card-body">
+
+        <h4 class="mb-3">
+            Recent Activity
+        </h4>
+
+        {% for activity in recent_activity %}
+            <div class="border-bottom py-2">
+
+                <div class="d-flex justify-content-between gap-3">
+
+                    <strong>
+                        {{ activity.get_action_display }}
+                    </strong>
+
+                    <small class="text-muted">
+                        {{ activity.created_at|date:"M d, Y H:i" }}
+                    </small>
+
+                </div>
+
+                {% if activity.description %}
+                    <div>
+                        {{ activity.description }}
+                    </div>
+                {% endif %}
+
+                <small class="text-muted">
+                    By:
+                    {% if activity.actor %}
+                        {{ activity.actor.get_full_name|default:activity.actor.username }}
+                    {% else %}
+                        Unknown user
+                    {% endif %}
+                </small>
+
+            </div>
+        {% empty %}
+            <p class="text-muted mb-0">
+                No management activity has been recorded yet.
+            </p>
+        {% endfor %}
+        <div class="mt-3">
+            <a
+                href="{% url 'league_manager:activity_list' league.slug %}"
+                class="btn btn-outline-primary"
+            >
+                View Full Activity History
+            </a>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const typeSelect = document.querySelector("select[name='league_type']");
+const regionSelector = document.querySelector(".region-selector");
+if (typeSelect && regionSelector) {
+    const regionInput = regionSelector.querySelector("select");
+    const updateRegionVisibility = () => {
+        const isRegional = typeSelect.value === "REGIONAL";
+        regionSelector.hidden = !isRegional;
+        if (regionInput) {
+            regionInput.disabled = !isRegional;
+            if (!isRegional) regionInput.value = "";
+        }
+    };
+    typeSelect.addEventListener("change", updateRegionVisibility);
+    updateRegionVisibility();
+}
+</script>
+{% endblock %}

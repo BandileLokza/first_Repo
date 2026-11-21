@@ -1,0 +1,40 @@
+{% extends "pool/manage/base.html" %}
+
+{% block manager_title %}Competition information{% endblock %}
+
+{% block manager_content %}
+<section class="pool-manager-panel">
+    <h2>Competition information</h2>
+    <p class="pool-manager-help">The superuser assigns the competition owner in Django admin. The competition format is fixed once its default stages exist.</p>
+    <aside class="pool-manager-allocation-preview" aria-labelledby="pool-operational-state-heading">
+        <h3 id="pool-operational-state-heading">Competition status</h3>
+        <p class="pool-manager-help mb-0">The competition becomes active automatically when its first played fixture starts. A superuser can mark the event finished in Django admin when it is formally closed.</p>
+    </aside>
+    {% if competition.format_type != 'LEAGUE' %}
+    <aside class="pool-manager-allocation-preview" aria-labelledby="pool-timer-setting-heading">
+        <h3 id="pool-timer-setting-heading">Tournament match timer</h3>
+        <p class="pool-manager-help mb-0">A time limit is optional. Starting a fixture snapshots the current duration, so changing this setting later does not alter a match that is already live.</p>
+    </aside>
+    {% endif %}
+    {% if competition.participant_mode == 'SINGLES' and competition.format_type == 'KNOCKOUT' %}
+    <aside class="pool-manager-allocation-preview" aria-labelledby="pool-lives-setting-heading">
+        <h3 id="pool-lives-setting-heading">Two-life entries</h3>
+        <p class="pool-manager-help mb-0">When enabled, an entrant keeps one real player profile and one competition entry while Life 1 and Life 2 follow separate bracket paths.</p>
+    </aside>
+    {% endif %}
+    {% if competition.points_mode == "MARGIN_BASED" %}
+    <aside class="pool-manager-allocation-preview" aria-labelledby="pool-race-target-policy-heading">
+        <h3 id="pool-race-target-policy-heading">Changing the table race target</h3>
+        <p class="pool-manager-help mb-0">Margin points must cover every possible winning margin. To change this target safely, first switch the <a href="{% url 'pool:manage_competition_standings' competition.slug %}?points_mode=FIXED">points system to Fixed</a> and save it, then change the race target here. Return to standings settings to choose the new terminal margin allocation before re-enabling margin-based points.</p>
+    </aside>
+    {% endif %}
+    <form method="post" enctype="multipart/form-data" class="pool-manager-form" novalidate>
+        {% csrf_token %}
+        {% include "pool/manage/_form_fields.html" with form=form %}
+        <div class="pool-manager-actions">
+            <button class="btn btn-primary" type="submit">Save competition information</button>
+            <a class="btn btn-outline-secondary" href="{% url 'pool:manage_competition_dashboard' competition.slug %}">Cancel</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

@@ -1,0 +1,4279 @@
+
+/* PUBLIC SPORT NAVIGATION */
+.sport-selector {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin: 0 auto 1rem;
+    max-width: 34rem;
+    width: 100%;
+    border-bottom: 1px solid rgba(123, 135, 148, 0.38);
+}
+
+.sport-selector-link {
+    color: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    font-size: 0.925rem;
+    font-weight: 700;
+    min-height: 3rem;
+    padding: 0.65rem 0.75rem 0.55rem;
+    position: relative;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.sport-selector-link:hover,
+.sport-selector-link:focus-visible {
+    background: rgba(0, 212, 255, 0.08);
+    color: inherit;
+    text-decoration: none;
+}
+
+.sport-selector-link.is-active {
+    background: rgba(0, 212, 255, 0.18);
+    box-shadow: inset 0 0 0 1px rgba(0, 212, 255, 0.22);
+    color: inherit;
+    border-radius: 0.6rem 0.6rem 0 0;
+}
+
+.sport-selector-link.is-active::after {
+    background: #00d4ff;
+    border-radius: 0;
+    bottom: -1px;
+    content: "";
+    height: 3px;
+    left: 0;
+    position: absolute;
+    right: 0;
+}
+
+.sport-selector-link.is-active:hover,
+.sport-selector-link.is-active:focus-visible {
+    background: rgba(0, 212, 255, 0.25);
+}
+
+body.dark-theme .sport-selector-link:not(.is-active) {
+    color: #e0e0e0;
+}
+
+@media (max-width: 359.98px) {
+    .sport-selector-link {
+        font-size: 0.82rem;
+        padding-inline: 0.35rem;
+    }
+}
+
+.back-btn {
+    display: inline-block;
+    background: linear-gradient(to bottom, #4a4a4a, #1f1f1f);
+    color: #00d4ff; /* A bright cyan/blue to contrast the dark bg */
+    padding: 8px 20px;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    
+    /* Cyan border and radiating glow */
+    border: none; /* Removing the old thin border */
+    border-bottom: 2px solid #00d4ff;
+    box-shadow: 0px 4px 12px -2px rgba(0, 212, 255, 0.4);
+    transition: all 0.2s ease-in-out;
+}
+
+.back-btn:hover {
+    color: #ffffff; /* Turns white on hover for clarity */
+    background: linear-gradient(to bottom, #5a5a5a, #2a2a2a);
+    transform: translateY(-2px);
+    box-shadow: 0px 6px 18px -2px rgba(0, 212, 255, 0.6);
+    text-decoration: none;
+}
+
+.back-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0px 2px 5px rgba(0, 212, 255, 0.4);
+}
+
+.history-back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    gap: 0.4rem;
+    min-inline-size: 44px;
+    min-block-size: 44px;
+    padding-inline: 0.75rem;
+    border: 1px solid #b7ccdb;
+    border-radius: 0.75rem;
+    background: #f0f7fc;
+    color: #154970;
+    font-size: 0.875rem;
+    font-weight: 700;
+    line-height: 1;
+    text-decoration: none;
+}
+
+.history-back:hover {
+    background: #e1eef8;
+    color: #103958;
+    text-decoration: none;
+}
+
+html.dark-theme .history-back {
+    border-color: #466477;
+    background: #202c36;
+    color: #9ce5fb;
+}
+
+html.dark-theme .history-back:hover {
+    background: #2b3e4c;
+    color: #d2f4fe;
+}
+
+.history-back:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+}
+
+@media (max-width: 575.98px) {
+    .history-back {
+        padding-inline: 0;
+    }
+
+    .history-back-label {
+        display: none;
+    }
+}
+
+
+.match-item {
+    background-color: #ffffff;
+    transition: all 0.2s ease-in-out;
+    border: 1px solid #e9ecef;
+    border-radius:8px;
+}
+
+.match-item:hover {
+    background-color: #f8f9fa;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+}
+
+
+/* Shrink the logos slightly so they don't stretch the row height */
+.team-logo {
+    width: 26px; /* Reduced from 40px */
+    height: 26px;
+    object-fit: contain;
+    margin-right: 8px;
+}
+.team-info{
+    display:flex;
+    align-items:center;
+    gap:6px;
+}
+
+.live-indicator{
+    color:red;
+    font-weight:600;
+}
+
+.result-indicator{
+    color:#555;
+    font-weight:600;
+}
+
+.upcoming-indicator{
+    color:#888;
+    font-weight:600;
+}
+.league-match{
+    display:flex;
+    gap:12px;
+    padding:8px 0;
+}
+
+.match-time{
+    min-width:95px;
+    font-size:13px;
+    color:#555;
+}
+
+.status-text{
+    font-size:11px;
+    font-weight:600;
+    color:#777;
+}
+
+.match-teams{
+    flex:1;
+}
+
+.team-inline{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+}
+.score-or-vs { 
+    font-weight: bold; 
+}
+
+.fixture-line{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+.team-logo-large{
+width:70px;
+height:70px;
+object-fit:contain;
+}
+
+.team-identity-link {
+    color: inherit;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+}
+
+.team-identity-link:hover .team-name {
+    text-decoration: underline;
+}
+
+.team-logo-fallback {
+    align-items: center;
+    background: #6c757d;
+    border-radius: 50%;
+    color: #fff;
+    display: inline-flex;
+    font-size: 1.6rem;
+    font-weight: 700;
+    height: 70px;
+    justify-content: center;
+    width: 70px;
+}
+
+.fixture-edit-link {
+    color: inherit;
+    text-decoration: none;
+}
+
+.fixture-edit-link:hover {
+    text-decoration: underline;
+}
+
+.score-big{
+font-size:48px;
+font-weight:700;
+}
+
+.goal-line{
+font-size:14px;
+margin-top:4px;
+}
+
+.match-status{
+margin-top:5px;
+}
+
+.match-tab{
+animation:fadein .2s;
+}
+.see-more-container{
+    margin-top:8px;
+}
+
+.see-more-btn{
+    font-size:13px;
+    color:#0d6efd;
+    text-decoration:none;
+    font-weight:600;
+}
+
+.see-more-btn:hover{
+    text-decoration:underline;
+}
+
+@keyframes fadein{
+from{opacity:0}
+to{opacity:1}
+}
+
+.team-highlight{
+background-color:#2365ac !important;
+font-weight:600;
+}
+
+.team-highlight td{
+background-color:#2365ac !important;
+}   
+
+.competition-info {
+    text-align: center;  /* Centers inline content horizontally */
+    margin: 20px 0;       /* Optional spacing above and below */
+    font-size: 1.2em;     /* Optional: makes it stand out a bit */
+}
+
+/* =========================
+   STICKY LEAGUE TABS
+   ========================= */
+
+.nav-tabs{
+    position:sticky;
+    top:0;
+    background:white;
+    z-index:100;
+    padding-top:5px;
+}
+
+/* =========================
+   MATCH ITEMS MOBILE
+   ========================= */
+
+@media (max-width:768px){
+
+    .match-item{
+        padding:10px;
+    }
+
+    .fixture-line{
+        font-size:14px;
+        gap:6px;
+    }
+
+}
+
+/* =====================================================
+   GLOBAL NAVIGATION AUTHENTICATION CONTROLS
+   ===================================================== */
+.esports-nav-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 52px;
+}
+
+.esports-header-identity {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    max-width: calc(100% - 52px);
+}
+
+.esports-brand-centered {
+    position: static;
+    transform: none;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+    text-decoration: none;
+}
+
+.esports-brand-centered img {
+    height: 30px;
+    width: 30px;
+    object-fit: contain;
+}
+
+.brand-emblem-fallback {
+    align-items: center;
+    background: #8bdc1f;
+    border: 1px solid #a7ee4c;
+    border-radius: 50%;
+    color: #071018;
+    display: inline-flex;
+    font-size: 0.9rem;
+    font-weight: 900;
+    height: 30px;
+    justify-content: center;
+    line-height: 1;
+    width: 30px;
+}
+
+.esports-brand-centered .brand-text {
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.esports-menu-btn {
+    position: absolute;
+    left: 0;
+}
+
+.esports-nav-actions {
+    position: absolute;
+    right: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem !important;
+}
+
+.esports-nav-actions .theme-toggle-btn {
+    position: static !important;
+    right: auto;
+    flex: 0 0 auto;
+}
+
+.auth-signin-btn {
+    background: #8bdc1f;
+    border: 1px solid #a7ee4c;
+    border-radius: 999px;
+    color: #071018;
+    font-size: 0.85rem;
+    font-weight: 800;
+    line-height: 1.2;
+    padding: 0.5rem 0.8rem;
+    white-space: nowrap;
+}
+
+.auth-signin-btn:hover,
+.auth-signin-btn:focus {
+    background: #a7ee4c;
+    border-color: #c0f375;
+    color: #071018;
+}
+
+.auth-avatar-btn {
+    align-items: center;
+    background: #8bdc1f;
+    border: 1px solid #a7ee4c;
+    border-radius: 50%;
+    color: #071018;
+    display: inline-flex;
+    font-size: 0.85rem;
+    font-weight: 800;
+    height: 40px;
+    justify-content: center;
+    padding: 0;
+    width: 40px;
+}
+
+.auth-avatar-btn:hover,
+.auth-avatar-btn:focus {
+    background: #a7ee4c;
+    border-color: #c0f375;
+    color: #071018;
+}
+
+.user-menu-identity {
+    max-width: 260px;
+}
+
+.logout-confirm-modal {
+    border: 0;
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+html.dark-theme .logout-confirm-modal,
+body.dark-theme .logout-confirm-modal {
+    background: #1d1d1d;
+    border: 1px solid #3a3a3a;
+    color: #f8fafc;
+}
+
+html.dark-theme .logout-confirm-modal .btn-close,
+body.dark-theme .logout-confirm-modal .btn-close {
+    filter: invert(1) grayscale(1) brightness(2);
+}
+
+/* =====================================================
+   VISITOR CALL TO ACTION ABOVE THE FOOTER
+   ===================================================== */
+.auth-footer-cta {
+    background: linear-gradient(135deg, #0b1a26, #122b3d);
+    border-top: 1px solid rgba(139, 220, 31, 0.3);
+    border-bottom: 1px solid rgba(139, 220, 31, 0.2);
+    color: #ffffff;
+    margin-top: 3rem;
+    padding: 2rem 0;
+}
+
+.auth-footer-cta-content {
+    align-items: center;
+    display: flex;
+    gap: 1.5rem;
+    justify-content: space-between;
+}
+
+.auth-footer-cta h2 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    margin: 0 0 0.25rem;
+}
+
+.auth-footer-cta p {
+    color: rgba(255, 255, 255, 0.75);
+    margin: 0;
+}
+
+.auth-footer-cta-actions {
+    display: flex;
+    flex-shrink: 0;
+    gap: 0.65rem;
+}
+
+.auth-footer-signin,
+.auth-footer-signup {
+    border-radius: 999px;
+    font-weight: 800;
+    padding: 0.55rem 1rem;
+}
+
+.auth-footer-signin {
+    background: #8bdc1f;
+    border-color: #8bdc1f;
+    color: #071018;
+}
+
+.auth-footer-signin:hover,
+.auth-footer-signin:focus {
+    background: #a7ee4c;
+    border-color: #a7ee4c;
+    color: #071018;
+}
+
+.auth-footer-signup {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    color: #ffffff;
+}
+
+.auth-footer-signup:hover,
+.auth-footer-signup:focus {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: #ffffff;
+    color: #ffffff;
+}
+
+@media (min-width: 992px) {
+    .esports-brand-centered img,
+    .brand-emblem-fallback {
+        height: 42px;
+        width: 42px;
+    }
+
+    .brand-emblem-fallback {
+        font-size: 1.1rem;
+    }
+
+    .esports-brand-centered .brand-text {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .esports-header-identity {
+        left: 42%;
+    }
+
+    .esports-brand-centered img,
+    .brand-emblem-fallback {
+        height: 26px;
+        width: 26px;
+    }
+
+    .brand-emblem-fallback {
+        font-size: 0.8rem;
+    }
+
+    .esports-brand-centered .brand-text {
+        font-size: 0.76rem;
+    }
+
+    .esports-nav-actions {
+        gap: 0.35rem !important;
+    }
+
+    .esports-nav-actions .theme-toggle-btn,
+    .auth-avatar-btn {
+        height: 36px;
+        width: 36px;
+    }
+
+    .auth-signin-btn {
+        font-size: 0.75rem;
+        padding: 0.45rem 0.55rem;
+    }
+
+    .auth-footer-cta {
+        margin-top: 2rem;
+    }
+
+    .auth-footer-cta-content {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .auth-footer-cta-actions {
+        width: 100%;
+    }
+
+    .auth-footer-cta-actions .btn {
+        flex: 1;
+    }
+}
+
+/* Football directory sections remain one accessible tab row on narrow
+   displays. The horizontal hint avoids compressing four clear labels into
+   unreadable buttons while retaining the established Bootstrap nav styling. */
+.football-directory-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+    gap: 0.35rem;
+    padding-bottom: 0.2rem;
+}
+
+.football-directory-tabs .nav-link {
+    flex: 1 0 auto;
+    min-width: 7rem;
+    white-space: nowrap;
+}
+
+.football-directory-tabs .nav-link:focus-visible {
+    outline: 3px solid rgba(13, 110, 253, 0.7);
+    outline-offset: 2px;
+}
+
+body.dark-theme .football-directory-tabs .nav-link:focus-visible,
+[data-bs-theme="dark"] .football-directory-tabs .nav-link:focus-visible {
+    outline-color: var(--esports-green-bright);
+}
+
+@media (max-width: 575.98px) {
+    .football-directory-tabs {
+        justify-content: flex-start;
+    }
+
+    .football-directory-tabs .nav-link {
+        min-width: auto;
+        font-size: 0.85rem;
+        padding: 0.48rem 0.75rem;
+    }
+}
+
+/* Football region, league and sponsor branding.  Images are constrained so
+   remote originals never affect card or header layout. */
+.region-brand,
+.league-row-identity,
+.league-card-title,
+.league-card-identity,
+.league-inline-identity,
+.league-detail-identity {
+    align-items: center;
+    display: flex;
+    min-width: 0;
+}
+
+.region-brand { gap: 0.7rem; }
+
+.region-logo,
+.region-detail-logo,
+.league-card-logo,
+.league-row-logo,
+.league-detail-logo,
+.league-sponsor-logo,
+.management-brand-preview {
+    display: inline-block;
+    flex: 0 0 auto;
+    object-fit: contain;
+}
+
+.region-logo {
+    width: 3rem;
+    height: 3rem;
+}
+
+.region-logo--fallback,
+.region-detail-logo--fallback,
+.league-card-logo--fallback,
+.league-row-logo--fallback,
+.league-detail-logo--fallback {
+    align-items: center;
+    background: rgba(139, 220, 31, 0.14);
+    border-radius: 50%;
+    display: inline-flex;
+    justify-content: center;
+}
+
+.league-row-identity { gap: 0.65rem; }
+
+.league-row-logo {
+    width: 1.8rem;
+    height: 1.8rem;
+}
+
+.league-card-title {
+    font-size: clamp(1.1rem, 1rem + 0.5vw, 1.2rem);
+    gap: 0.5rem;
+    line-height: 1.25;
+}
+
+.league-card-identity {
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.league-card-identity a {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.league-card-logo {
+    width: 2.1rem;
+    height: 2.1rem;
+}
+
+.league-inline-identity {
+    display: inline-flex;
+    gap: 0.4rem;
+    vertical-align: middle;
+}
+
+.league-inline-logo {
+    display: inline-block;
+    flex: 0 0 auto;
+    object-fit: contain;
+    width: 1.35rem;
+    height: 1.35rem;
+    vertical-align: middle;
+}
+
+.league-inline-logo--fallback {
+    align-items: center;
+    background: rgba(139, 220, 31, 0.14);
+    border-radius: 50%;
+    display: inline-flex;
+    justify-content: center;
+}
+
+/* Stored fixture venues are supplementary to the teams and score. */
+.fixture-location {
+    color: #6c757d;
+    font-size: 0.8rem;
+    line-height: 1.3;
+    margin-top: 0.35rem;
+    overflow-wrap: anywhere;
+    text-align: center;
+}
+
+body.dark-theme .fixture-location,
+[data-bs-theme="dark"] .fixture-location {
+    color: var(--esports-muted-dark, #b7c0cc);
+}
+
+.region-detail-header {
+    align-items: center;
+    display: flex;
+    gap: 1rem;
+    margin: 1.25rem 0;
+}
+
+.region-detail-logo {
+    width: clamp(4.5rem, 12vw, 6.5rem);
+    height: clamp(4.5rem, 12vw, 6.5rem);
+}
+
+.league-detail-header {
+    align-items: flex-start;
+    display: flex;
+    gap: 1.5rem;
+    justify-content: space-between;
+}
+
+.league-detail-identity { gap: 1rem; }
+
+.league-detail-logo {
+    width: clamp(4.5rem, 10vw, 6.25rem);
+    height: clamp(4.5rem, 10vw, 6.25rem);
+}
+
+.league-detail-info { min-width: 0; }
+
+.league-detail-info h2 {
+    font-size: clamp(1.45rem, 1.05rem + 1.1vw, 1.875rem);
+    font-weight: 800;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+}
+
+.league-sponsor {
+    align-items: center;
+    display: flex;
+    flex: 0 1 11rem;
+    flex-direction: column;
+    gap: 0.25rem;
+    text-align: center;
+}
+
+.league-sponsor-label {
+    color: #6c757d;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.league-sponsor-logo {
+    max-width: 8rem;
+    width: 100%;
+    height: 3.5rem;
+}
+
+.league-sponsor-name { font-weight: 600; }
+
+.management-brand-preview {
+    max-width: 5rem;
+    width: 100%;
+    height: 4rem;
+}
+
+@media (max-width: 575.98px) {
+    .region-detail-header {
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .league-detail-header,
+    .league-detail-identity {
+        align-items: center;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .league-detail-info h2 {
+        font-size: clamp(1.35rem, 6.5vw, 1.65rem);
+    }
+
+    .league-sponsor { flex-basis: auto; }
+}
+
+/* Connected knockout bracket: the inner grid can scroll horizontally without
+   widening the page itself, while compact cards remain readable on phones. */
+.bracket-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    padding-bottom: 0.5rem;
+}
+
+.bracket-grid {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(230px, 280px);
+    gap: 1rem;
+    align-items: start;
+    min-width: 100%;
+    width: max-content;
+}
+
+.bracket-round {
+    min-width: 0;
+}
+
+.bracket-round-title {
+    min-height: 2.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.bracket-tie-card {
+    border-color: var(--bs-border-color);
+}
+
+.bracket-slot {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.bracket-slot > span:first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.bracket-team-choice ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.5rem 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+@media (max-width: 575.98px) {
+    .bracket-grid {
+        grid-auto-columns: minmax(210px, 84vw);
+        gap: 0.75rem;
+    }
+}
+
+/* =========================
+   RESPONSIVE TABLE HELPERS
+   ========================= */
+
+/* =========================
+   TABLE BASE
+   ========================= */
+
+.table-responsive{
+    overflow-x:auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* force table to be wider than phone */
+.table-responsive table{
+    min-width:720px;
+    white-space:nowrap;
+}
+
+/* equal spacing */
+table th,
+table td{
+    padding:8px 10px;
+    text-align:center;
+}
+
+/* =========================
+   STANDINGS STICKY COLUMNS (UPDATED 5-COLUMN LAYOUT)
+   ========================= */
+
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table-responsive table {
+    min-width: max-content; 
+    white-space: nowrap;
+}
+
+.sticky-col {
+    position: sticky;
+    background-color: white; 
+    z-index: 2;
+}
+
+thead th.sticky-col {
+    background-color: #212529; 
+    z-index: 3;
+}
+
+/* ---------- 5 PINNED COLUMNS ---------- */
+
+.col-pos {
+    left: 0;
+    min-width: 40px;
+    max-width: 40px;
+}
+
+.col-team {
+    left: 40px;
+    min-width: 120px; 
+    max-width: 120px;
+    text-align: left;
+}
+
+.col-played {
+    left: 160px; /* 40 (pos) + 120 (team) */
+    min-width: 40px;
+    max-width: 40px;
+    /* Adds shadow here because this is the new edge of the left sticky zone */
+    box-shadow: 4px 0 6px -4px rgba(0,0,0,0.1); 
+}
+
+.col-pts {
+    right: 0;
+    min-width: 50px;
+    max-width: 50px;
+}
+
+.col-gd {
+    right: 50px; /* Starts exactly where col-pts ends */
+    min-width: 50px;
+    max-width: 50px;
+    /* Adds shadow here because this is the new edge of the right sticky zone */
+    box-shadow: -4px 0 6px -4px rgba(0,0,0,0.1); 
+}
+
+table td, table th {
+    padding: 8px 12px;
+    text-align: center;
+}
+
+/* Give the team column more breathing room on laptops/desktops */
+@media (min-width: 768px) {
+    .col-team {
+        min-width: 200px;
+        max-width: 200px;
+    }
+    .col-played {
+        left: 240px; /* 40 + 200 */
+    }
+}
+/* MATCH HEADER LAYOUT */
+
+.match-header{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:60px;
+    flex-wrap:wrap;
+    text-align:center;
+}
+
+/* TEAM BLOCK */
+
+.match-team{
+    max-width:200px;
+}
+
+/* =========================
+   MATCH HEADER LAYOUT
+   ========================= */
+
+.match-header {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Aligns items to the top so logos stay level */
+    flex-wrap: nowrap;       /* CRITICAL: Forces everything onto one single line */
+    gap: 15px;
+    text-align: center;
+    width: 100%;
+}
+
+.match-team {
+    flex: 1;       /* Lets both teams take up equal space on the sides */
+    min-width: 0;  /* Prevents long names from breaking the flex container */
+}
+
+.match-score-block {
+    flex: 0 0 auto; /* Tells the score block to only take exactly the space it needs */
+}
+
+.team-name {
+    font-size: 1.25rem;
+    font-weight: normal;   /* Removes the bold formatting */
+    margin-top: 10px;
+    margin-bottom: 10px;
+    word-wrap: break-word; /* Wraps long names naturally without breaking layout */
+}
+
+/* =========================
+   MOBILE MATCH HEADER
+   ========================= */
+
+@media (max-width: 768px) {
+    .match-header {
+        gap: 8px; /* Tighter spacing for smaller screens */
+    }
+    
+    .score-big {
+        font-size: 28px; /* Slightly scaled down so it fits perfectly on mobile */
+    }
+    
+    .team-logo-large {
+        width: 45px;
+        height: 45px;
+    }
+
+    .team-logo-fallback {
+        font-size: 1.1rem;
+        height: 45px;
+        width: 45px;
+    }
+    
+    .team-name {
+        font-size: 0.95rem; /* Smaller, un-bolded text for mobile */
+    }
+}
+
+.admin-flow-buttons{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+}
+
+.admin-flow-buttons .btn{
+    flex:1 1 120px;
+}
+/* MATCH TABS */
+
+#matchTabs{
+    flex-wrap:wrap;
+}
+
+#matchTabs .nav-link{
+    cursor:pointer;
+}
+
+@media (max-width:768px){
+
+    #matchTabs .nav-link{
+        font-size:13px;
+        padding:6px 10px;
+    }
+
+}
+@media (max-width:768px){
+
+    #tab-lineup .row{
+        gap:20px;
+    }
+
+    #tab-lineup .col-md-6{
+        width:100%;
+    }
+
+}
+.goal-line{
+    font-size:14px;
+    margin-top:4px;
+}
+
+.goal-type-marker{
+    display:inline-block;
+    margin-left:4px;
+    padding:1px 5px;
+    border-radius:999px;
+    background:#e9ecef;
+    color:#495057;
+    font-size:0.72em;
+    font-weight:700;
+    line-height:1.35;
+    vertical-align:middle;
+}
+
+.lineup-player{
+    display:flex;
+    align-items:center;
+    gap:0.65rem;
+    min-width:0;
+}
+
+.player-photo-thumb,
+.player-photo-fallback{
+    width:34px;
+    height:34px;
+    flex:0 0 34px;
+    border-radius:50%;
+}
+
+.player-photo-thumb{
+    object-fit:cover;
+    border:1px solid #d1d5db;
+}
+
+.player-photo-fallback{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    background:#e9ecef;
+    color:#495057;
+    font-size:0.8rem;
+    font-weight:700;
+}
+
+.lineup-player-name{
+    min-width:0;
+    overflow-wrap:anywhere;
+}
+
+.player-form-photo{
+    width:72px;
+    height:72px;
+    object-fit:cover;
+    border:1px solid #d1d5db;
+    border-radius:50%;
+}
+
+html.dark-theme .player-photo-fallback,
+body.dark-theme .player-photo-fallback,
+html.dark-mode .player-photo-fallback,
+body.dark-mode .player-photo-fallback{
+    background:#343a40;
+    color:#f8fafc;
+}
+
+html.dark-theme .goal-type-marker,
+body.dark-theme .goal-type-marker,
+html.dark-mode .goal-type-marker,
+body.dark-mode .goal-type-marker{
+    background:#343a40;
+    color:#f8fafc;
+}
+
+@media (max-width:768px){
+
+    .goal-line{
+        font-size:13px;
+    }
+
+    .player-photo-thumb,
+    .player-photo-fallback{
+        width:30px;
+        height:30px;
+        flex-basis:30px;
+    }
+
+}
+@media (max-width:768px){
+
+    .card-body{
+        padding:12px;
+    }
+
+}
+
+/* =========================
+   MATCH FIXTURES & RESULTS (UPDATED)
+   ========================= */
+
+.fixture-line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap; /* Force everything on a single line */
+    gap: 8px;
+    width: 100%;
+}
+
+.fixture-team {
+    flex: 1; /* Both teams take equal width */
+    min-width: 0; /* Critical: allows text truncation inside flex */
+    display: flex;
+    align-items: center;
+    font-weight: normal; /* Ensures team names are NOT bolded */
+}
+
+.fixture-team.home {
+    justify-content: flex-end;
+    text-align: right;
+}
+
+.fixture-team.away {
+    justify-content: flex-start;
+    text-align: left;
+}
+
+.team-name-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.football-team-link {
+    color: inherit;
+    text-decoration: none;
+}
+
+.football-team-link:hover,
+.football-team-link:focus-visible {
+    color: inherit;
+    text-decoration: underline;
+}
+
+.football-match-card:focus-visible {
+    outline: 3px solid var(--esports-green, #8bdc1f);
+    outline-offset: 3px;
+}
+
+.score-or-vs { 
+    flex: 0 0 auto; /* Prevent the score from shrinking */
+    font-weight: bold; /* Ensures score or 'vs' IS bolded */
+    font-size: 1.1rem;
+    padding: 0 4px;
+}
+
+/* =========================
+   STANDINGS TABLE HELPERS (UPDATED)
+   ========================= */
+
+.table-team-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    overflow: hidden; /* Prevents long names from breaking the 120px sticky width */
+}
+
+/* Ensure sticky columns have a solid background when scrolling,
+   matching Bootstrap's striped table logic */
+tbody tr .sticky-col {
+    background-color: #ffffff;
+}
+.table-striped tbody tr:nth-of-type(odd) .sticky-col {
+    background-color: #f8f9fa; /* Matches bootstrap striped row */
+}
+
+/* =========================
+   LEAGUE LIST NEW DESIGN (DARK & NEON THEME)
+   ========================= */
+
+.league-block {
+    max-width: 800px; /* Stops it from getting too wide */
+    margin: 0 auto 35px auto; /* The 'auto' magically centers it on the screen */
+    
+    /* Keep your existing styles below: */
+    background-color: #2b2b2b; 
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #444; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.league-title {
+    background-color: #333333;
+    font-size: 20px;
+    margin: 0; /* Removed bottom margin to sit flush with the matches */
+    padding: 12px 16px;
+    border-bottom: 1px solid #444;
+}
+
+/* The competition name identifies standings screenshots and can be long. */
+.league-standings-title {
+    color: #8bdc1f;
+    font-weight: 800;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 575.98px) {
+    .league-standings-title {
+        font-size: 18px;
+        padding: 12px 16px;
+    }
+}
+
+/* League title link - replace purple with EsportsLive green */
+.league-title a {
+    text-decoration: none;
+    color: #8bdc1f;
+    font-weight: 800;
+}
+
+.league-title a:hover {
+    color: #b6ff3b;
+    text-decoration: none;
+}
+/* MATCH ROW */
+/* Reduce padding on the overall row */
+.league-match {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 8px 12px; /* Reduced top/bottom padding from 16px to 8px */
+    border-bottom: 1px solid #444; 
+    text-decoration: none;
+    color: #ffffff; 
+    background: linear-gradient(to right, #16261a 0%, #2b2b2b 40%); 
+    transition: all 0.2s ease-in-out;
+}
+
+.league-match:hover {
+    background: linear-gradient(to right, #1d3323 0%, #363636 40%);
+    color: #ffffff;
+}
+
+/* TIME / STATUS COLUMN */
+.match-time {
+    min-width: 95px;
+    font-size: 13px;
+    color: #d1d5db; /* Light grey for the date/time text */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* THE GLOWING UPCOMING PILL */
+.upcoming-indicator .status-text {
+    /* 3D dark pill effect */
+    background: linear-gradient(to bottom, #4a4a4a, #1f1f1f);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 20px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    /* The neon green border and glowing shadow */
+    border-bottom: 2px solid #00ff00;
+    box-shadow: 0px 4px 12px -2px rgba(0, 255, 0, 0.6);
+    display: inline-block;
+    text-transform: capitalize;
+}
+
+/* TEAM BLOCK */
+.match-teams {
+    flex: 1;
+}
+
+.team-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px; /* Slightly smaller font looks cleaner */
+    padding: 3px 0; /* Reduced padding from 6px to 3px */
+    color: #ffffff; 
+}
+
+.score {
+    font-weight: bold;
+    color: #ffffff;
+}
+
+/* Public league previews reserve a stable far-right score column. */
+.league-match--compact {
+    column-gap: clamp(0.85rem, 2vw, 1.1rem);
+    row-gap: 0.5rem;
+}
+
+.league-match--compact .match-time {
+    flex: 0 0 6.25rem;
+    min-width: 0;
+}
+
+.league-match--compact .match-teams {
+    min-width: 0;
+}
+
+.league-match--compact .team-line {
+    justify-content: flex-start;
+}
+
+.league-match--compact .team-info {
+    min-width: 0;
+    gap: 0.4rem;
+}
+
+.league-match--compact .team-logo {
+    flex: 0 0 auto;
+    margin-right: 0;
+}
+
+.league-match--compact .team-info span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.league-match--has-score {
+    display: grid;
+    grid-template-columns: minmax(5.5rem, 6.25rem) minmax(0, 1fr) 2.25rem;
+}
+
+.league-match--compact .upcoming-indicator .status-text {
+    border-bottom-width: 1px;
+    box-shadow: 0 2px 7px -2px rgba(0, 255, 0, 0.5);
+    font-size: 0.65rem;
+    padding: 0.22rem 0.7rem;
+}
+
+.compact-score-column {
+    align-self: stretch;
+    display: flex;
+    flex: 0 0 2.25rem;
+    flex-direction: column;
+    justify-content: space-around;
+    min-width: 2.25rem;
+    text-align: right;
+}
+
+.compact-score {
+    font-weight: 700;
+    line-height: 1.7;
+}
+
+@media (max-width: 420px) {
+    .league-match--compact {
+        column-gap: 0.7rem;
+        row-gap: 0.4rem;
+        padding-inline: 0.625rem;
+    }
+
+    .league-match--compact .match-time {
+        flex-basis: 5.5rem;
+        font-size: 0.75rem;
+    }
+
+    .league-match--has-score {
+        grid-template-columns: 5.5rem minmax(0, 1fr) 2rem;
+    }
+
+    .compact-score-column {
+        flex-basis: 2rem;
+        min-width: 2rem;
+    }
+}
+
+/* LIVE MATCH (Bonus: Added a red glow for live matches to match the vibe!) */
+.league-match.live .match-time {
+    color: #ffffff;
+}
+
+.live-indicator {
+    background: linear-gradient(to bottom, #4a4a4a, #1f1f1f);
+    padding: 6px 20px;
+    border-radius: 20px;
+    border-bottom: 2px solid #ff3b30;
+    box-shadow: 0px 4px 12px -2px rgba(255, 59, 48, 0.6);
+    font-weight: 700;
+    font-size: 12px;
+    display: inline-block;
+}
+
+/* RESULTS STYLING */
+/* THE GLOWING FULL-TIME (FT) PILL */
+.result-indicator .status-text {
+    background: linear-gradient(to bottom, #4a4a4a, #1f1f1f);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 16px; /* Slightly tighter padding since 'FT' is a short word */
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    /* Sleek silver/grey border and shadow for finished games */
+    border-bottom: 2px solid #a0a0a0;
+    box-shadow: 0px 4px 12px -2px rgba(160, 160, 160, 0.6);
+    display: inline-block;
+    margin-top: 4px; /* Gives a little breathing room from the date */
+}
+
+/* Dimmer text for the date sitting above the FT pill */
+.result-indicator {
+    color: #888888; 
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* SEE MORE BUTTON CONTAINER */
+.see-more-container {
+    margin-top: 0;
+    padding: 16px 12px; /* Slightly more padding for a better bottom finish */
+    background-color: #2b2b2b;
+    text-align: center;
+    border-top: 1px solid #444; /* Separates the button from the last match row */
+}
+
+/* See More button - replace magenta with green */
+.see-more-btn {
+    display: inline-block;
+    background: linear-gradient(to bottom, #202a24, #0b0f12);
+    color: #8bdc1f;
+    font-size: 13px;
+    font-weight: 800;
+    padding: 8px 24px;
+    border-radius: 20px;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border: 1px solid rgba(139, 220, 31, 0.7);
+    border-bottom: 2px solid #8bdc1f;
+    box-shadow: 0px 4px 15px -3px rgba(139, 220, 31, 0.45);
+    transition: all 0.2s ease-in-out;
+}
+
+.see-more-btn:hover {
+    color: #b6ff3b;
+    transform: translateY(-2px);
+    box-shadow: 0px 6px 20px -2px rgba(139, 220, 31, 0.65);
+    text-decoration: none;
+}
+.see-more-btn:active {
+    transform: translateY(1px); /* Sinks down when clicked */
+    box-shadow: 0px 2px 5px rgba(255, 0, 255, 0.4);
+}
+
+/* THE 3D SCORE / VS CENTERPIECE */
+.score-or-vs {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(to bottom, #4a4a4a, #1f1f1f);
+    color: #ffcc00; /* Vibrant Gold/Yellow */
+    font-weight: 800;
+    font-size: 14px;
+    padding: 4px 12px;
+    min-width: 60px; /* Ensures the box doesn't jump size between 'vs' and '0-0' */
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    
+    /* Golden radiating glow */
+    border-bottom: 2px solid #ffcc00;
+    box-shadow: 0px 4px 10px -2px rgba(255, 204, 0, 0.5);
+    
+    /* Keeps it perfectly centered in the row */
+    margin: 0 10px; 
+}
+
+/* Optional: Make the score slightly bigger than the 'vs' text */
+.score-or-vs {
+    font-family: 'Courier New', Courier, monospace; /* Optional: gives it a scoreboard feel */
+}
+
+/* Target team names specifically inside table rows */
+.table .team-name-text {
+    font-size: 0.85rem;          /* Slightly smaller than standard (1rem) */
+    font-weight: 500;            /* Keeps it readable at smaller sizes */
+    letter-spacing: -0.3px;      /* Tighter spacing to fit more letters */
+    white-space: nowrap;         /* Prevents name from breaking into two lines */
+    overflow: hidden;            /* Ensures it doesn't bleed into next cell */
+    text-overflow: ellipsis;     /* Adds "..." if the name is still too long */
+    display: inline-block;
+    vertical-align: middle;
+    max-width: 120px;            /* Limits width so it doesn't push the 'P' column away */
+}
+
+/* Adjust for very small screens */
+@media (max-width: 480px) {
+    .table .team-name-text {
+        font-size: 0.75rem;      /* Even smaller for mobile phones */
+        max-width: 90px;         /* Shorter limit for small screens */
+    }
+    
+    /* Optional: Reduce padding in the table cells to save more horizontal space */
+    .table td, .table th {
+        padding-left: 4px !important;
+        padding-right: 4px !important;
+    }
+}
+
+/* =========================
+   MATCH DETAIL STANDINGS FIX ONLY
+   ========================= */
+
+.match-standings-wrap {
+    width: 100%;
+    max-width: 720px;
+    margin: 24px auto 0 auto;
+}
+
+.standings-table {
+    width: 100% !important;
+    min-width: 0 !important;
+    table-layout: fixed;
+    white-space: nowrap;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.standings-table th,
+.standings-table td {
+    padding: 6px 7px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.standings-table .sticky-col {
+    position: sticky;
+    z-index: 2;
+    background: inherit;
+}
+
+.standings-table thead .sticky-col {
+    background-color: #212529 !important;
+    z-index: 4;
+}
+
+.standings-table .col-pos {
+    left: 0;
+    width: 40px;
+    min-width: 40px;
+    max-width: 40px;
+}
+
+.standings-table .col-team {
+    left: 40px;
+    width: auto;
+    min-width: 170px;
+    text-align: left;
+    box-shadow: 4px 0 6px -4px rgba(0,0,0,0.12);
+}
+
+.standings-table .col-pts {
+    right: 0;
+    width: 46px;
+    min-width: 46px;
+    max-width: 46px;
+    box-shadow: -4px 0 6px -4px rgba(0,0,0,0.12);
+}
+
+.standings-table th:not(.col-pos):not(.col-team):not(.col-pts),
+.standings-table td:not(.col-pos):not(.col-team):not(.col-pts) {
+    width: 42px;
+    min-width: 42px;
+    max-width: 42px;
+}
+
+.standings-table .table-team-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.standings-table .team-logo {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    flex: 0 0 18px;
+    margin: 0;
+}
+
+.standings-table .team-name-text {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.standings-table tbody tr .sticky-col {
+    background-color: #ffffff;
+}
+
+.standings-table.table-striped tbody tr:nth-of-type(odd) .sticky-col {
+    background-color: #f8f9fa;
+}
+
+.standings-table .team-highlight td {
+    background-color: #2365ac !important;
+    font-weight: 600;
+}
+
+.standings-table .team-highlight .sticky-col {
+    background-color: #2365ac !important;
+}
+
+@media (max-width: 768px) {
+    .match-standings-wrap {
+        max-width: 100%;
+        margin-top: 18px;
+    }
+
+    .standings-table {
+        width: max-content !important;
+        min-width: 0 !important;
+        table-layout: auto;
+    }
+
+    .standings-table th,
+    .standings-table td {
+        padding: 5px 5px;
+        font-size: 11px;
+    }
+
+    .standings-table .col-pos {
+        width: 32px;
+        min-width: 32px;
+        max-width: 32px;
+    }
+
+    .standings-table .col-team {
+        left: 32px;
+        width: 100px;
+        min-width: 100px;
+        max-width: 100px;
+    }
+
+    .standings-table .col-pts {
+        width: 40px;
+        min-width: 40px;
+        max-width: 40px;
+    }
+
+    .standings-table .team-logo {
+        width: 15px;
+        height: 15px;
+        flex: 0 0 15px;
+    }
+
+    .standings-table .team-name-text {
+        font-size: 10px;
+    }
+
+    .standings-table th:not(.col-pos):not(.col-team):not(.col-pts),
+    .standings-table td:not(.col-pos):not(.col-team):not(.col-pts) {
+        width: 34px;
+        min-width: 34px;
+        max-width: 34px;
+    }
+}
+
+/* =========================
+   FORCE EQUAL COLUMN SPACING (LEAGUE STANDINGS)
+   ========================= */
+
+.league-block table td:not(.col-pos):not(.col-team):not(.col-pts):not(.col-gd),
+.league-block table th:not(.col-pos):not(.col-team):not(.col-pts):not(.col-gd) {
+    width: 42px;
+    min-width: 42px;
+    max-width: 42px;
+}
+
+/* Compact derived football form stays inside the existing scrollable stats area. */
+.league-block .form-column {
+    min-width: 116px !important;
+    width: 116px !important;
+    max-width: 116px !important;
+}
+
+.form-badges {
+    display: inline-flex;
+    gap: 3px;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.form-badge {
+    align-items: center;
+    border-radius: 999px;
+    display: inline-flex;
+    font-size: .72rem;
+    font-weight: 700;
+    height: 20px;
+    justify-content: center;
+    line-height: 1;
+    width: 20px;
+}
+
+.form-w { background: #198754; color: #fff; }
+.form-d { background: #6c757d; color: #fff; }
+.form-l { background: #dc3545; color: #fff; }
+
+.team-profile-logo {
+    width: 72px;
+    height: 72px;
+    object-fit: contain;
+}
+
+.team-summary-grid {
+    display: grid;
+    gap: .5rem;
+    grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
+}
+
+.team-summary-grid span { display: flex; justify-content: space-between; }
+
+/* Increase horizontal spacing between columns */
+.league-block table td,
+.league-block table th {
+    padding: 8px 16px;
+}
+
+/* =========================
+   HOMEPAGE HERO BANNER
+   ========================= */
+
+.homepage-hero-banner {
+    position: relative;
+    max-width: 1100px;
+    margin: 0 auto 28px auto;
+    min-height: 320px;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #111;
+    border: 1px solid #333;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+}
+
+.homepage-hero-image {
+    width: 100%;
+    height: 320px;
+    object-fit: cover;
+    display: block;
+}
+
+.homepage-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        rgba(0, 0, 0, 0.80) 0%,
+        rgba(0, 0, 0, 0.55) 45%,
+        rgba(0, 0, 0, 0.25) 100%
+    );
+    z-index: 1;
+}
+
+.homepage-hero-content {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    padding: 32px 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    color: #ffffff;
+}
+
+.homepage-hero-sponsored {
+    display: inline-block;
+    margin-bottom: 12px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.homepage-hero-title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+    max-width: 650px;
+    line-height: 1.1;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+}
+
+.homepage-hero-subtitle {
+    font-size: 1rem;
+    max-width: 620px;
+    margin-bottom: 18px;
+    color: #f0f0f0;
+    line-height: 1.5;
+}
+
+.homepage-hero-btn {
+    display: inline-block;
+    background: linear-gradient(to bottom, #4a4a4a, #1f1f1f);
+    color: #00ff66;
+    font-size: 14px;
+    font-weight: 800;
+    padding: 10px 22px;
+    border-radius: 999px;
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    border-bottom: 2px solid #00ff66;
+    box-shadow: 0px 4px 15px -3px rgba(0, 255, 102, 0.45);
+    transition: all 0.2s ease-in-out;
+}
+
+.homepage-hero-btn:hover {
+    color: #66ff99;
+    text-decoration: none;
+    transform: translateY(-2px);
+    box-shadow: 0px 6px 20px -2px rgba(0, 255, 102, 0.60);
+}
+
+.homepage-hero-logo-wrap {
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+    z-index: 3;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 10px 14px;
+    border-radius: 14px;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.20);
+}
+
+.homepage-hero-logo {
+    display: block;
+    max-width: 120px;
+    max-height: 52px;
+    object-fit: contain;
+}
+
+@media (max-width: 768px) {
+    .homepage-hero-banner {
+        min-height: 260px;
+        border-radius: 14px;
+    }
+
+    .homepage-hero-image {
+        height: 260px;
+    }
+
+    .homepage-hero-content {
+        padding: 22px 18px;
+    }
+
+    .homepage-hero-title {
+        font-size: 1.55rem;
+        max-width: 100%;
+    }
+
+    .homepage-hero-subtitle {
+        font-size: 0.92rem;
+        max-width: 100%;
+        margin-bottom: 14px;
+    }
+
+    .homepage-hero-btn {
+        font-size: 13px;
+        padding: 9px 18px;
+    }
+
+    .homepage-hero-logo-wrap {
+        right: 14px;
+        bottom: 14px;
+        padding: 8px 10px;
+    }
+
+    .homepage-hero-logo {
+        max-width: 90px;
+        max-height: 40px;
+    }
+}
+
+/* =========================
+   LEAGUE LIST LIGHT/DARK FIX
+   ========================= */
+
+/* Light mode */
+[data-bs-theme="light"] .league-block,
+body:not([data-bs-theme="dark"]) .league-block {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+[data-bs-theme="light"] .league-title,
+body:not([data-bs-theme="dark"]) .league-title {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+[data-bs-theme="light"] .league-match,
+body:not([data-bs-theme="dark"]) .league-match {
+    background: #ffffff;
+    color: #212529;
+    border-bottom: 1px solid #e9ecef;
+}
+
+[data-bs-theme="light"] .league-match:hover,
+body:not([data-bs-theme="dark"]) .league-match:hover {
+    background: #f8f9fa;
+    color: #000000;
+}
+
+[data-bs-theme="light"] .see-more-container,
+body:not([data-bs-theme="dark"]) .see-more-container {
+    background-color: #ffffff;
+    border-top: 1px solid #e9ecef;
+}
+
+/* Dark mode */
+[data-bs-theme="dark"] .league-block {
+    background-color: #2b2b2b;
+    border: 1px solid #444;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+[data-bs-theme="dark"] .league-title {
+    background-color: #333333;
+    border-bottom: 1px solid #444;
+}
+
+[data-bs-theme="dark"] .league-match {
+    background: linear-gradient(to right, #16261a 0%, #2b2b2b 40%);
+    color: #ffffff;
+    border-bottom: 1px solid #444;
+}
+
+[data-bs-theme="dark"] .league-match:hover {
+    background: linear-gradient(to right, #1d3323 0%, #363636 40%);
+    color: #ffffff;
+}
+
+[data-bs-theme="dark"] .see-more-container {
+    background-color: #2b2b2b;
+    border-top: 1px solid #444;
+}
+
+.team-line,
+.score {
+    color: inherit;
+}
+
+/* =========================
+   LEAGUE LIST DARK MODE FIX
+   ========================= */
+
+body.dark-theme .league-block {
+    background-color: #2b2b2b !important;
+    border-color: #444 !important;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3) !important;
+}
+
+body.dark-theme .league-title {
+    background-color: #333333 !important;
+    border-bottom-color: #444 !important;
+}
+
+body.dark-theme .league-match {
+    background: linear-gradient(to right, #16261a 0%, #2b2b2b 40%) !important;
+    color: #ffffff !important;
+    border-bottom-color: #444 !important;
+}
+
+body.dark-theme .league-match:hover {
+    background: linear-gradient(to right, #1d3323 0%, #363636 40%) !important;
+    color: #ffffff !important;
+}
+
+body.dark-theme .team-line,
+body.dark-theme .score {
+    color: #ffffff !important;
+}
+
+body.dark-theme .see-more-container {
+    background-color: #2b2b2b !important;
+    border-top-color: #444 !important;
+}
+
+.esports-brand {
+    display: flex;
+    align-items: center;
+    padding: 0;
+}
+
+.esports-brand img {
+    height: 46px;
+    width: auto;
+    object-fit: contain;
+}
+
+@media (max-width: 768px) {
+    .esports-brand img {
+        height: 38px;
+    }
+}
+/* =========================
+   ESPORTSLIVE MOBILE NAVBAR
+   ========================= */
+
+.esports-mobile-navbar {
+    background: #071018;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding: 8px 0;
+}
+
+.esports-nav-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 46px;
+}
+
+.esports-header-identity {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    max-width: calc(100% - 52px);
+}
+
+.esports-brand-centered {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+    text-decoration: none;
+}
+
+.esports-brand-centered img {
+    height: 30px;
+    width: auto;
+    object-fit: contain;
+}
+
+.brand-emblem-fallback {
+    align-items: center;
+    background: #8bdc1f;
+    border: 1px solid #a7ee4c;
+    border-radius: 50%;
+    color: #071018;
+    display: inline-flex;
+    font-size: 0.9rem;
+    font-weight: 900;
+    height: 30px;
+    justify-content: center;
+    line-height: 1;
+    width: 30px;
+}
+
+.esports-brand-centered .brand-text {
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.esports-menu-btn {
+    position: absolute;
+    left: 0;
+    border: none;
+    padding: 4px 6px;
+    box-shadow: none !important;
+}
+
+.esports-menu-btn .navbar-toggler-icon {
+    width: 24px;
+    height: 24px;
+}
+
+.theme-toggle-btn {
+    position: absolute;
+    right: 0;
+}
+
+.esports-collapse {
+    position: absolute;
+    top: 52px;
+    left: 0;
+    right: 0;
+    background: #071018;
+    padding: 10px 14px;
+    border-radius: 0 0 12px 12px;
+    z-index: 999;
+}
+
+/* Authentication control available on every page through base.html. */
+.esports-nav-actions {
+    display: flex;
+    gap: 0.65rem !important;
+    position: absolute;
+    right: 0;
+}
+
+.esports-nav-actions .theme-toggle-btn {
+    position: static !important;
+    flex: 0 0 auto;
+}
+
+.auth-signin-btn {
+    background: #8bdc1f;
+    border: 1px solid #a7ee4c;
+    border-radius: 999px;
+    color: #071018;
+    font-size: 0.85rem;
+    font-weight: 800;
+    line-height: 1.2;
+    padding: 0.5rem 0.8rem;
+    white-space: nowrap;
+}
+
+.auth-signin-btn:hover,
+.auth-signin-btn:focus {
+    background: #a7ee4c;
+    border-color: #c0f375;
+    color: #071018;
+}
+
+.auth-avatar-btn {
+    align-items: center;
+    background: #8bdc1f;
+    border: 1px solid #a7ee4c;
+    border-radius: 50%;
+    color: #071018;
+    display: inline-flex;
+    font-size: 0.85rem;
+    font-weight: 800;
+    height: 40px;
+    justify-content: center;
+    padding: 0;
+    width: 40px;
+}
+
+.auth-avatar-btn:hover,
+.auth-avatar-btn:focus {
+    background: #a7ee4c;
+    border-color: #c0f375;
+    color: #071018;
+}
+
+.user-menu-identity {
+    max-width: 260px;
+}
+
+.auth-footer-cta {
+    background: linear-gradient(135deg, #0b1a26, #122b3d);
+    border-top: 1px solid rgba(139, 220, 31, 0.3);
+    border-bottom: 1px solid rgba(139, 220, 31, 0.2);
+    color: #ffffff;
+    margin-top: 3rem;
+    padding: 2rem 0;
+}
+
+.auth-footer-cta-content {
+    align-items: center;
+    display: flex;
+    gap: 1.5rem;
+    justify-content: space-between;
+}
+
+.auth-footer-cta h2 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    margin: 0 0 0.25rem;
+}
+
+.auth-footer-cta p {
+    color: rgba(255, 255, 255, 0.75);
+    margin: 0;
+}
+
+.auth-footer-cta-actions {
+    display: flex;
+    flex-shrink: 0;
+    gap: 0.65rem;
+}
+
+.auth-footer-signin,
+.auth-footer-signup {
+    border-radius: 999px;
+    font-weight: 800;
+    padding: 0.55rem 1rem;
+}
+
+.auth-footer-signin {
+    background: #8bdc1f;
+    border-color: #8bdc1f;
+    color: #071018;
+}
+
+.auth-footer-signin:hover,
+.auth-footer-signin:focus {
+    background: #a7ee4c;
+    border-color: #a7ee4c;
+    color: #071018;
+}
+
+.auth-footer-signup {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    color: #ffffff;
+}
+
+.auth-footer-signup:hover,
+.auth-footer-signup:focus {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: #ffffff;
+    color: #ffffff;
+}
+
+@media (max-width: 575.98px) {
+    .esports-header-identity {
+        left: 42%;
+    }
+
+    .esports-brand-centered img {
+        height: 26px;
+    }
+
+    .esports-brand-centered .brand-text {
+        font-size: 0.76rem;
+    }
+
+    .brand-emblem-fallback {
+        font-size: 0.8rem;
+        height: 26px;
+        width: 26px;
+    }
+
+    .esports-nav-actions {
+        gap: 0.35rem !important;
+    }
+
+    .esports-nav-actions .theme-toggle-btn {
+        height: 36px;
+        width: 36px;
+    }
+
+    .auth-signin-btn {
+        font-size: 0.75rem;
+        padding: 0.45rem 0.55rem;
+    }
+
+    .auth-avatar-btn {
+        height: 36px;
+        width: 36px;
+    }
+
+    .auth-footer-cta {
+        margin-top: 2rem;
+    }
+
+    .auth-footer-cta-content {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .auth-footer-cta-actions {
+        width: 100%;
+    }
+
+    .auth-footer-cta-actions .btn {
+        flex: 1;
+    }
+}
+
+/* Desktop adjustment */
+@media (min-width: 992px) {
+    .esports-brand-centered img {
+        height: 42px;
+    }
+
+    .brand-emblem-fallback {
+        font-size: 1.1rem;
+        height: 42px;
+        width: 42px;
+    }
+
+    .esports-brand-centered .brand-text {
+        font-size: 1.2rem;
+    }
+}
+
+/* Region cards use a background link layer while their league links remain
+   above it, avoiding invalid nested anchors. */
+.region-preview-card {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.region-preview-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.6rem 1.4rem rgba(0, 0, 0, 0.22) !important;
+}
+
+.region-card-overlay::after {
+    z-index: 1;
+}
+
+.region-card-foreground {
+    z-index: 2;
+}
+
+.region-card-overlay:focus::after {
+    outline: 3px solid #8bdc1f;
+    outline-offset: -3px;
+}
+
+.region-card {
+    background: #17212b;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.region-title,
+.region-title a {
+    color: #f8fafc;
+}
+
+.region-title a:hover,
+.region-title a:focus {
+    color: #a3e635;
+}
+
+.region-league-list {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.region-league-link {
+    align-items: center;
+    background: rgba(7, 14, 22, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.13);
+    border-radius: 0.45rem;
+    color: #f1f5f9;
+    display: flex;
+    gap: 0.75rem;
+    justify-content: space-between;
+    min-height: 2.75rem;
+    padding: 0.65rem 0.8rem;
+    text-decoration: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.region-league-link:hover,
+.region-league-link:focus {
+    background: rgba(20, 42, 34, 0.9);
+    border-color: #8bdc1f;
+    box-shadow: 0 0 0 0.15rem rgba(139, 220, 31, 0.18);
+    color: #ffffff;
+    outline: 0;
+}
+
+.region-secondary-text {
+    color: #aab4c0;
+    font-size: 0.875rem;
+}
+
+body:not(.dark-theme) .region-card {
+    background: #ffffff;
+    border-color: rgba(15, 23, 42, 0.14);
+}
+
+body:not(.dark-theme) .region-title,
+body:not(.dark-theme) .region-title a {
+    color: #111827;
+}
+
+body:not(.dark-theme) .region-league-link {
+    background: #f8fafc;
+    border-color: rgba(15, 23, 42, 0.14);
+    color: #1f2937;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #ffffff;
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin: 22px 0 14px;
+}
+
+.section-icon {
+    color: #8bdc1f;
+    font-size: 1.4rem;
+    filter: drop-shadow(0 0 6px rgba(139, 220, 31, 0.7));
+}
+
+.organisation-heading-icon {
+    align-items: center;
+    display: inline-flex;
+    flex: 0 0 2.35rem;
+    height: 2.35rem;
+    justify-content: center;
+}
+
+.organisation-heading-logo {
+    display: block;
+    height: 2.25rem;
+    max-width: 2.5rem;
+    object-fit: contain;
+    width: 2.25rem;
+}
+
+.organisation-heading-fallback {
+    line-height: 1;
+}
+
+body:not(.dark-theme) .section-title {
+    color: #111827;
+}
+/* ===============================
+   LEAGUE TITLE + PREDICTION BUTTON
+   =============================== */
+
+.league-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.league-header-row .league-title {
+    margin: 0;
+    flex: 1;
+    min-width: 0;
+}
+
+/* The shared public football card keeps the full name beside its logo. */
+.league-header-row .league-card-title {
+    background: transparent;
+    border: 0;
+    font-size: 1.2rem;
+    line-height: 1.3;
+    padding: 0;
+}
+
+.league-header-row .league-card-identity {
+    flex: 1 1 0;
+    width: 100%;
+}
+
+.league-header-row .league-card-title a {
+    display: block;
+    flex: 1 1 0;
+    min-width: 0;
+    overflow: visible;
+    overflow-wrap: anywhere;
+    text-overflow: clip;
+    white-space: normal;
+}
+
+/* Fancy prediction button beside league name */
+.prediction-title-btn {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+
+    padding: 7px 13px;
+    border-radius: 999px;
+
+    background: linear-gradient(135deg, #ff9800, #ff3d00);
+    color: #ffffff !important;
+
+    font-size: 0.78rem;
+    font-weight: 900;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+
+    box-shadow: 0 0 14px rgba(255, 112, 67, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+
+    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    animation: predictionTitlePulse 1.8s infinite;
+}
+
+.prediction-title-btn:hover {
+    color: #ffffff !important;
+    text-decoration: none;
+    transform: translateY(-1px) scale(1.04);
+    filter: brightness(1.08);
+    box-shadow: 0 0 22px rgba(255, 112, 67, 0.85);
+}
+
+@keyframes predictionTitlePulse {
+    0% {
+        box-shadow: 0 0 9px rgba(255, 112, 67, 0.45);
+    }
+
+    50% {
+        box-shadow: 0 0 20px rgba(255, 112, 67, 0.9);
+    }
+
+    100% {
+        box-shadow: 0 0 9px rgba(255, 112, 67, 0.45);
+    }
+}
+
+/* Mobile: keep it neat */
+@media (max-width: 600px) {
+    .league-header-row {
+        padding: 12px 12px 9px;
+        gap: 8px;
+    }
+
+    .league-header-row .league-card-title {
+        font-size: 1.05rem;
+    }
+
+    .league-header-row .league-card-logo {
+        width: 1.8rem;
+        height: 1.8rem;
+    }
+
+    .prediction-title-btn {
+        padding: 6px 10px;
+        font-size: 0.68rem;
+    }
+}
+/* =========================
+   LEAGUE DETAIL PAGE FIXES
+   Tabs, headings, dark mode text
+   ========================= */
+
+:root {
+    --esports-green: #8bdc1f;
+    --esports-green-bright: #b6ff3b;
+    --esports-dark-card: #1d1d1d;
+    --esports-dark-border: #343434;
+    --esports-muted-dark: #b7c0cc;
+}
+
+/* League season text */
+.league-season {
+    color: #6c757d;
+    font-size: 0.95rem;
+}
+
+body.dark-theme .league-season,
+[data-bs-theme="dark"] .league-season {
+    color: var(--esports-muted-dark) !important;
+}
+
+/* Replace purple section headings */
+.league-section-heading,
+.league-tab-content > h4 {
+    color: var(--esports-green);
+    text-align: center;
+    font-weight: 800;
+    text-shadow: 0 0 8px rgba(139, 220, 31, 0.25);
+}
+
+/* Match links should inherit theme color instead of forcing text-dark */
+.league-match-link {
+    color: inherit;
+}
+
+.league-match-link:hover {
+    color: inherit;
+}
+
+/* Make Bootstrap muted text visible in dark mode on league detail */
+body.dark-theme .league-tab-content .text-muted,
+[data-bs-theme="dark"] .league-tab-content .text-muted {
+    color: var(--esports-muted-dark) !important;
+}
+
+/* Card text in dark mode */
+body.dark-theme .league-tab-content .card,
+[data-bs-theme="dark"] .league-tab-content .card {
+    background-color: var(--esports-dark-card);
+    border-color: var(--esports-dark-border);
+    color: #ffffff;
+}
+
+body.dark-theme .league-tab-content .card-body,
+[data-bs-theme="dark"] .league-tab-content .card-body {
+    color: #ffffff;
+}
+
+body.dark-theme .league-tab-content p,
+[data-bs-theme="dark"] .league-tab-content p {
+    color: #ffffff;
+}
+
+/* Match item dark mode */
+body.dark-theme .match-item,
+[data-bs-theme="dark"] .match-item {
+    background-color: #1f1f1f;
+    border-color: #383838;
+    color: #ffffff;
+}
+
+body.dark-theme .match-item:hover,
+[data-bs-theme="dark"] .match-item:hover {
+    background-color: #262626;
+    border-color: #4a4a4a;
+}
+
+body.dark-theme .team-name-text,
+[data-bs-theme="dark"] .team-name-text {
+    color: #ffffff;
+}
+
+/* =========================
+   LEAGUE DETAIL TABS
+   ========================= */
+
+/* Override the old global .nav-tabs background:white */
+#leagueTabs.nav-tabs {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 6px;
+    padding: 6px;
+    background: #ffffff;
+    border-bottom: 1px solid #dee2e6;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+#leagueTabs .nav-item {
+    flex: 0 0 auto;
+}
+
+#leagueTabs .nav-link {
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #0d6efd;
+    background: transparent;
+    white-space: nowrap;
+}
+
+#leagueTabs .nav-link:hover {
+    color: #0a58ca;
+    background: rgba(13, 110, 253, 0.08);
+}
+
+#leagueTabs .nav-link.active {
+    color: #111827;
+    background: #ffffff;
+    border-color: #dee2e6;
+    border-bottom: 3px solid var(--esports-green);
+}
+
+/* Dark mode tabs */
+body.dark-theme #leagueTabs.nav-tabs,
+[data-bs-theme="dark"] #leagueTabs.nav-tabs {
+    background: #111111 !important;
+    border: 1px solid #2f2f2f;
+    border-radius: 8px;
+}
+
+body.dark-theme #leagueTabs .nav-link,
+[data-bs-theme="dark"] #leagueTabs .nav-link {
+    color: #e5e7eb;
+    background: #1b1b1b;
+    border-color: #333333;
+}
+
+body.dark-theme #leagueTabs .nav-link:hover,
+[data-bs-theme="dark"] #leagueTabs .nav-link:hover {
+    color: var(--esports-green-bright);
+    background: #242424;
+    border-color: rgba(139, 220, 31, 0.45);
+}
+
+body.dark-theme #leagueTabs .nav-link.active,
+[data-bs-theme="dark"] #leagueTabs .nav-link.active {
+    color: var(--esports-green-bright);
+    background: #202a24;
+    border-color: rgba(139, 220, 31, 0.75);
+    border-bottom: 3px solid var(--esports-green);
+    box-shadow: 0 0 12px rgba(139, 220, 31, 0.18);
+}
+
+/* Mobile tab polish */
+@media (max-width: 768px) {
+    #leagueTabs.nav-tabs {
+        gap: 5px;
+        padding: 6px;
+    }
+
+    #leagueTabs .nav-link {
+        font-size: 0.78rem;
+        padding: 7px 10px;
+    }
+}
+/* =========================
+   LEAGUE DETAIL STANDINGS DARK MODE FIX
+   Applies to overview standings + standings tab
+   ========================= */
+
+body.dark-theme .league-block .table,
+[data-bs-theme="dark"] .league-block .table {
+    --bs-table-bg: #161616;
+    --bs-table-color: #f8fafc;
+    --bs-table-striped-bg: #202020;
+    --bs-table-striped-color: #f8fafc;
+    --bs-table-hover-bg: #26321f;
+    --bs-table-hover-color: #ffffff;
+
+    background-color: #161616 !important;
+    color: #f8fafc !important;
+}
+
+body.dark-theme .league-block .table tbody tr,
+[data-bs-theme="dark"] .league-block .table tbody tr {
+    background-color: #161616 !important;
+    color: #f8fafc !important;
+}
+
+body.dark-theme .league-block .table-striped tbody tr:nth-of-type(odd),
+[data-bs-theme="dark"] .league-block .table-striped tbody tr:nth-of-type(odd) {
+    background-color: #202020 !important;
+    color: #f8fafc !important;
+}
+
+body.dark-theme .league-block .table td,
+body.dark-theme .league-block .table th,
+[data-bs-theme="dark"] .league-block .table td,
+[data-bs-theme="dark"] .league-block .table th {
+    color: #f8fafc !important;
+    border-color: #333333 !important;
+}
+
+/* Fix sticky columns that were staying white */
+body.dark-theme .league-block .table tbody tr .sticky-col,
+[data-bs-theme="dark"] .league-block .table tbody tr .sticky-col {
+    background-color: #161616 !important;
+    color: #f8fafc !important;
+}
+
+body.dark-theme .league-block .table-striped tbody tr:nth-of-type(odd) .sticky-col,
+[data-bs-theme="dark"] .league-block .table-striped tbody tr:nth-of-type(odd) .sticky-col {
+    background-color: #202020 !important;
+    color: #f8fafc !important;
+}
+
+/* Keep table header dark */
+body.dark-theme .league-block .table thead th,
+body.dark-theme .league-block .table thead .sticky-col,
+[data-bs-theme="dark"] .league-block .table thead th,
+[data-bs-theme="dark"] .league-block .table thead .sticky-col {
+    background-color: #111827 !important;
+    color: #ffffff !important;
+}
+
+/* Team names inside standings */
+body.dark-theme .league-block .table .team-name-text,
+[data-bs-theme="dark"] .league-block .table .team-name-text {
+    color: #ffffff !important;
+}
+
+/* Points column should stay clear and strong */
+body.dark-theme .league-block .table .col-pts,
+[data-bs-theme="dark"] .league-block .table .col-pts {
+    color: #ffffff !important;
+    font-weight: 800;
+}
+
+/* See more buttons for overview sections */
+.league-see-more-btn {
+    display: inline-block;
+    padding: 8px 18px;
+    border-radius: 999px;
+    background: linear-gradient(to bottom, #4a4a4a, #1f1f1f);
+    color: #8bdc1f !important;
+    font-size: 13px;
+    font-weight: 800;
+    text-decoration: none;
+    border: none;
+    border-bottom: 2px solid #8bdc1f;
+    box-shadow: 0 4px 14px rgba(139, 220, 31, 0.35);
+    transition: all 0.2s ease-in-out;
+}
+
+.league-see-more-btn:hover {
+    color: #b6ff3b !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(139, 220, 31, 0.55);
+    text-decoration: none;
+}
+/* =========================
+   OVERVIEW STATS TABLE DARK MODE FIX
+   ========================= */
+
+.league-stats-block {
+    max-width: 800px;
+    margin: 0 auto 35px auto;
+}
+
+.league-stats-table {
+    margin-bottom: 0;
+}
+
+/* Light mode */
+.league-stats-table td,
+.league-stats-table th {
+    color: #111827;
+}
+
+/* Dark mode */
+body.dark-theme .league-stats-table,
+[data-bs-theme="dark"] .league-stats-table {
+    --bs-table-bg: #161616;
+    --bs-table-color: #f8fafc;
+    --bs-table-striped-bg: #202020;
+    --bs-table-striped-color: #f8fafc;
+    --bs-table-hover-bg: #26321f;
+    --bs-table-hover-color: #ffffff;
+
+    background-color: #161616 !important;
+    color: #f8fafc !important;
+}
+
+body.dark-theme .league-stats-table tbody tr,
+[data-bs-theme="dark"] .league-stats-table tbody tr {
+    background-color: #161616 !important;
+    color: #f8fafc !important;
+}
+
+body.dark-theme .league-stats-table.table-striped tbody tr:nth-of-type(odd),
+[data-bs-theme="dark"] .league-stats-table.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #202020 !important;
+    color: #f8fafc !important;
+}
+
+body.dark-theme .league-stats-table td,
+body.dark-theme .league-stats-table th,
+[data-bs-theme="dark"] .league-stats-table td,
+[data-bs-theme="dark"] .league-stats-table th {
+    color: #f8fafc !important;
+    border-color: #333333 !important;
+}
+
+body.dark-theme .league-stats-table thead th,
+[data-bs-theme="dark"] .league-stats-table thead th {
+    background-color: #111827 !important;
+    color: #ffffff !important;
+}
+
+body.dark-theme .league-stats-table .team-name-text,
+[data-bs-theme="dark"] .league-stats-table .team-name-text {
+    color: #ffffff !important;
+}
+
+/* Make empty message visible in both modes */
+.league-stats-table td.text-center {
+    font-weight: 600;
+}
+
+body.dark-theme .league-stats-table td.text-center,
+[data-bs-theme="dark"] .league-stats-table td.text-center {
+    color: #d1d5db !important;
+}
+
+/* =========================
+   MOBILE-FRIENDLY TOP SCORERS TABLE
+   ========================= */
+
+.mobile-player-stats-table {
+    min-width: 0 !important;
+    width: 100% !important;
+    table-layout: fixed;
+}
+
+.mobile-player-stats-table th,
+.mobile-player-stats-table td {
+    vertical-align: middle;
+}
+
+.mobile-player-stats-table .stats-rank-col {
+    width: 42px;
+    min-width: 42px;
+    max-width: 42px;
+    text-align: center;
+}
+
+.mobile-player-stats-table .stats-goals-col {
+    width: 58px;
+    min-width: 58px;
+    max-width: 58px;
+    text-align: center;
+    font-weight: 800;
+}
+
+.mobile-player-stats-table .stats-player-col {
+    width: auto;
+    text-align: left;
+    overflow: hidden;
+}
+
+.player-stat-info {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+    width: 100%;
+}
+
+.player-stat-logo {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+    flex: 0 0 30px;
+}
+
+.player-stat-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+    width: 100%;
+    line-height: 1.15;
+}
+
+.player-stat-name {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #111827;
+}
+
+.player-stat-team {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: #6b7280;
+}
+
+/* Dark mode */
+body.dark-theme .player-stat-name,
+[data-bs-theme="dark"] .player-stat-name {
+    color: #ffffff !important;
+}
+
+body.dark-theme .player-stat-team,
+[data-bs-theme="dark"] .player-stat-team {
+    color: #b7c0cc !important;
+}
+
+/* Make rows feel closer to LiveScore style */
+.mobile-player-stats-table tbody tr {
+    height: 52px;
+}
+
+body.dark-theme .mobile-player-stats-table tbody tr,
+[data-bs-theme="dark"] .mobile-player-stats-table tbody tr {
+    border-bottom: 1px solid #2f2f2f;
+}
+
+/* Mobile tightening */
+@media (max-width: 480px) {
+    .mobile-player-stats-table th,
+    .mobile-player-stats-table td {
+        padding: 8px 6px !important;
+    }
+
+    .mobile-player-stats-table .stats-rank-col {
+        width: 34px;
+        min-width: 34px;
+        max-width: 34px;
+        font-size: 0.78rem;
+    }
+
+    .mobile-player-stats-table .stats-goals-col {
+        width: 48px;
+        min-width: 48px;
+        max-width: 48px;
+        font-size: 0.78rem;
+    }
+
+    .player-stat-info {
+        gap: 7px;
+    }
+
+    .player-stat-logo {
+        width: 26px;
+        height: 26px;
+        flex-basis: 26px;
+    }
+
+    .player-stat-name {
+        font-size: 0.82rem;
+    }
+
+    .player-stat-team {
+        font-size: 0.66rem;
+    }
+}
+.league-section-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin: 10px 0 8px;
+    color: #f8f9fa;
+}
+
+body.light-mode .league-section-label {
+    color: #333;
+}
+/* League list section label: Today's Matches / Upcoming Fixtures / Latest Results */
+.league-section-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin: 10px 0 8px;
+    color: #111827; /* black-ish for light mode */
+}
+
+/* Dark mode */
+body.dark-mode .league-section-label,
+html.dark-mode .league-section-label {
+    color: #f8fafc;
+}
+/* Match date/time text in light mode */
+.match-time {
+    color: #111827;
+    font-weight: 600;
+}
+
+/* Slightly softer but still readable in dark mode */
+body.dark-mode .match-time,
+html.dark-mode .match-time {
+    color: #cbd5e1;
+}
+
+/* Keep status badges readable */
+.status-text {
+    font-weight: 700;
+}
+body:not(.dark-mode) .result-indicator,
+body:not(.dark-mode) .upcoming-indicator,
+body:not(.dark-mode) .match-time {
+    color: #111827 !important;
+}
+/* ==============================
+   League list light/dark fixes
+   ============================== */
+
+.league-section-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin: 10px 0 8px;
+    color: #111827;
+}
+
+.match-time {
+    color: #111827;
+    font-weight: 600;
+}
+
+.status-text {
+    font-weight: 700;
+}
+
+/* Dark mode support */
+html.dark-mode,
+html.dark-mode body,
+body.dark-mode {
+    background-color: #121212;
+    color: #f8fafc;
+}
+
+html.dark-mode .league-section-label,
+body.dark-mode .league-section-label {
+    color: #f8fafc;
+}
+
+html.dark-mode .match-time,
+body.dark-mode .match-time {
+    color: #cbd5e1;
+}
+
+/* Strong light-mode override */
+body:not(.dark-mode) .league-section-label,
+html:not(.dark-mode) .league-section-label {
+    color: #111827 !important;
+}
+
+body:not(.dark-mode) .match-time,
+html:not(.dark-mode) .match-time,
+body:not(.dark-mode) .result-indicator,
+body:not(.dark-mode) .upcoming-indicator {
+    color: #111827 !important;
+}
+/* ==============================
+   League list light mode fixes
+   ============================== */
+
+html.light-theme .league-block,
+body.light-theme .league-block {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    border-color: #e5e7eb !important;
+}
+
+html.light-theme .league-header-row,
+body.light-theme .league-header-row {
+    background-color: #f8f9fa !important;
+    color: #111827 !important;
+}
+
+html.light-theme .league-match,
+body.light-theme .league-match {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    border-color: #e5e7eb !important;
+}
+
+html.light-theme .league-section-label,
+body.light-theme .league-section-label {
+    color: #111827 !important;
+}
+
+html.light-theme .match-time,
+body.light-theme .match-time,
+html.light-theme .result-indicator,
+body.light-theme .result-indicator,
+html.light-theme .upcoming-indicator,
+body.light-theme .upcoming-indicator {
+    color: #111827 !important;
+}
+
+html.light-theme .team-info span,
+body.light-theme .team-info span,
+html.light-theme .score,
+body.light-theme .score {
+    color: #111827 !important;
+}
+/* ==============================
+   League list dark mode fixes
+   ============================== */
+
+html.dark-theme .league-block,
+body.dark-theme .league-block {
+    background-color: #1e1e1e !important;
+    color: #ffffff !important;
+    border-color: #333 !important;
+}
+
+html.dark-theme .league-header-row,
+body.dark-theme .league-header-row {
+    background-color: #2b2b2b !important;
+    color: #ffffff !important;
+}
+
+html.dark-theme .league-match,
+body.dark-theme .league-match {
+    background-color: #1e1e1e !important;
+    color: #ffffff !important;
+    border-color: #333 !important;
+}
+
+html.dark-theme .league-section-label,
+body.dark-theme .league-section-label {
+    color: #f8fafc !important;
+}
+
+html.dark-theme .match-time,
+body.dark-theme .match-time {
+    color: #cbd5e1 !important;
+}
+
+html.dark-theme .team-info span,
+body.dark-theme .team-info span,
+html.dark-theme .score,
+body.dark-theme .score {
+    color: #ffffff !important;
+}
+/* =====================================================
+   MATCH DETAIL DARK MODE FIX
+   Fixes cards, tabs, table, lineups, stats and text
+   ===================================================== */
+
+/* Main match detail text */
+html.dark-theme .competition-info,
+body.dark-theme .competition-info,
+html.dark-mode .competition-info,
+body.dark-mode .competition-info {
+    color: #cbd5e1 !important;
+}
+
+html.dark-theme .match-header,
+body.dark-theme .match-header,
+html.dark-mode .match-header,
+body.dark-mode .match-header {
+    color: #ffffff !important;
+}
+
+html.dark-theme .team-name,
+body.dark-theme .team-name,
+html.dark-mode .team-name,
+body.dark-mode .team-name {
+    color: #ffffff !important;
+    font-weight: 700;
+}
+
+html.dark-theme .score-big,
+body.dark-theme .score-big,
+html.dark-mode .score-big,
+body.dark-mode .score-big {
+    color: #ffffff !important;
+}
+
+/* Admin controls card + info/stats cards */
+html.dark-theme .card,
+body.dark-theme .card,
+html.dark-mode .card,
+body.dark-mode .card {
+    background-color: #1d1d1d !important;
+    color: #f8fafc !important;
+    border-color: #343434 !important;
+}
+
+html.dark-theme .card-body,
+body.dark-theme .card-body,
+html.dark-mode .card-body,
+body.dark-mode .card-body {
+    background-color: transparent !important;
+    color: #f8fafc !important;
+}
+
+html.dark-theme .card h4,
+html.dark-theme .card h5,
+html.dark-theme .card h6,
+html.dark-theme .card p,
+body.dark-theme .card h4,
+body.dark-theme .card h5,
+body.dark-theme .card h6,
+body.dark-theme .card p,
+html.dark-mode .card h4,
+html.dark-mode .card h5,
+html.dark-mode .card h6,
+html.dark-mode .card p,
+body.dark-mode .card h4,
+body.dark-mode .card h5,
+body.dark-mode .card h6,
+body.dark-mode .card p {
+    color: #f8fafc !important;
+}
+
+/* Bootstrap muted text was too dark */
+html.dark-theme .text-muted,
+body.dark-theme .text-muted,
+html.dark-mode .text-muted,
+body.dark-mode .text-muted {
+    color: #b7c0cc !important;
+}
+
+/* Admin panel button should still look clear */
+html.dark-theme .btn-dark,
+body.dark-theme .btn-dark,
+html.dark-mode .btn-dark,
+body.dark-mode .btn-dark {
+    background-color: #111827 !important;
+    border-color: #374151 !important;
+    color: #ffffff !important;
+}
+
+/* =====================================================
+   MATCH DETAIL TABS
+   ===================================================== */
+
+#matchTabs.nav-tabs {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 6px;
+    padding: 6px;
+    background: #ffffff;
+    border-bottom: 1px solid #dee2e6;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+#matchTabs .nav-item {
+    flex: 0 0 auto;
+}
+
+#matchTabs .nav-link {
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #0d6efd;
+    background: transparent;
+    white-space: nowrap;
+}
+
+#matchTabs .nav-link.active {
+    color: #111827;
+    background: #ffffff;
+    border-color: #dee2e6;
+    border-bottom: 3px solid #8bdc1f;
+}
+
+/* Dark tabs */
+html.dark-theme #matchTabs.nav-tabs,
+body.dark-theme #matchTabs.nav-tabs,
+html.dark-mode #matchTabs.nav-tabs,
+body.dark-mode #matchTabs.nav-tabs {
+    background: #111111 !important;
+    border: 1px solid #2f2f2f !important;
+    border-radius: 8px;
+}
+
+html.dark-theme #matchTabs .nav-link,
+body.dark-theme #matchTabs .nav-link,
+html.dark-mode #matchTabs .nav-link,
+body.dark-mode #matchTabs .nav-link {
+    color: #e5e7eb !important;
+    background: #1b1b1b !important;
+    border-color: #333333 !important;
+}
+
+html.dark-theme #matchTabs .nav-link:hover,
+body.dark-theme #matchTabs .nav-link:hover,
+html.dark-mode #matchTabs .nav-link:hover,
+body.dark-mode #matchTabs .nav-link:hover {
+    color: #b6ff3b !important;
+    background: #242424 !important;
+    border-color: rgba(139, 220, 31, 0.45) !important;
+}
+
+html.dark-theme #matchTabs .nav-link.active,
+body.dark-theme #matchTabs .nav-link.active,
+html.dark-mode #matchTabs .nav-link.active,
+body.dark-mode #matchTabs .nav-link.active {
+    color: #b6ff3b !important;
+    background: #202a24 !important;
+    border-color: rgba(139, 220, 31, 0.75) !important;
+    border-bottom: 3px solid #8bdc1f !important;
+    box-shadow: 0 0 12px rgba(139, 220, 31, 0.18);
+}
+
+/* =====================================================
+   MATCH DETAIL TABLE DARK MODE
+   Fixes the white log/team-name area
+   ===================================================== */
+
+html.dark-theme #tab-table .table,
+body.dark-theme #tab-table .table,
+html.dark-mode #tab-table .table,
+body.dark-mode #tab-table .table,
+html.dark-theme #tab-stats .table,
+body.dark-theme #tab-stats .table,
+html.dark-mode #tab-stats .table,
+body.dark-mode #tab-stats .table {
+    --bs-table-bg: #161616;
+    --bs-table-color: #f8fafc;
+    --bs-table-striped-bg: #202020;
+    --bs-table-striped-color: #f8fafc;
+    --bs-table-hover-bg: #26321f;
+    --bs-table-hover-color: #ffffff;
+
+    background-color: #161616 !important;
+    color: #f8fafc !important;
+}
+
+html.dark-theme #tab-table .table td,
+html.dark-theme #tab-table .table th,
+body.dark-theme #tab-table .table td,
+body.dark-theme #tab-table .table th,
+html.dark-mode #tab-table .table td,
+html.dark-mode #tab-table .table th,
+body.dark-mode #tab-table .table td,
+body.dark-mode #tab-table .table th,
+html.dark-theme #tab-stats .table td,
+html.dark-theme #tab-stats .table th,
+body.dark-theme #tab-stats .table td,
+body.dark-theme #tab-stats .table th,
+html.dark-mode #tab-stats .table td,
+html.dark-mode #tab-stats .table th,
+body.dark-mode #tab-stats .table td,
+body.dark-mode #tab-stats .table th {
+    color: #f8fafc !important;
+    border-color: #333333 !important;
+}
+
+/* Very important: sticky columns were staying white */
+html.dark-theme .standings-table tbody tr .sticky-col,
+body.dark-theme .standings-table tbody tr .sticky-col,
+html.dark-mode .standings-table tbody tr .sticky-col,
+body.dark-mode .standings-table tbody tr .sticky-col {
+    background-color: #161616 !important;
+    color: #ffffff !important;
+}
+
+html.dark-theme .standings-table.table-striped tbody tr:nth-of-type(odd) .sticky-col,
+body.dark-theme .standings-table.table-striped tbody tr:nth-of-type(odd) .sticky-col,
+html.dark-mode .standings-table.table-striped tbody tr:nth-of-type(odd) .sticky-col,
+body.dark-mode .standings-table.table-striped tbody tr:nth-of-type(odd) .sticky-col {
+    background-color: #202020 !important;
+    color: #ffffff !important;
+}
+
+/* Header must stay strong */
+html.dark-theme .standings-table thead th,
+html.dark-theme .standings-table thead .sticky-col,
+body.dark-theme .standings-table thead th,
+body.dark-theme .standings-table thead .sticky-col,
+html.dark-mode .standings-table thead th,
+html.dark-mode .standings-table thead .sticky-col,
+body.dark-mode .standings-table thead th,
+body.dark-mode .standings-table thead .sticky-col {
+    background-color: #111827 !important;
+    color: #ffffff !important;
+}
+
+/* Highlighted teams should remain visible */
+html.dark-theme .standings-table .team-highlight td,
+body.dark-theme .standings-table .team-highlight td,
+html.dark-mode .standings-table .team-highlight td,
+body.dark-mode .standings-table .team-highlight td {
+    background-color: #14532d !important;
+    color: #ffffff !important;
+    font-weight: 800;
+}
+
+html.dark-theme .standings-table .team-highlight .sticky-col,
+body.dark-theme .standings-table .team-highlight .sticky-col,
+html.dark-mode .standings-table .team-highlight .sticky-col,
+body.dark-mode .standings-table .team-highlight .sticky-col {
+    background-color: #14532d !important;
+    color: #ffffff !important;
+}
+
+html.dark-theme .standings-table .team-name-text,
+body.dark-theme .standings-table .team-name-text,
+html.dark-mode .standings-table .team-name-text,
+body.dark-mode .standings-table .team-name-text {
+    color: #ffffff !important;
+}
+
+/* =====================================================
+   LINEUPS TAB DARK MODE
+   ===================================================== */
+
+html.dark-theme #tab-lineup,
+body.dark-theme #tab-lineup,
+html.dark-mode #tab-lineup,
+body.dark-mode #tab-lineup {
+    color: #ffffff !important;
+}
+
+html.dark-theme #tab-lineup h5,
+body.dark-theme #tab-lineup h5,
+html.dark-mode #tab-lineup h5,
+body.dark-mode #tab-lineup h5 {
+    color: #ffffff !important;
+}
+
+html.dark-theme #tab-lineup .list-group-item,
+body.dark-theme #tab-lineup .list-group-item,
+html.dark-mode #tab-lineup .list-group-item,
+body.dark-mode #tab-lineup .list-group-item {
+    background-color: #1d1d1d !important;
+    color: #f8fafc !important;
+    border-color: #343434 !important;
+}
+
+html.dark-theme #tab-lineup p,
+body.dark-theme #tab-lineup p,
+html.dark-mode #tab-lineup p,
+body.dark-mode #tab-lineup p {
+    color: #cbd5e1 !important;
+}
+
+/* =====================================================
+   STATS TAB DARK MODE
+   ===================================================== */
+
+html.dark-theme #tab-stats,
+body.dark-theme #tab-stats,
+html.dark-mode #tab-stats,
+body.dark-mode #tab-stats {
+    color: #ffffff !important;
+}
+
+html.dark-theme #tab-stats h5,
+html.dark-theme #tab-stats h6,
+body.dark-theme #tab-stats h5,
+body.dark-theme #tab-stats h6,
+html.dark-mode #tab-stats h5,
+html.dark-mode #tab-stats h6,
+body.dark-mode #tab-stats h5,
+body.dark-mode #tab-stats h6 {
+    color: #ffffff !important;
+}
+
+/* Mobile improvements */
+@media (max-width: 768px) {
+    #matchTabs.nav-tabs {
+        gap: 5px;
+        padding: 6px;
+    }
+
+    #matchTabs .nav-link {
+        font-size: 0.78rem;
+        padding: 7px 10px;
+    }
+
+    .match-header {
+        align-items: flex-start;
+    }
+
+    .team-logo-large {
+        width: 48px;
+        height: 48px;
+    }
+
+    .team-name {
+        font-size: 0.85rem;
+        font-weight: 700;
+    }
+
+    .score-big {
+        font-size: 30px;
+    }
+}
+/* =====================================================
+   MATCH DETAIL TABLE HIGHLIGHT FIX
+   Keeps the two playing teams highlighted in dark mode
+   ===================================================== */
+
+/* Highlighted teams in dark mode */
+html.dark-theme #tab-table .standings-table tbody tr.team-highlight td,
+body.dark-theme #tab-table .standings-table tbody tr.team-highlight td,
+html.dark-mode #tab-table .standings-table tbody tr.team-highlight td,
+body.dark-mode #tab-table .standings-table tbody tr.team-highlight td {
+    background-color: #14532d !important;
+    color: #ffffff !important;
+    font-weight: 800 !important;
+}
+
+/* Sticky columns inside highlighted rows */
+html.dark-theme #tab-table .standings-table tbody tr.team-highlight .sticky-col,
+body.dark-theme #tab-table .standings-table tbody tr.team-highlight .sticky-col,
+html.dark-mode #tab-table .standings-table tbody tr.team-highlight .sticky-col,
+body.dark-mode #tab-table .standings-table tbody tr.team-highlight .sticky-col {
+    background-color: #14532d !important;
+    color: #ffffff !important;
+}
+
+/* Team name text inside highlighted rows */
+html.dark-theme #tab-table .standings-table tbody tr.team-highlight .team-name-text,
+body.dark-theme #tab-table .standings-table tbody tr.team-highlight .team-name-text,
+html.dark-mode #tab-table .standings-table tbody tr.team-highlight .team-name-text,
+body.dark-mode #tab-table .standings-table tbody tr.team-highlight .team-name-text {
+    color: #ffffff !important;
+    font-weight: 800 !important;
+}
+
+/* Optional: give the highlighted teams a small green glow */
+html.dark-theme #tab-table .standings-table tbody tr.team-highlight,
+body.dark-theme #tab-table .standings-table tbody tr.team-highlight,
+html.dark-mode #tab-table .standings-table tbody tr.team-highlight,
+body.dark-mode #tab-table .standings-table tbody tr.team-highlight {
+    box-shadow: inset 4px 0 0 #8bdc1f;
+}
+/* Safer Top Scorers spacing fix */
+.mobile-player-stats-table {
+    width: 100% !important;
+    min-width: 0 !important;
+    table-layout: fixed !important;
+}
+
+.mobile-player-stats-table .stats-rank-col {
+    padding-left: 1px !important;
+    padding-right: 1px !important;
+}
+
+.mobile-player-stats-table .stats-player-col {
+    text-align: left !important;
+    padding-left: 0px !important;
+    padding-right: 2px !important;
+}
+
+.mobile-player-stats-table .stats-goals-col {
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+}
+
+.mobile-player-stats-table .player-stat-info {
+    gap: 6px !important;
+}
+
+.mobile-player-stats-table .player-stat-logo {
+    width: 24px !important;
+    height: 24px !important;
+    flex: 0 0 24px !important;
+}
+/* =========================
+   HOMEPAGE HERO BANNER - CYCLING SLIDES
+   Add this AFTER your existing .homepage-hero-banner rules.
+   It builds on top of them rather than replacing them.
+   ========================= */
+
+/* The outer container already has position/sizing from your existing
+   .homepage-hero-banner rule. We just need it to host stacked slides. */
+.homepage-hero-banner {
+    position: relative;
+}
+
+/* Each banner (player photo or ad) is stacked directly on top of the
+   others and faded in/out. Only one has .active at a time. */
+.homepage-hero-slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+
+.homepage-hero-slide.active {
+    position: relative; /* first/active slide sets the container's height */
+    opacity: 1;
+    visibility: visible;
+    z-index: 1;
+}
+
+/* When more than one slide exists, non-active slides must not affect
+   layout height - keep them absolutely positioned and invisible until
+   they become active. */
+.homepage-hero-slide:not(.active) {
+    position: absolute;
+}
+
+/* Small progress dots so visitors can see there are multiple slides.
+   Purely decorative - hidden automatically when there's only one slide
+   since the template doesn't render the dots container at all then. */
+.homepage-hero-dots {
+    position: absolute;
+    left: 50%;
+    bottom: 16px;
+    transform: translateX(-50%);
+    z-index: 3;
+    display: flex;
+    gap: 8px;
+}
+
+.homepage-hero-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.homepage-hero-dot.active {
+    background: #8bdc1f;
+    border-color: #8bdc1f;
+    transform: scale(1.15);
+    box-shadow: 0 0 8px rgba(139, 220, 31, 0.7);
+}
+
+@media (max-width: 768px) {
+    .homepage-hero-dots {
+        bottom: 10px;
+        gap: 6px;
+    }
+
+    .homepage-hero-dot {
+        width: 6px;
+        height: 6px;
+    }
+}
+
+.signin-modal{
+
+    border:none;
+    border-radius:20px;
+
+}
+
+.dark-theme .signin-modal{
+
+    background:#1d1d1d;
+    color:white;
+
+}
+
+.dark-theme .signin-modal .text-muted{
+
+    color:#cccccc!important;
+
+}
+
+/* Keep the football start confirmation readable inside the dark match card.
+   The modal is nested in that card, whose dark-theme text rule would otherwise
+   force its heading and paragraphs to light text over Bootstrap's light modal. */
+.start-match-confirm-modal .modal-content {
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    color: #212529;
+}
+
+.start-match-confirm-modal .modal-header,
+.start-match-confirm-modal .modal-footer {
+    background-color: #ffffff;
+    border-color: #dee2e6;
+    color: #212529;
+}
+
+html.dark-theme .start-match-confirm-modal .modal-title,
+body.dark-theme .start-match-confirm-modal .modal-title,
+html.dark-theme .start-match-confirm-modal .modal-body,
+body.dark-theme .start-match-confirm-modal .modal-body,
+html.dark-theme .start-match-confirm-modal .modal-body p,
+body.dark-theme .start-match-confirm-modal .modal-body p,
+html.dark-theme .start-match-confirm-modal .start-match-confirm-teams,
+body.dark-theme .start-match-confirm-modal .start-match-confirm-teams {
+    color: #212529 !important;
+    opacity: 1;
+}
+
+.start-match-confirm-modal .btn-close {
+    filter: none;
+    opacity: 0.75;
+}
+
+/* =====================================================
+   LEAGUE MANAGER
+   Scoped table and dashboard colours.  These classes are deliberately added
+   only to manager templates, so public football and Pools tables keep their
+   existing presentation.
+   ===================================================== */
+.league-manager-table {
+    --bs-table-bg: #ffffff;
+    --bs-table-color: #1f2937;
+    --bs-table-striped-bg: #f3f4f6;
+    --bs-table-striped-color: #1f2937;
+    --bs-table-border-color: #d1d5db;
+}
+
+.league-manager-table thead.table-dark th {
+    background-color: #1f2937;
+    border-color: #374151;
+    color: #ffffff;
+}
+
+.league-manager-search {
+    max-width: 42rem;
+}
+
+.league-manager-search .form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 .2rem rgba(13, 110, 253, .2);
+}
+
+.league-manager-league-title {
+    overflow-wrap: anywhere;
+}
+
+html.dark-theme .league-manager-table,
+body.dark-theme .league-manager-table,
+html.dark-mode .league-manager-table,
+body.dark-mode .league-manager-table {
+    --bs-table-bg: #171717;
+    --bs-table-color: #f8fafc;
+    --bs-table-striped-bg: #242424;
+    --bs-table-striped-color: #f8fafc;
+    --bs-table-hover-bg: #2d2d2d;
+    --bs-table-hover-color: #ffffff;
+    --bs-table-border-color: #404040;
+}
+
+html.dark-theme .league-manager-table td,
+html.dark-theme .league-manager-table th,
+body.dark-theme .league-manager-table td,
+body.dark-theme .league-manager-table th,
+html.dark-mode .league-manager-table td,
+html.dark-mode .league-manager-table th,
+body.dark-mode .league-manager-table td,
+body.dark-mode .league-manager-table th {
+    color: #f8fafc;
+    border-color: #404040;
+}
+
+html.dark-theme .league-manager-table .text-muted,
+body.dark-theme .league-manager-table .text-muted,
+html.dark-mode .league-manager-table .text-muted,
+body.dark-mode .league-manager-table .text-muted {
+    color: #cbd5e1 !important;
+}
+
+html.dark-theme .league-manager-table thead.table-dark th,
+body.dark-theme .league-manager-table thead.table-dark th,
+html.dark-mode .league-manager-table thead.table-dark th,
+body.dark-mode .league-manager-table thead.table-dark th {
+    background-color: #111827;
+    border-color: #374151;
+    color: #ffffff;
+}
+
+html.dark-theme .league-manager-search .form-control,
+body.dark-theme .league-manager-search .form-control,
+html.dark-mode .league-manager-search .form-control,
+body.dark-mode .league-manager-search .form-control {
+    background-color: #171717;
+    border-color: #525252;
+    color: #f8fafc;
+}
+
+html.dark-theme .league-manager-search .form-control::placeholder,
+body.dark-theme .league-manager-search .form-control::placeholder,
+html.dark-mode .league-manager-search .form-control::placeholder,
+body.dark-mode .league-manager-search .form-control::placeholder {
+    color: #a3a3a3;
+}
+
+/* The abandoned-match decision page uses optional notes; keep its hint and
+   placeholder readable when the management UI is in dark mode. */
+html.dark-theme .abandoned-resolution-form .form-text,
+body.dark-theme .abandoned-resolution-form .form-text,
+html.dark-mode .abandoned-resolution-form .form-text,
+body.dark-mode .abandoned-resolution-form .form-text,
+[data-bs-theme="dark"] .abandoned-resolution-form .form-text {
+    color: #cbd5e1 !important;
+}
+
+html.dark-theme .abandoned-resolution-form .form-control::placeholder,
+body.dark-theme .abandoned-resolution-form .form-control::placeholder,
+html.dark-mode .abandoned-resolution-form .form-control::placeholder,
+body.dark-mode .abandoned-resolution-form .form-control::placeholder,
+[data-bs-theme="dark"] .abandoned-resolution-form .form-control::placeholder {
+    color: #cbd5e1;
+    opacity: 1;
+}
+
+@media (max-width: 575.98px) {
+    .league-manager-search .input-group {
+        flex-wrap: wrap;
+    }
+
+    .league-manager-search .form-control {
+        flex-basis: 100%;
+        width: 100%;
+        margin-bottom: .5rem;
+        border-radius: .375rem !important;
+    }
+}
+
+.start-match-confirm-modal .btn-close:hover,
+.start-match-confirm-modal .btn-close:focus {
+    opacity: 1;
+}
+
+.start-match-confirm-modal .btn-outline-secondary {
+    border-color: #6c757d;
+    color: #495057;
+}
+
+.start-match-confirm-modal .btn-outline-secondary:hover,
+.start-match-confirm-modal .btn-outline-secondary:focus {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: #ffffff;
+}
+
+.signin-modal .btn{
+
+    padding:12px;
+    border-radius:12px;
+    font-weight:600;
+
+}
+.esports-nav-container{
+
+    display:grid;
+
+    grid-template-columns:1fr auto 1fr;
+
+    align-items:center;
+
+    min-height:68px;
+
+}
+
+.nav-left{
+
+    display:flex;
+
+    justify-content:flex-start;
+
+}
+
+.nav-center{
+
+    display:flex;
+
+    justify-content:center;
+
+}
+
+.nav-right{
+
+    display:flex;
+
+    justify-content:flex-end;
+
+    align-items:center;
+
+    gap:12px;
+
+}
+
+.signin-btn{
+
+    background:#16a34a;
+
+    color:#fff;
+
+    border:none;
+
+    border-radius:22px;
+
+    padding:8px 18px;
+
+    font-weight:600;
+
+    transition:.25s;
+
+}
+
+.signin-btn:hover{
+
+    background:#15803d;
+
+    transform:translateY(-1px);
+
+}
+
+.user-btn{
+
+    background:#16a34a;
+
+    color:white;
+
+    border:none;
+
+    border-radius:22px;
+
+    padding:8px 18px;
+
+    font-weight:600;
+
+}
+
+.theme-toggle-btn{
+
+    flex-shrink:0;
+
+}
+@media (max-width:768px){
+
+.esports-nav-container{
+
+    grid-template-columns:50px 1fr auto;
+
+}
+
+.brand-text{
+
+    font-size:1.2rem;
+
+}
+
+.signin-btn{
+
+    padding:8px 14px;
+
+    font-size:.9rem;
+
+}
+
+}
+
+/* Keep the header layout stable after the older navbar rules above. */
+.esports-nav-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 52px;
+}
+
+.esports-header-identity {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    max-width: calc(100% - 52px);
+}
+
+.esports-brand-centered {
+    position: static;
+    transform: none;
+}
+
+.esports-nav-actions {
+    position: absolute;
+    right: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem !important;
+}
+
+.esports-nav-actions .theme-toggle-btn {
+    position: static !important;
+    right: auto;
+    flex: 0 0 auto;
+}
+
+@media (max-width: 575.98px) {
+    .esports-header-identity {
+        left: 42%;
+    }
+
+    .esports-nav-actions {
+        gap: 0.35rem !important;
+    }
+}
+
+/* Football match notices occupy a full row after both teams and their scorers. */
+.football-match-summary .goal-line,
+.football-match-summary .match-score-block {
+    overflow-wrap: anywhere;
+}
+
+.football-match-summary .match-score-block {
+    min-width: 0;
+    max-width: 40%;
+}
+
+.football-match-summary .match-abandonment-notice {
+    margin: .65rem 0 0;
+    padding: .5rem .75rem;
+    font-size: .875rem;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.match-abandonment-notice p {
+    margin: .15rem 0 0;
+}
+
+.match-abandonment-actions {
+    margin-top: .4rem;
+    padding-top: .4rem;
+    border-top: 1px solid currentColor;
+}
+
+.match-abandonment-actions .btn {
+    max-width: 100%;
+    white-space: normal;
+}
+
+html.dark-theme .match-abandonment-notice.alert-danger,
+body.dark-theme .match-abandonment-notice.alert-danger,
+html.dark-mode .match-abandonment-notice.alert-danger,
+body.dark-mode .match-abandonment-notice.alert-danger,
+[data-bs-theme="dark"] .match-abandonment-notice.alert-danger {
+    background-color: #3d1820;
+    border-color: #8f3b4a;
+    color: #ffdce1;
+}
+
+html.dark-theme .match-abandonment-notice .btn-outline-danger,
+body.dark-theme .match-abandonment-notice .btn-outline-danger,
+html.dark-mode .match-abandonment-notice .btn-outline-danger,
+body.dark-mode .match-abandonment-notice .btn-outline-danger,
+[data-bs-theme="dark"] .match-abandonment-notice .btn-outline-danger {
+    --bs-btn-color: #ffb1bc;
+    --bs-btn-border-color: #ffb1bc;
+    --bs-btn-hover-color: #231015;
+    --bs-btn-hover-bg: #ffb1bc;
+    --bs-btn-hover-border-color: #ffb1bc;
+}

@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ entry.team.name }} lineup | {{ match.competition.name }} | EsportsLive{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'pool/css/pool.css' %}">
+{% endblock %}
+
+{% block content %}
+<main class="pool-page pool-team-lineup-page">
+    {% include "pool/_page_navigation.html" with back_fallback=lineup_back_url show_pool_home=True %}
+
+    <header class="pool-detail-hero pool-team-lineup-hero">
+        <div class="pool-detail-branding">
+            {% if entry.team.logo %}<img src="{{ entry.team.logo.url }}" alt="{{ entry.team.name }} logo" class="pool-detail-logo" decoding="async">{% else %}<span class="pool-detail-logo pool-detail-logo--fallback" aria-hidden="true">8</span>{% endif %}
+        </div>
+        <div class="pool-detail-copy">
+            <div class="pool-detail-status-row"><span class="pool-status pool-status--{{ match.status|lower }}">{{ match.get_status_display }}</span></div>
+            <h1>{{ entry.team.name }} lineup</h1>
+            <p class="pool-detail-mode">{{ match.home_entry.display_name }} vs {{ match.away_entry.display_name }} · Race to {{ match.race_target }}</p>
+            <p class="pool-section-note mb-0">Submit one to five starters. Empty positions remain clearly marked as vacant and may be filled later by an authorised scorer using this team’s competition roster.</p>
+        </div>
+    </header>
+
+    {% if messages %}
+    <section aria-label="Lineup messages">
+        {% for message in messages %}<div class="alert {% if message.tags == 'error' %}alert-danger{% elif message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}" role="status">{{ message }}</div>{% endfor %}
+    </section>
+    {% endif %}
+
+    {% if can_edit_lineup %}
+    <section class="pool-section pool-lineup-editor" aria-labelledby="lineup-editor-title">
+        <div class="pool-section-heading">
+            <div><p class="pool-eyebrow">Team sheet</p><h2 id="lineup-editor-title">{% if lineup %}Update{% else %}Submit{% endif %} lineup</h2></div>
+            {% if match.status == 'LIVE' %}<p class="pool-section-note">Live corrections remain available only before any scheduled rack has started.</p>{% endif %}
+        </div>
+        <form method="post" class="pool-manager-form pool-lineup-form" novalidate>
+            {% csrf_token %}
+            {% if form.non_field_errors %}<div class="alert alert-danger" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+            <div class="pool-lineup-starters">
+                {% for field in starter_fields %}
+                <div class="pool-lineup-position">
+                    {{ field.label_tag }}{{ field }}{% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}{% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+            {% if form.substitutes %}
+            <fieldset class="pool-lineup-substitutes mt-3">
+                <legend>{{ form.substitutes.label }}</legend>
+
+                {% if form.substitutes.help_text %}
+                <p class="pool-manager-help">
+                    {{ form.substitutes.help_text }}
+                </p>
+                {% endif %}
+
+                <div class="pool-lineup-substitute-grid">
+                    {% for checkbox in form.substitutes %}
+                    <label
+                        class="pool-lineup-substitute-option"
+                        for="{{ checkbox.id_for_label }}"
+                    >
+                        {{ checkbox.tag }}
+                        <span>{{ checkbox.choice_label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+
+                {% for error in form.substitutes.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ error }}
+                </div>
+                {% endfor %}
+            </fieldset>
+            {% endif %}
+            <div class="pool-manager-actions mt-3"><button class="btn btn-primary btn-lg" type="submit">Save lineup</button></div>
+        </form>
+    </section>
+    {% else %}
+    <section class="pool-section"><div class="alert alert-secondary mb-0" role="status">{% if match.status == 'LIVE' %}{% if is_manager %}This lineup is locked for team staff because the fixture is live. A competition manager may make a pre-rack correction only while no scheduled rack has started.{% else %}This lineup is locked because the fixture is live.{% endif %}{% else %}This lineup is read-only because this fixture is no longer available for lineup changes.{% endif %}</div></section>
+    {% endif %}
+
+    <section class="pool-section" aria-labelledby="submitted-lineup-title">
+        <div class="pool-section-heading"><div><p class="pool-eyebrow">Current team sheet</p><h2 id="submitted-lineup-title">Submitted lineup</h2></div></div>
+        {% if lineup_positions %}
+        <ol class="pool-lineup-list">
+            {% for position in lineup_positions %}<li><span>Position {{ position.position }}</span>{% if position.player %}<strong>{{ position.player.full_name }}</strong>{% else %}<strong class="pool-muted">Vacant</strong>{% endif %}</li>{% endfor %}
+        </ol>
+        {% else %}<div class="pool-empty-state pool-empty-state--compact"><p>No valid starting lineup has been submitted yet.</p></div>{% endif %}
+        {% if lineup_members %}<p class="pool-section-note mt-3 mb-0"><strong>Submitted squad:</strong> {% for member in lineup_members %}{{ member.player.full_name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+    </section>
+</main>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load socialaccount %}
+
+{% block title %}Join Predictions{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 520px;">
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4 text-center">
+
+            <h2 class="mb-2">Join {% include "leagues/partials/league_identity.html" with league=competition variant="inline" %} Predictions</h2>
+
+            <p class="text-muted mb-4">
+                Create your account first using Google. After that, you will complete your prediction profile.
+            </p>
+
+            <div class="alert alert-info text-start">
+                <strong>Step 1 of 2:</strong><br>
+                Login or register with Google.
+            </div>
+
+            <a href="{% url 'google_login_for_predictions' competition.slug %}" class="btn btn-primary w-100">
+                Continue with Google
+            </a>
+
+            <div class="mt-3 text-muted small">
+                Your standings name and payout phone number will be added in the final step.
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

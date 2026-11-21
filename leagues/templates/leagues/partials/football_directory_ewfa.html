@@ -1,0 +1,4 @@
+<h2 class="section-title"><span class="section-icon organisation-heading-icon">{% if ewfa_organisation and ewfa_organisation.logo %}<img src="{{ ewfa_organisation.logo.url }}" alt="{{ ewfa_organisation.name }} logo" class="organisation-heading-logo" onerror="this.hidden=true;this.nextElementSibling.hidden=false;">{% endif %}<span class="organisation-heading-fallback" aria-hidden="true" {% if ewfa_organisation and ewfa_organisation.logo %}hidden{% endif %}>&#127942;</span></span> Eswatini Women's Football Association (EWFA)</h2>
+{% for item in ewfa_league_data %}
+{% include "leagues/partials/league_card.html" with item=item %}
+{% empty %}<p class="text-muted">No women's football leagues have been added yet.</p>{% endfor %}

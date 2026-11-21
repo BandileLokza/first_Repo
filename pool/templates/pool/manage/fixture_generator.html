@@ -1,0 +1,66 @@
+{% extends "pool/manage/base.html" %}
+{% load static %}
+
+{% block manager_title %}Fixture generator · {{ competition.name }}{% endblock %}
+
+{% block manager_content %}
+<script src="{% static 'pool/js/fixture_generator_scope.js' %}" defer></script>
+<section class="pool-manager-panel mb-3" aria-labelledby="pool-fixture-generator-title">
+    <div>
+        <p class="pool-eyebrow">League fixture generator</p>
+        <h2 id="pool-fixture-generator-title">Round-robin fixtures</h2>
+        <p class="pool-manager-help mb-0">Create a shuffled first round, review it, and add reverse fixtures only when you are ready. Dates remain blank for managers to schedule later.</p>
+    </div>
+    <form method="get" class="pool-manager-form mt-3" action="{% url 'pool:manage_competition_fixture_generator' competition.slug %}" data-pool-fixture-scope-form>
+        <div class="row g-3 align-items-end">
+            <div class="col-12 col-md-5"><label class="form-label" for="{{ scope_form.stage.id_for_label }}">Table stage</label>{{ scope_form.stage }}{% for error in scope_form.stage.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}</div>
+            <div class="col-12 col-md-5"><label class="form-label" for="{{ scope_form.group.id_for_label }}">Group</label>{{ scope_form.group }}<div class="form-text">Choose a group only for a group stage.</div>{% for error in scope_form.group.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}</div>
+            <div class="col-12 col-md-2"><button class="btn btn-outline-primary w-100" type="submit">Open table</button></div>
+        </div>
+        {% for error in scope_form.non_field_errors %}<div class="alert alert-danger mt-3 mb-0" role="alert">{{ error }}</div>{% endfor %}
+    </form>
+</section>
+
+{% if fixture_scope %}
+<section class="pool-manager-panel mb-3" aria-labelledby="pool-fixture-status-title">
+    <div class="d-flex flex-wrap align-items-start justify-content-between gap-2">
+        <div>
+            <h2 id="pool-fixture-status-title">{{ fixture_scope.label }}</h2>
+            <p class="pool-manager-help mb-0">Entrants: {{ fixture_status.entrant_count }} · First-round {{ fixture_round_term|lower }}s: {{ fixture_status.first_round_gameweeks }} · First-round matches: {{ fixture_status.first_round_matches }}</p>
+        </div>
+    </div>
+    <dl class="pool-information-grid mt-3">
+        <div><dt>First Round</dt><dd>{% if fixture_status.first_round_generated %}<span class="pool-status pool-status--active">Generated</span>{% else %}<span class="pool-status pool-status--draft">Not generated</span>{% endif %}</dd></div>
+        <div><dt>Second Round</dt><dd>{% if fixture_status.second_round_generated %}<span class="pool-status pool-status--active">Generated</span>{% else %}<span class="pool-status pool-status--draft">Not generated</span>{% endif %}</dd></div>
+    </dl>
+    {% if fixture_status.blocking_reasons %}
+    <div class="alert alert-warning mb-0" role="status"><strong>Generation safety check</strong><ul class="mb-0 mt-2">{% for reason in fixture_status.blocking_reasons %}<li>{{ reason }}</li>{% endfor %}</ul></div>
+    {% endif %}
+    {% if not fixture_preview %}
+    <div class="pool-manager-actions mt-3">
+        {% if fixture_status.can_generate_first_round %}
+        <form method="post">{% csrf_token %}<input type="hidden" name="action" value="preview_first_round"><input type="hidden" name="stage" value="{{ selected_stage.pk }}">{% if selected_group %}<input type="hidden" name="group" value="{{ selected_group.pk }}">{% endif %}<button class="btn btn-primary" type="submit">Generate First Round Preview</button></form>
+        {% endif %}
+        {% if fixture_status.can_generate_second_round %}
+        <form method="post">{% csrf_token %}<input type="hidden" name="action" value="preview_second_round"><input type="hidden" name="stage" value="{{ selected_stage.pk }}">{% if selected_group %}<input type="hidden" name="group" value="{{ selected_group.pk }}">{% endif %}<button class="btn btn-primary" type="submit">Generate Second Round Preview</button></form>
+        {% endif %}
+    </div>
+    {% endif %}
+</section>
+
+{% if fixture_preview %}
+<section class="pool-manager-panel" aria-labelledby="pool-fixture-preview-title">
+    <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3"><div><p class="pool-eyebrow">Review before saving</p><h2 id="pool-fixture-preview-title">{% if fixture_preview.leg == 1 %}First{% else %}Second{% endif %} Round Preview</h2><p class="pool-manager-help mb-0">{{ fixture_preview.fixture_count }} fixtures across {{ fixture_preview.gameweek_count }} {{ fixture_round_term|lower }}s. No fixtures have been saved yet.</p></div></div>
+    {% for gameweek in preview_gameweeks %}
+    <section class="pool-fixture-preview-week mb-3"><h3>{{ fixture_round_term }} {{ gameweek.number }}</h3><ul class="pool-manager-list mb-0">{% for row in gameweek.fixtures %}<li>{{ row.home_entry.display_name }} <span class="pool-muted">vs</span> {{ row.away_entry.display_name }}</li>{% endfor %}</ul></section>
+    {% endfor %}
+    <form method="post" class="pool-manager-form mt-3" novalidate>
+        {% csrf_token %}<input type="hidden" name="action" value="confirm"><input type="hidden" name="stage" value="{{ selected_stage.pk }}">{% if selected_group %}<input type="hidden" name="group" value="{{ selected_group.pk }}">{% endif %}
+        {{ confirm_form.token }}
+        <div class="form-check mb-3">{{ confirm_form.confirm }}<label class="form-check-label" for="{{ confirm_form.confirm.id_for_label }}">{{ confirm_form.confirm.label }}</label>{% for error in confirm_form.confirm.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}</div>
+        <button class="btn btn-success" type="submit">Confirm &amp; Generate {% if fixture_preview.leg == 1 %}First{% else %}Second{% endif %} Round Fixtures</button>
+    </form>
+</section>
+{% endif %}
+{% endif %}
+{% endblock %}

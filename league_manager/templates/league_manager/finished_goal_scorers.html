@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+{% block title %}{% if edit_result %}Edit Finished Match{% else %}Manage Goal Scorers{% endif %} - {{ league.name }}{% endblock %}
+{% block content %}
+{% include "league_manager/_report_messages.html" %}
+<div class="mb-3">
+    <a href="{% url 'league_manager:result_update' league.slug %}?tab=finished" class="back-btn">
+        &larr; Update Results
+    </a>
+</div>
+
+<header class="card shadow-sm mb-4">
+    <div class="card-body text-center">
+        <p class="text-muted mb-1">{{ league.name }}</p>
+        <h2 class="h4 mb-3">{% if edit_result %}Edit Finished Match{% else %}Manage Goal Scorers{% endif %}</h2>
+        <div class="row align-items-center g-2 mb-2">
+            <div class="col text-break">
+                {% if match.home_team.logo %}
+                    <img src="{{ match.home_team.logo.url }}" alt="" width="40" height="40" class="object-fit-contain mb-1">
+                {% endif %}
+                <div class="fw-semibold">{{ match.home_team }}</div>
+            </div>
+            <div class="col-auto">
+                <div class="display-6 fw-bold">{{ match.home_score }} &ndash; {{ match.away_score }}</div>
+                <span class="badge text-bg-secondary">FINISHED</span>
+            </div>
+            <div class="col text-break">
+                {% if match.away_team.logo %}
+                    <img src="{{ match.away_team.logo.url }}" alt="" width="40" height="40" class="object-fit-contain mb-1">
+                {% endif %}
+                <div class="fw-semibold">{{ match.away_team }}</div>
+            </div>
+        </div>
+        {% if match.match_date %}<p class="small text-muted mb-2">{{ match.match_date|date:"M j, Y H:i" }}</p>{% endif %}
+        {% if edit_result %}
+            <p class="small text-muted mb-0">
+                {{ match.get_stage_label }}
+                {% if match.gameweek %}&middot; Gameweek {{ match.gameweek }}{% endif %}
+                {% if match.stage.stage_type == "KNOCKOUT" or match.leg > 1 %}&middot; Leg {{ match.leg }}{% endif %}
+                {% if match.location %}&middot; {{ match.location }}{% endif %}
+            </p>
+        {% else %}
+            <p class="mb-0">Manage goal scorers without changing the final result.</p>
+        {% endif %}
+    </div>
+</header>
+
+{% if goal_count_warning %}<div class="alert alert-warning" role="alert">{{ goal_count_warning }}</div>{% endif %}
+{% if invalid_goal_team %}
+    <div class="alert alert-warning" role="alert">
+        A historical goal is credited to a team outside this fixture. That goal needs separate review.
+    </div>
+{% endif %}
+
+<form method="post" id="finished-goal-scorers">
+    {% csrf_token %}
+    <input type="hidden" name="version" value="{{ version }}">
+    {% if edit_result %}
+        <section class="card mb-3" aria-labelledby="final-score-heading">
+            <div class="card-body">
+                <h3 id="final-score-heading" class="h5">Final score</h3>
+                {{ score_form.non_field_errors }}
+                <div class="row g-3">
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label" for="{{ score_form.home_score.id_for_label }}">{{ match.home_team }} final score</label>
+                        {{ score_form.home_score }}
+                        {{ score_form.home_score.errors }}
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label" for="{{ score_form.away_score.id_for_label }}">{{ match.away_team }} final score</label>
+                        {{ score_form.away_score }}
+                        {{ score_form.away_score.errors }}
+                    </div>
+                    {% if match.stage.stage_type == "KNOCKOUT" %}
+                        <div class="col-12 small text-muted">Leave the 90-minute score blank when it matches the final score.</div>
+                        {% for field in score_form %}
+                            {% if field.name != "home_score" and field.name != "away_score" %}
+                                <div class="col-12 col-sm-6">
+                                    <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                    {{ field }}
+                                    {{ field.errors }}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+        <h3 class="h5 mt-4">Recorded goals</h3>
+    {% endif %}
+    {% for section in sections %}
+        <section class="card shadow-sm mb-3" aria-labelledby="scorers-{{ section.team.pk }}">
+            <div class="card-body">
+                <h3 id="scorers-{{ section.team.pk }}" class="h5">{{ section.team }} &mdash; {{ section.score }} goal{{ section.score|pluralize }}</h3>
+                {% if edit_result %}
+                    <div data-goal-list>
+                        {% for row in section.rows %}
+                            {% include "league_manager/_finished_match_goal_row.html" with form=row.form %}
+                        {% endfor %}
+                    </div>
+                    <template data-goal-template>
+                        {% include "league_manager/_finished_match_goal_row.html" with form=section.addition_form row=None %}
+                    </template>
+                    <button type="button" class="btn btn-sm btn-outline-success" data-add-goal hidden>Add another goal</button>
+                {% else %}
+                    {% if section.over_capacity %}
+                        <p class="small text-muted">This team's recorded goal count exceeds its score. Existing scorers can be corrected here.</p>
+                    {% endif %}
+                    {% for row in section.rows %}
+                        <fieldset class="border rounded p-3 mb-3" data-goal-row
+                                  data-team-id="{{ section.team.pk }}" data-opposing-team-id="{{ section.opposing_team_id }}">
+                            <legend class="float-none w-auto px-2 mb-0 fs-6 fw-semibold">Goal {{ forloop.counter }}</legend>
+                            {% if row.saved_name %}
+                                <p class="small text-muted mb-2">
+                                    {% if row.goal.player_id %}Recorded scorer{% else %}Recorded name without a linked player{% endif %}
+                                    &middot; {{ row.saved_name }}
+                                </p>
+                            {% elif row.goal %}
+                                <p class="small text-muted mb-2">Recorded goal &middot; Scorer not recorded</p>
+                            {% else %}
+                                <p class="small text-muted mb-2">Goal details not entered</p>
+                            {% endif %}
+                            {% include "league_manager/_finished_goal_fields.html" with form=row.form %}
+                        </fieldset>
+                    {% empty %}
+                        <p class="text-muted mb-0">There are no goal slots for this team.</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </section>
+    {% endfor %}
+    {% if outside_goals %}
+        <section class="card border-warning mb-3" aria-labelledby="outside-goals-heading">
+            <div class="card-body">
+                <h3 id="outside-goals-heading" class="h5">Goals credited outside this fixture</h3>
+                <p class="small text-muted">Remove these entries before saving. Add any valid goal under the correct team.</p>
+                {% for goal in outside_goals %}
+                    <div class="form-check mb-2">
+                        <input type="checkbox" class="form-check-input" id="goal-{{ goal.goal_id }}-remove"
+                               name="goal-{{ goal.goal_id }}-remove" value="1" data-remove-goal{% if goal.remove %} checked{% endif %}>
+                        <label class="form-check-label text-break" for="goal-{{ goal.goal_id }}-remove">
+                            Remove {{ goal.team }} goal &middot; {{ goal.player_name|default:"Unknown Scorer" }}
+                            {% if goal.minute is not None %}&middot; {{ goal.minute }}&prime;{% endif %}
+                            &middot; {{ goal.type_label }}
+                        </label>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+    {% if edit_result or sections.0.rows or sections.1.rows %}
+        <div class="d-grid d-sm-flex justify-content-sm-end">
+            <button type="submit" class="btn btn-success">{% if edit_result %}Save Match Corrections{% else %}Save Goal Scorers{% endif %}</button>
+        </div>
+    {% endif %}
+</form>
+
+<script>
+function prepareGoalRow(row) {
+    const player = row.querySelector("select");
+    const newPlayer = row.querySelector("[data-new-player]");
+    const name = newPlayer.querySelector("input");
+    const update = () => {
+        const type = row.querySelector("input[type=radio]:checked");
+        const team = type && type.value === "OWN_GOAL" ? row.dataset.opposingTeamId : row.dataset.teamId;
+        for (const option of player.options) {
+            if (!option.dataset.teamId) continue;
+            const allowed = option.dataset.teamId === team;
+            // Keep a historical or invalid selection visible so another edit
+            // on the page cannot silently clear it.
+            option.hidden = !allowed && !option.selected;
+            option.disabled = !allowed && !option.selected;
+        }
+        newPlayer.hidden = player.value !== "__new__" && !name.value && !newPlayer.querySelector(".errorlist");
+        name.disabled = newPlayer.hidden;
+    };
+    player.addEventListener("change", () => {
+        if (player.value !== "__new__") name.value = "";
+    });
+    row.addEventListener("change", update);
+    update();
+}
+
+document.querySelectorAll("[data-goal-row]").forEach(prepareGoalRow);
+document.querySelectorAll("[data-add-goal]").forEach(button => {
+    button.hidden = false;
+    const list = button.parentElement.querySelector("[data-goal-list]");
+    const template = button.parentElement.querySelector("[data-goal-template]");
+    button.addEventListener("click", () => {
+        const used = new Set([...list.querySelectorAll("[data-goal-prefix]")].map(row => row.dataset.goalPrefix));
+        const row = template.content.firstElementChild.cloneNode(true);
+        const prefix = row.dataset.goalPrefix;
+        let index = 0;
+        while (used.has(prefix.replace("__index__", index))) index++;
+        row.dataset.goalPrefix = prefix.replace("__index__", index);
+        for (const field of row.querySelectorAll("[id], [name], [for]")) {
+            for (const attribute of ["id", "name", "for"]) {
+                if (field.hasAttribute(attribute)) {
+                    field.setAttribute(attribute, field.getAttribute(attribute).replace("__index__", index));
+                }
+            }
+        }
+        list.append(row);
+        row.open = true;
+        prepareGoalRow(row.querySelector("[data-goal-row]"));
+        row.querySelector("select").focus();
+    });
+});
+document.querySelectorAll("[data-remove-goal]").forEach(checkbox => {
+    const fields = checkbox.closest("details")?.querySelector("[data-goal-edit-fields]");
+    if (!fields) return;
+    const update = () => { fields.disabled = checkbox.checked; };
+    checkbox.addEventListener("change", update);
+    update();
+});
+document.getElementById("finished-goal-scorers").addEventListener("submit", event => {
+    if (event.currentTarget.querySelector("[data-remove-goal]:checked") &&
+        !window.confirm("Remove the selected goals when saving these corrections?")) {
+        event.preventDefault();
+    }
+});
+</script>
+{% endblock %}

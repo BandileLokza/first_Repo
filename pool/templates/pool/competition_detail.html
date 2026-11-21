@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ competition.name }} | 8-Ball Pool | EsportsLive{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'pool/css/pool.css' %}">
+{% endblock %}
+
+{% block content %}
+{% url 'pool:competition_tab_content' competition.slug '__tab__' as competition_tab_url_template %}
+<main
+    class="pool-page pool-competition-page"
+    data-pool-competition-tab-shell
+    data-pool-competition-tab-url-template="{{ competition_tab_url_template }}"
+    data-pool-competition-active-tab="{{ active_tab }}"
+>
+    {% url 'pool:home' as pool_home_fallback %}
+    {% include "pool/_page_navigation.html" with back_fallback=pool_home_fallback show_pool_home=True %}
+
+    <header class="pool-detail-hero">
+        <div class="pool-detail-branding">
+            {% if competition.logo %}
+            <img src="{{ competition.logo.url }}" alt="{{ competition.name }} logo" class="pool-detail-logo" decoding="async">
+            {% else %}
+            <span class="pool-detail-logo pool-detail-logo--fallback" aria-hidden="true">8</span>
+            {% endif %}
+        </div>
+        <div class="pool-detail-copy">
+            <div class="pool-detail-status-row">
+                <span class="pool-status pool-status--{{ competition.operational_state|lower }}">{{ competition_state_label }}</span>
+                <span class="pool-detail-format">{{ competition.get_format_type_display }}</span>
+            </div>
+            <h1>{{ competition.name }}</h1>
+            {% if season_selector_competitions|length > 1 %}
+            <div class="mt-2">
+                <label for="pool-season-selector" class="visually-hidden">Season</label>
+                <select
+                    id="pool-season-selector"
+                    class="form-select form-select-sm w-auto"
+                    onchange="if (this.value) { window.location.href = this.value; }"
+                >
+                    {% for season_competition in season_selector_competitions %}
+                    <option
+                        value="{% url 'pool:competition_detail' season_competition.slug %}?tab={{ active_tab }}"
+                        {% if season_competition.pk == competition.pk %}selected{% endif %}
+                    >Season: {{ season_competition.season|default:season_competition.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+            <p class="pool-detail-mode">{{ competition.get_participant_mode_display }} competition &middot; Race to {{ competition.default_race_target }}</p>
+            <dl class="pool-detail-meta">
+                <div>
+                    <dt>Dates</dt>
+                    <dd>
+                        {% if competition.start_date %}{{ competition.start_date|date:"M j, Y" }}{% else %}To be confirmed{% endif %}
+                        {% if competition.end_date %} &ndash; {{ competition.end_date|date:"M j, Y" }}{% endif %}
+                    </dd>
+                </div>
+                <div>
+                    <dt>Venue</dt>
+                    <dd>{{ competition.venue|default:"Venue to be confirmed" }}</dd>
+                </div>
+            </dl>
+            {% if can_manage_competition %}
+            <p class="mt-3 mb-0"><a class="btn btn-outline-primary btn-sm" href="{% url 'pool:manage_competition_dashboard' competition.slug %}">Manage competition</a></p>
+            {% endif %}
+        </div>
+    </header>
+
+    <nav
+        class="pool-tabs"
+        aria-label="{{ competition.name }} sections"
+        role="tablist"
+        data-pool-competition-tabs
+    >
+        <a id="pool-tab-overview" class="pool-tab {% if active_tab == 'overview' %}is-active{% endif %}" href="{% url 'pool:competition_detail' competition.slug %}?tab=overview" role="tab" data-pool-tab="overview" aria-controls="pool-panel-overview" aria-selected="{% if active_tab == 'overview' %}true{% else %}false{% endif %}" tabindex="{% if active_tab == 'overview' %}0{% else %}-1{% endif %}">Overview</a>
+        <a id="pool-tab-entrants" class="pool-tab {% if active_tab == 'entrants' %}is-active{% endif %}" href="{% url 'pool:competition_detail' competition.slug %}?tab=entrants{% if entrant_query %}&amp;q={{ entrant_query|urlencode }}{% endif %}{% if entrant_region %}&amp;region={{ entrant_region|urlencode }}{% endif %}" role="tab" data-pool-tab="entrants" aria-controls="pool-panel-entrants" aria-selected="{% if active_tab == 'entrants' %}true{% else %}false{% endif %}" tabindex="{% if active_tab == 'entrants' %}0{% else %}-1{% endif %}">Entrants</a>
+        <a id="pool-tab-fixtures" class="pool-tab {% if active_tab == 'fixtures' %}is-active{% endif %}" href="{% url 'pool:competition_detail' competition.slug %}?tab=fixtures" role="tab" data-pool-tab="fixtures" aria-controls="pool-panel-fixtures" aria-selected="{% if active_tab == 'fixtures' %}true{% else %}false{% endif %}" tabindex="{% if active_tab == 'fixtures' %}0{% else %}-1{% endif %}">Fixtures</a>
+        <a id="pool-tab-results" class="pool-tab {% if active_tab == 'results' %}is-active{% endif %}" href="{% url 'pool:competition_detail' competition.slug %}?tab=results" role="tab" data-pool-tab="results" aria-controls="pool-panel-results" aria-selected="{% if active_tab == 'results' %}true{% else %}false{% endif %}" tabindex="{% if active_tab == 'results' %}0{% else %}-1{% endif %}">Results</a>
+        {% if has_standings %}
+        <a id="pool-tab-standings" class="pool-tab {% if active_tab == 'standings' %}is-active{% endif %}" href="{% url 'pool:competition_detail' competition.slug %}?tab=standings" role="tab" data-pool-tab="standings" aria-controls="pool-panel-standings" aria-selected="{% if active_tab == 'standings' %}true{% else %}false{% endif %}" tabindex="{% if active_tab == 'standings' %}0{% else %}-1{% endif %}">Standings</a>
+        {% endif %}
+        {% if has_knockout %}
+        <a id="pool-tab-bracket" class="pool-tab {% if active_tab == 'bracket' %}is-active{% endif %}" href="{% url 'pool:competition_detail' competition.slug %}?tab=bracket" role="tab" data-pool-tab="bracket" aria-controls="pool-panel-bracket" aria-selected="{% if active_tab == 'bracket' %}true{% else %}false{% endif %}" tabindex="{% if active_tab == 'bracket' %}0{% else %}-1{% endif %}">Bracket</a>
+        {% endif %}
+        <a id="pool-tab-stats" class="pool-tab {% if active_tab == 'stats' %}is-active{% endif %}" href="{% url 'pool:competition_detail' competition.slug %}?tab=stats" role="tab" data-pool-tab="stats" aria-controls="pool-panel-stats" aria-selected="{% if active_tab == 'stats' %}true{% else %}false{% endif %}" tabindex="{% if active_tab == 'stats' %}0{% else %}-1{% endif %}">Stats</a>
+    </nav>
+
+    <section
+        id="pool-panel-{{ active_tab }}"
+        class="pool-section pool-tab-panel{% if active_tab == 'overview' %} pool-overview{% endif %}"
+        role="tabpanel"
+        aria-labelledby="pool-tab-{{ active_tab }}"
+        tabindex="0"
+        data-pool-competition-tab-panel
+        data-loaded="true"
+    >
+        {% include "pool/_competition_tab_content.html" %}
+    </section>
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'pool/js/competition_tabs.js' %}" defer></script>
+{% endblock %}

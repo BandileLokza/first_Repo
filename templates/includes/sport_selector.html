@@ -1,0 +1,16 @@
+<nav class="sport-selector" aria-label="Sport selection">
+    <a
+        class="sport-selector-link {% if active_sport == 'football' %}is-active{% endif %}"
+        href="{% url 'league_list' %}"
+        {% if active_sport == 'football' %}aria-current="page"{% endif %}
+    >
+        Football
+    </a>
+    <a
+        class="sport-selector-link {% if active_sport == 'pool' %}is-active{% endif %}"
+        href="{% url 'pool:home' %}"
+        {% if active_sport == 'pool' %}aria-current="page"{% endif %}
+    >
+        8-Ball Pool
+    </a>
+</nav>

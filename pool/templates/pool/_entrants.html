@@ -1,0 +1,45 @@
+<div class="pool-entrant-list{% if entrant_preview_mode %} pool-entrant-list--preview{% endif %}">
+    {% for entry in entrants %}
+    <article class="pool-entrant-card">
+        {% if competition.participant_mode == 'SINGLES' %}
+        <a
+            class="pool-entrant-avatar-link"
+            href="{% url 'pool:player_detail' entry.player.public_id %}{% if competition.visibility == 'PUBLISHED' %}?competition={{ competition.slug }}{% endif %}"
+            aria-label="View {{ entry.player.full_name }}'s player profile"
+        >
+            {% if entry.player.profile_picture %}
+            <img src="{{ entry.player.profile_picture.url }}" alt="" class="pool-entrant-avatar" loading="lazy" decoding="async">
+            {% else %}
+            <span class="pool-entrant-avatar pool-entrant-avatar--fallback" aria-hidden="true">8</span>
+            {% endif %}
+        </a>
+        <div class="pool-entrant-copy">
+            <h3><a href="{% url 'pool:player_detail' entry.player.public_id %}{% if competition.visibility == 'PUBLISHED' %}?competition={{ competition.slug }}{% endif %}">{{ entry.player.full_name }}</a></h3>
+            {% if entry.player.nickname %}<p class="pool-entrant-nickname">&ldquo;{{ entry.player.nickname }}&rdquo;</p>{% endif %}
+            {% if entry.player.region or competition.allow_two_lives and entry.public_life_count > 1 %}
+            <p class="pool-entrant-meta">
+                {% if entry.player.region %}<span>{{ entry.player.region }}</span>{% endif %}
+                {% if competition.allow_two_lives and entry.public_life_count > 1 %}<span>{{ entry.public_life_count }} lives</span>{% endif %}
+            </p>
+            {% endif %}
+        </div>
+        {% else %}
+        <a
+            class="pool-entrant-avatar-link"
+            href="{% url 'pool:team_detail' entry.team.pk %}{% if competition.visibility == 'PUBLISHED' %}?competition={{ competition.slug }}{% endif %}"
+            aria-label="View {{ entry.team.name }} team page"
+        >
+            {% if entry.team.logo %}
+            <img src="{{ entry.team.logo.url }}" alt="" class="pool-entrant-avatar" loading="lazy" decoding="async">
+            {% else %}
+            <span class="pool-entrant-avatar pool-entrant-avatar--fallback" aria-hidden="true">8</span>
+            {% endif %}
+        </a>
+        <div class="pool-entrant-copy">
+            <h3><a href="{% url 'pool:team_detail' entry.team.pk %}{% if competition.visibility == 'PUBLISHED' %}?competition={{ competition.slug }}{% endif %}">{{ entry.team.name }}</a></h3>
+            <p class="pool-entrant-meta"><span>{{ entry.public_roster_count }} registered player{{ entry.public_roster_count|pluralize }}</span></p>
+        </div>
+        {% endif %}
+    </article>
+    {% endfor %}
+</div>

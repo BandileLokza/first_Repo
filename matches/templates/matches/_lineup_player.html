@@ -1,0 +1,14 @@
+<li class="list-group-item lineup-player">
+    {% if player.photo %}
+        <img
+            src="{{ player.photo.url }}"
+            alt="{{ player.name }} profile photo"
+            class="player-photo-thumb"
+            loading="lazy"
+            decoding="async"
+        >
+    {% else %}
+        <span class="player-photo-fallback" aria-hidden="true">{{ player.name|slice:":1"|upper }}</span>
+    {% endif %}
+    <span class="lineup-player-name">{{ player.name }}</span>
+</li>

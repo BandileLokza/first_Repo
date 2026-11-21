@@ -1,0 +1,26 @@
+{% extends "pool/manage/base.html" %}
+
+{% block manager_title %}Register new roster player · {{ competition.name }}{% endblock %}
+
+{% block manager_content %}
+<section class="pool-manager-panel">
+    <h2>Register new player</h2>
+    <p class="pool-manager-help">Team: <strong>{{ team.name }}</strong></p>
+    <p class="pool-manager-help">Register this player and add them directly to {{ team.name }}'s roster. Contact details remain private.</p>
+    <form method="post" enctype="multipart/form-data" class="pool-manager-form" novalidate>
+        {% csrf_token %}
+        {% include "pool/manage/_form_fields.html" with form=form %}
+        {% if duplicate_suggestions %}
+        <input type="hidden" name="save_mode" value="{{ save_mode }}">
+        <section class="pool-manager-panel mt-3" aria-labelledby="possible-player-matches-title">
+            <h3 id="possible-player-matches-title">Possible existing players</h3>
+            <p class="pool-manager-help">Choose an existing profile for the same person, or explicitly create a different person.</p>
+            <div class="list-group">{% for player in duplicate_suggestions %}<label class="list-group-item list-group-item-action"><input class="form-check-input me-2" type="radio" name="existing_player" value="{{ player.pk }}"><strong>{{ player.full_name }}</strong>{% if player.nickname %} ({{ player.nickname }}){% endif %}{% if player.region %} — {{ player.region }}{% endif %}</label>{% endfor %}</div>
+            <div class="pool-manager-actions mt-3"><button class="btn btn-primary" type="submit" name="action" value="use_existing">Use selected player</button><button class="btn btn-outline-warning" type="submit" name="action" value="save_as_new">Register as new player</button></div>
+        </section>
+        {% else %}
+        <div class="pool-manager-actions"><button class="btn btn-primary" type="submit" name="save_mode" value="save">Register &amp; add player</button><button class="btn btn-outline-primary" type="submit" name="save_mode" value="add_another">Save &amp; add another</button><a class="btn btn-outline-secondary" href="{% url 'pool:manage_competition_team_roster_add' competition.slug entry.pk %}">Select existing player</a><a class="btn btn-outline-secondary" href="{% url 'pool:manage_competition_team_roster' competition.slug entry.pk %}">Cancel</a></div>
+        {% endif %}
+    </form>
+</section>
+{% endblock %}

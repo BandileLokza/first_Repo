@@ -1,0 +1,46 @@
+{% extends "pool/manage/base.html" %}
+
+{% block manager_title %}{{ page_title }} · {{ competition.name }}{% endblock %}
+
+{% block manager_content %}
+<section class="pool-manager-panel" aria-labelledby="manual-final-result-title">
+    <div class="mb-3">
+        <h2 id="manual-final-result-title">{{ page_title }}</h2>
+        <p class="pool-manager-help mb-0">
+            {{ match.home_participant_display_name }} vs {{ match.away_participant_display_name }} · Race to {{ match.race_target }}
+        </p>
+    </div>
+
+    <div class="alert alert-info" role="note">
+        Use this only for a verified result entered outside eSportsLive. It records the aggregate score without creating rack-by-rack history. For team fixtures, outcome totals are never assigned to individual players.
+    </div>
+
+    {% if manual_result_unavailable_reason %}
+    <div class="alert alert-warning" role="alert">{{ manual_result_unavailable_reason }}</div>
+    <a class="btn btn-outline-secondary" href="{{ page_navigation_back_url }}">Back to fixtures</a>
+    {% else %}
+    <form method="post" class="pool-manager-form" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+        <h3 class="h5">Final score</h3>
+        <div class="row g-3 mb-4">
+            <div class="col-md-6"><label class="form-label" for="{{ form.home_score.id_for_label }}">{{ match.home_participant_display_name }}</label>{{ form.home_score }}{{ form.home_score.errors }}</div>
+            <div class="col-md-6"><label class="form-label" for="{{ form.away_score.id_for_label }}">{{ match.away_participant_display_name }}</label>{{ form.away_score }}{{ form.away_score.errors }}</div>
+        </div>
+        <h3 class="h5">Optional rack outcome details</h3>
+        <p class="pool-manager-help">Optional. Leave blank if detailed outcomes are unknown. Unspecified rack wins are treated as normal wins.</p>
+        <div class="table-responsive"><table class="table pool-manager-table"><thead><tr><th></th><th>{{ match.home_participant_display_name }}</th><th>{{ match.away_participant_display_name }}</th></tr></thead><tbody>
+            <tr><th>Green Apples</th><td>{{ form.home_green_apples }}</td><td>{{ form.away_green_apples }}</td></tr>
+            <tr><th>Red Apples</th><td>{{ form.home_red_apples }}</td><td>{{ form.away_red_apples }}</td></tr>
+            <tr><th>One Visits</th><td>{{ form.home_one_visits }}</td><td>{{ form.away_one_visits }}</td></tr>
+        </tbody></table></div>
+        <div class="mb-3"><label class="form-label" for="{{ form.reason.id_for_label }}">Reason / note</label>{{ form.reason }}</div>
+        <div class="form-check mb-3">{{ form.confirm }} <label class="form-check-label" for="{{ form.confirm.id_for_label }}">{{ form.confirm.label }}</label>{{ form.confirm.errors }}</div>
+        <div class="pool-manager-actions mt-3">
+            <button class="btn btn-primary" type="submit">Save final result</button>
+            <a class="btn btn-outline-secondary" href="{{ page_navigation_back_url }}">Cancel</a>
+        </div>
+    </form>
+    {% endif %}
+</section>
+{% endblock %}

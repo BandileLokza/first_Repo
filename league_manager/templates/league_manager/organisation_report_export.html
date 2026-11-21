@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Export {{ report_kind|title }} - {{ scope.name }}{% endblock %}
+
+{% block content %}
+{% include "league_manager/_report_messages.html" %}
+<div class="mb-4">
+    <a href="{% url 'league_manager:dashboard' %}" class="back-btn">&larr; BACK</a>
+    <h2 class="mt-3 mb-1">Export {{ report_kind|title }}</h2>
+    <p class="text-muted mb-0">{{ scope.report_description }}</p>
+</div>
+
+{% if report_kind == 'FIXTURES' or report_kind == 'RESULTS' %}
+<p>{% if scope.organisation == 'ZONAL' %}<a class="btn btn-outline-primary" href="{% url 'league_manager:organisation_league_owners' scope.key %}">Manage league stationery</a>{% else %}<a class="btn btn-outline-primary" href="{% url 'league_manager:organisation_fixture_letterhead' scope.key %}">Report stationery</a>{% endif %}</p>
+{% endif %}
+
+{% if warnings %}
+<div class="alert alert-warning"><strong>{{ warnings_title|default:"Incomplete results warning" }}</strong><ul class="mb-0 mt-2">{% for warning in warnings %}<li>{{ warning }}</li>{% endfor %}</ul>{% if confirm_download %}<p class="mb-0 mt-2">Unfinished fixtures are not included and no score will be invented.</p>{% endif %}</div>
+{% endif %}
+
+<div class="card shadow-sm"><div class="card-body">
+<form method="post" id="organisation-report-form">
+    {% csrf_token %}
+    <fieldset class="mb-4"><legend class="form-label">Leagues</legend>
+        <div class="form-check"><input class="form-check-input" type="radio" name="selection_mode" id="all-leagues" value="ALL" {% if preference.selection_mode == 'ALL' %}checked{% endif %}><label class="form-check-label" for="all-leagues">All Leagues</label></div>
+        <div class="form-check"><input class="form-check-input" type="radio" name="selection_mode" id="custom-leagues" value="CUSTOM" {% if preference.selection_mode == 'CUSTOM' %}checked{% endif %}><label class="form-check-label" for="custom-leagues">Selected Leagues</label></div>
+        <div class="border rounded p-3 mt-2" data-custom-leagues>
+            {% for league_series in series %}<div class="form-check"><input class="form-check-input" type="checkbox" name="series" value="{{ league_series.id }}" id="series-{{ league_series.id }}" {% if preview_series != None and league_series.id in preview_series or preview_series == None and league_series in preference.selected_series.all %}checked{% endif %}><label class="form-check-label" for="series-{{ league_series.id }}">{{ league_series.name }}</label></div>{% empty %}<span class="text-muted">{{ scope.empty_message }}</span>{% endfor %}
+        </div>
+    </fieldset>
+    {% if report_kind == 'FIXTURES' %}
+    <fieldset class="mb-4"><legend class="form-label">Fixture export scope</legend>
+        {% for value, label, help_text in fixture_scope_options %}
+        <div class="form-check mb-2"><input class="form-check-input" type="radio" name="fixture_scope" id="fixture-scope-{{ value|lower }}" value="{{ value }}" {% if fixture_scope == value %}checked{% endif %}><label class="form-check-label" for="fixture-scope-{{ value|lower }}"><span class="fw-semibold">{{ label }}</span><span class="d-block text-muted small">{{ help_text }}</span></label></div>
+        {% endfor %}
+    </fieldset>
+    <fieldset class="mb-4" data-fixture-gameweek-mode><legend class="form-label">Weekly gameweek selection</legend>
+        <div class="form-check"><input class="form-check-input" type="radio" name="fixture_gameweek_mode" id="fixture-gameweek-mode-automatic" value="AUTOMATIC" {% if fixture_gameweek_mode != 'MANUAL' %}checked{% endif %}><label class="form-check-label" for="fixture-gameweek-mode-automatic"><span class="fw-semibold">Automatic selection</span><span class="d-block text-muted small">Choose the next relevant gameweek from confirmed future fixtures.</span></label></div>
+        <div class="form-check mt-2"><input class="form-check-input" type="radio" name="fixture_gameweek_mode" id="fixture-gameweek-mode-manual" value="MANUAL" {% if fixture_gameweek_mode == 'MANUAL' %}checked{% endif %}><label class="form-check-label" for="fixture-gameweek-mode-manual"><span class="fw-semibold">Select gameweek manually</span><span class="d-block text-muted small">Export every recorded fixture for the selected gameweek, including completed and live matches.</span></label></div>
+    </fieldset>
+    <fieldset class="mb-4 border rounded p-3" data-manual-gameweeks><legend class="form-label px-1">Select gameweek for each league</legend>
+        <p class="form-text mt-0">Leagues may be at different gameweeks. Manual reports retain original dates/times and show each fixture's status.</p>
+        {% for option in manual_gameweek_options %}
+        <div class="mb-3" data-manual-gameweek data-series-id="{{ option.series_id }}">
+            <label class="form-label" for="manual-gameweek-{{ option.competition_id }}">{{ option.competition }}</label>
+            {% if option.gameweeks %}<select class="form-select" id="manual-gameweek-{{ option.competition_id }}" name="manual_gameweek_{{ option.competition_id }}" required><option value="">Select gameweek</option>{% for gameweek in option.gameweeks %}<option value="{{ gameweek }}" {% if option.selected_gameweek == gameweek %}selected{% endif %}>Gameweek {{ gameweek }}</option>{% endfor %}</select>{% else %}<p class="text-muted mb-0">No recorded gameweeks are available for this league.</p>{% endif %}
+        </div>
+        {% empty %}<p class="text-muted mb-0">No active leagues are available.</p>{% endfor %}
+    </fieldset>
+    {% endif %}
+    <fieldset class="mb-4"><legend class="form-label">Output format</legend>
+        <div class="form-check"><input class="form-check-input" type="radio" name="output_format" id="docx-format" value="DOCX" {% if preference.output_format == 'DOCX' %}checked{% endif %}><label class="form-check-label" for="docx-format">Word (.docx)</label></div>
+        <div class="form-check"><input class="form-check-input" type="radio" name="output_format" id="pdf-format" value="PDF" {% if preference.output_format == 'PDF' %}checked{% endif %}><label class="form-check-label" for="pdf-format">PDF (.pdf)</label></div>
+    </fieldset>
+    {% include "league_manager/_approved_report_artwork.html" %}
+    {% if confirm_download %}<input type="hidden" name="confirmed" value="1">{% endif %}
+    <div class="d-flex gap-2 flex-wrap"><button name="action" value="save" type="submit" class="btn btn-outline-primary">Save As My Default</button><button name="action" value="download" type="submit" class="btn btn-primary">{% if confirm_download %}Confirm and Download{% else %}Download{% endif %}</button>{% if report_kind != "STANDINGS" %}<button name="action" value="preview" type="submit" class="btn btn-secondary">Preview unsigned PDF</button>{% endif %}</div>
+</form>
+</div></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(() => {
+ const custom = document.querySelector("[data-custom-leagues]");
+ const mode = document.querySelector("[data-fixture-gameweek-mode]");
+ const manual = document.querySelector("[data-manual-gameweeks]");
+ const nextScope = document.querySelector("#fixture-scope-next_upcoming");
+ const update = () => {
+   const all = document.querySelector("#all-leagues").checked;
+   const isManual = document.querySelector("#fixture-gameweek-mode-manual")?.checked;
+   const isNextScope = !nextScope || nextScope.checked;
+   custom.hidden = all;
+   if (mode) mode.hidden = !isNextScope;
+   if (manual) manual.hidden = !isNextScope || !isManual;
+   document.querySelectorAll("[data-manual-gameweek]").forEach(row => {
+     const selected = all || document.querySelector(`[name="series"][value="${row.dataset.seriesId}"]`)?.checked;
+     row.hidden = !isNextScope || !isManual || !selected;
+     row.querySelectorAll("select").forEach(select => { select.disabled = !isNextScope || !isManual || !selected; });
+   });
+ };
+ document.querySelectorAll("input[name='selection_mode'], input[name='fixture_gameweek_mode'], input[name='fixture_scope'], input[name='series']").forEach(input => input.addEventListener("change", update)); update();
+})();
+</script>
+{% endblock %}

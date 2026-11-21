@@ -1,0 +1,86 @@
+{% for display in bracket_displays %}
+<section class="pool-bracket-section" aria-labelledby="pool-bracket-{{ display.bracket.pk }}">
+    <div class="pool-section-heading">
+        <div>
+            <p class="pool-eyebrow">{{ display.bracket.stage.name }}</p>
+            <h2 id="pool-bracket-{{ display.bracket.pk }}">Knockout bracket</h2>
+        </div>
+        <p class="pool-section-note">{{ display.bracket.size }} slots · {{ display.bracket.get_draw_method_display }}</p>
+    </div>
+    {% if display.rounds %}
+    <div class="pool-bracket-display" data-pool-bracket-display>
+        {% if display.large_draw %}
+        <div class="pool-bracket-half-selector" data-pool-bracket-half-controls role="group" aria-label="Large bracket view">
+            <span class="pool-bracket-half-selector-label">View</span>
+            <button class="btn btn-sm btn-outline-primary" type="button" data-pool-bracket-half-filter="top" aria-pressed="false">Top half</button>
+            <button class="btn btn-sm btn-outline-primary" type="button" data-pool-bracket-half-filter="bottom" aria-pressed="false">Bottom half</button>
+            <button class="btn btn-sm btn-outline-primary" type="button" data-pool-bracket-half-filter="all" aria-pressed="true">Full bracket</button>
+        </div>
+        {% endif %}
+        <div class="pool-bracket-scroll" tabindex="0" aria-label="{{ display.bracket.stage.name }} bracket rounds">
+            <div class="pool-bracket-grid">
+                {% for round in display.rounds %}
+                <section class="pool-bracket-round">
+                    <h3>{{ round.name }}</h3>
+                    {% for item in round.ties %}
+                    {% if item.half_heading %}<h4 class="pool-bracket-half-heading" data-pool-bracket-half="{{ item.draw_half }}">{{ item.half_heading }}</h4>{% endif %}
+                    <article class="pool-bracket-tie{% if item.draw_half %} pool-bracket-tie--{{ item.draw_half }}{% endif %}" data-pool-bracket-half="{{ item.draw_half|default:'shared' }}">
+                    <div class="pool-bracket-tie-meta"><span>{{ item.tie.round_name }} {{ item.tie.position }}</span><span>Race to {{ item.tie.race_target }}</span></div>
+                    <div class="pool-bracket-slot {% if item.home_slot.entry_life_id %}{% if item.tie.resolved_winner_life_id == item.home_slot.entry_life_id %}is-winner{% endif %}{% elif item.tie.resolved_winner_id == item.home_slot.entry_id %}is-winner{% endif %}"><span>{{ item.home_label }}</span>{% if item.tie.match %}<strong>{{ item.tie.match.home_score }}</strong>{% endif %}</div>
+                    <div class="pool-bracket-slot {% if item.away_slot.entry_life_id %}{% if item.tie.resolved_winner_life_id == item.away_slot.entry_life_id %}is-winner{% endif %}{% elif item.tie.resolved_winner_id == item.away_slot.entry_id %}is-winner{% endif %}"><span>{{ item.away_label }}</span>{% if item.tie.match %}<strong>{{ item.tie.match.away_score }}</strong>{% endif %}</div>
+                    {% if item.same_entry_final %}<p class="pool-bracket-note">Both tournament lives reached the final. Champion: {{ item.champion_label }}.</p>{% elif item.tie.resolution_method == 'BYE' %}<p class="pool-bracket-note">Advanced by bye</p>{% elif item.tie.match %}<a href="{% url 'pool:match_detail' item.tie.match.pk %}">{{ item.tie.match.get_status_display }}{% if item.tie.match.status == 'FINISHED' %} · {{ item.tie.match.get_result_method_display }}{% endif %}</a>{% else %}<p class="pool-bracket-note">Awaiting participants</p>{% endif %}
+                    </article>
+                    {% endfor %}
+                </section>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% else %}<div class="pool-empty-state"><h3>Bracket preparation is under way.</h3><p>Confirmed knockout slots and fixtures will appear here.</p></div>{% endif %}
+    {% if display.third_place or display.same_entry_third_place %}
+    <section class="pool-third-place"{% if display.third_place %} aria-labelledby="pool-third-place-{{ display.third_place.pk }}"{% endif %}>
+        <h3{% if display.third_place %} id="pool-third-place-{{ display.third_place.pk }}"{% endif %}>Third-place match</h3>
+        {% if display.same_entry_third_place %}
+        <p class="pool-bracket-note"><strong>Third place: {{ display.third_place_label|default:"Shared entry" }}.</strong> No match is needed because the same entry reached both third-place paths.</p>
+        {% else %}
+        <article class="pool-bracket-tie">
+            <div class="pool-bracket-tie-meta"><span>Third place</span><span>Race to {{ display.third_place.race_target }}</span></div>
+            <div class="pool-bracket-slot {% if display.third_place_home_slot.entry_life_id %}{% if display.third_place.resolved_winner_life_id == display.third_place_home_slot.entry_life_id %}is-winner{% endif %}{% elif display.third_place.resolved_winner_id == display.third_place_home_slot.entry_id %}is-winner{% endif %}"><span>{{ display.third_place_home_label }}</span>{% if display.third_place.match %}<strong>{{ display.third_place.match.home_score }}</strong>{% endif %}</div>
+            <div class="pool-bracket-slot {% if display.third_place_away_slot.entry_life_id %}{% if display.third_place.resolved_winner_life_id == display.third_place_away_slot.entry_life_id %}is-winner{% endif %}{% elif display.third_place.resolved_winner_id == display.third_place_away_slot.entry_id %}is-winner{% endif %}"><span>{{ display.third_place_away_label }}</span>{% if display.third_place.match %}<strong>{{ display.third_place.match.away_score }}</strong>{% endif %}</div>
+            {% if display.third_place.match %}<a href="{% url 'pool:match_detail' display.third_place.match.pk %}">{{ display.third_place.match.get_status_display }}{% if display.third_place.match.status == 'FINISHED' %} Â· {{ display.third_place.match.get_result_method_display }}{% endif %}</a>{% endif %}
+        </article>
+        {% endif %}
+    </section>
+    {% endif %}
+</section>
+{% empty %}
+<div class="pool-empty-state"><h3>Bracket not generated yet.</h3><p>The organiser will publish the confirmed draw once the competition is ready.</p></div>
+{% endfor %}
+<script>
+(function () {
+    function initialiseBracketHalfSelector(display) {
+        if (display.dataset.poolBracketHalfReady) { return; }
+        const controls = display.querySelector("[data-pool-bracket-half-controls]");
+        if (!controls) { return; }
+        display.dataset.poolBracketHalfReady = "true";
+        const buttons = controls.querySelectorAll("[data-pool-bracket-half-filter]");
+        const items = display.querySelectorAll("[data-pool-bracket-half]");
+        function applyFilter(filter) {
+            items.forEach(function (item) {
+                const half = item.dataset.poolBracketHalf;
+                item.hidden = filter !== "all" && (half === "top" || half === "bottom") && half !== filter;
+            });
+            buttons.forEach(function (button) {
+                button.setAttribute("aria-pressed", String(button.dataset.poolBracketHalfFilter === filter));
+            });
+        }
+        buttons.forEach(function (button) {
+            button.addEventListener("click", function () {
+                applyFilter(button.dataset.poolBracketHalfFilter);
+            });
+        });
+        applyFilter(window.matchMedia && window.matchMedia("(max-width: 767px)").matches ? "top" : "all");
+    }
+    document.querySelectorAll("[data-pool-bracket-display]").forEach(initialiseBracketHalfSelector);
+}());
+</script>

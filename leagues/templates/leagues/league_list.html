@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+{% include "includes/sport_selector.html" %}
+
+{% if homepage_banners %}
+<section class="homepage-hero-banner" id="homepageHeroBanner" data-slide-count="{{ homepage_banners|length }}">
+    {% for banner in homepage_banners %}
+    <div class="homepage-hero-slide {% if forloop.first %}active{% endif %}" data-slide-index="{{ forloop.counter0 }}">
+
+        <img
+            src="{{ banner.image.url }}"
+            alt="{{ banner.title|default:'Homepage banner' }}"
+            class="homepage-hero-image"
+            decoding="async"
+        >
+
+        {% if banner.sponsor_name or banner.title or banner.subtitle or banner.button_text and banner.button_link %}
+            <div class="homepage-hero-overlay"></div>
+
+            <div class="homepage-hero-content">
+                {% if banner.sponsor_name %}
+                    <div class="homepage-hero-sponsored">
+                        Sponsored by {{ banner.sponsor_name }}
+                    </div>
+                {% endif %}
+
+                {% if banner.title %}
+                    <h1 class="homepage-hero-title">{{ banner.title }}</h1>
+                {% endif %}
+
+                {% if banner.subtitle %}
+                    <p class="homepage-hero-subtitle">{{ banner.subtitle }}</p>
+                {% endif %}
+
+                {% if banner.button_text and banner.button_link %}
+                    <a href="{{ banner.button_link }}" class="homepage-hero-btn">
+                        {{ banner.button_text }}
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {% if banner.sponsor_logo %}
+            <div class="homepage-hero-logo-wrap">
+                <img
+                    src="{{ banner.sponsor_logo.url }}"
+                    alt="{{ banner.sponsor_name|default:'Sponsor logo' }}"
+                    class="homepage-hero-logo"
+                    decoding="async"
+                >
+            </div>
+        {% endif %}
+
+    </div>
+    {% endfor %}
+
+    {% if homepage_banners|length > 1 %}
+    <div class="homepage-hero-dots">
+        {% for banner in homepage_banners %}
+        <span class="homepage-hero-dot {% if forloop.first %}active{% endif %}" data-dot-index="{{ forloop.counter0 }}"></span>
+        {% endfor %}
+    </div>
+    {% endif %}
+</section>
+{% endif %}
+
+<div class="nav nav-pills nav-fill mb-3 football-directory-tabs" role="tablist" aria-label="Football sections">
+    {% for section in football_directory_sections %}
+    <button id="football-tab-{{ section.key }}" class="nav-link {% if active_directory_tab == section.key %}active{% endif %}" type="button" role="tab" aria-controls="football-panel-{{ section.key }}" aria-selected="{% if active_directory_tab == section.key %}true{% else %}false{% endif %}" data-directory-tab="{{ section.key }}">{{ section.label }}</button>
+    {% endfor %}
+</div>
+
+{% for section in football_directory_sections %}
+<section data-directory-panel="{{ section.key }}" id="football-panel-{{ section.key }}" role="tabpanel" aria-labelledby="football-tab-{{ section.key }}" {% if active_directory_tab != section.key %}hidden{% endif %}>
+    {% include section.template %}
+</section>
+{% endfor %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const directoryTabs = document.querySelectorAll("[data-directory-tab]");
+    const directoryPanels = document.querySelectorAll("[data-directory-panel]");
+    const activateDirectoryTab = (tab, updateUrl) => {
+        directoryTabs.forEach((item) => {
+            const active = item === tab;
+            item.classList.toggle("active", active);
+            item.setAttribute("aria-selected", String(active));
+            item.tabIndex = active ? 0 : -1;
+        });
+        directoryPanels.forEach((panel) => {
+            panel.hidden = panel.dataset.directoryPanel !== tab.dataset.directoryTab;
+        });
+        if (updateUrl) {
+            const url = new URL(window.location.href);
+            url.searchParams.set("tab", tab.dataset.directoryTab);
+            window.history.replaceState({}, "", url);
+        }
+    };
+    directoryTabs.forEach((tab, index) => {
+        tab.addEventListener("click", () => activateDirectoryTab(tab, true));
+        tab.addEventListener("keydown", (event) => {
+            if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+            event.preventDefault();
+            let nextIndex = index;
+            if (event.key === 'ArrowLeft') nextIndex = (index - 1 + directoryTabs.length) % directoryTabs.length;
+            if (event.key === 'ArrowRight') nextIndex = (index + 1) % directoryTabs.length;
+            if (event.key === 'Home') nextIndex = 0;
+            if (event.key === 'End') nextIndex = directoryTabs.length - 1;
+            directoryTabs[nextIndex].focus();
+            activateDirectoryTab(directoryTabs[nextIndex], true);
+        });
+    });
+
+    const banner = document.getElementById("homepageHeroBanner");
+    if (!banner) return;
+
+    const slides = Array.from(banner.querySelectorAll(".homepage-hero-slide"));
+    const dots = Array.from(banner.querySelectorAll(".homepage-hero-dot"));
+    const slideCount = slides.length;
+
+    // Nothing to cycle if there's 0 or 1 banner - just leave the single
+    // slide (or nothing) statically visible.
+    if (slideCount <= 1) return;
+
+    const SLIDE_DURATION_MS = 10000;
+
+    // Fisher-Yates shuffle so the rotation order is random each cycle.
+    function shuffle(array) {
+        const arr = array.slice();
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    let order = shuffle([...Array(slideCount).keys()]);
+    let position = 0;
+
+    function showSlide(index) {
+        slides.forEach((slide) => slide.classList.remove("active"));
+        dots.forEach((dot) => dot.classList.remove("active"));
+
+        slides[index].classList.add("active");
+        if (dots[index]) dots[index].classList.add("active");
+    }
+
+    function advance() {
+        position += 1;
+
+        // Reached the end of this shuffled cycle - reshuffle and start
+        // a new circular loop so the order changes each pass through.
+        if (position >= order.length) {
+            order = shuffle([...Array(slideCount).keys()]);
+            position = 0;
+        }
+
+        showSlide(order[position]);
+    }
+
+    // Start on a random slide from the first shuffled order.
+    showSlide(order[position]);
+
+    setInterval(advance, SLIDE_DURATION_MS);
+})();
+</script>
+{% endblock %}

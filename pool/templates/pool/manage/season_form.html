@@ -1,0 +1,31 @@
+{% extends "pool/manage/base.html" %}
+
+{% block manager_title %}Create next season{% endblock %}
+
+{% block manager_content %}
+<section class="pool-manager-panel">
+    <h2>Create next league season</h2>
+    <p class="pool-manager-help">
+        This creates a fresh, draft season in the same series. Historical fixtures,
+        results, racks, standings, and baselines are not copied.
+    </p>
+    <form method="post" class="pool-manager-form" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+        <div class="mb-3">
+            <label class="form-label" for="{{ form.season.id_for_label }}">Season</label>
+            {{ form.season }}
+            {% for error in form.season.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="{{ form.slug.id_for_label }}">Competition slug</label>
+            {{ form.slug }}
+            {% for error in form.slug.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <button class="btn btn-primary" type="submit">Create fresh season</button>
+            <a class="btn btn-outline-secondary" href="{% url 'pool:manage_competition_dashboard' competition.slug %}">Cancel</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

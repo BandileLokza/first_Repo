@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ team.name }} | 8-Ball Pool | EsportsLive{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'pool/css/pool.css' %}">
+{% endblock %}
+
+{% block content %}
+<main class="pool-page pool-team-page">
+    {% url 'pool:home' as team_back_url %}
+    {% include "pool/_page_navigation.html" with back_fallback=team_back_url show_pool_home=True %}
+
+    <header class="pool-profile-hero pool-team-hero">
+        {% if team.logo %}
+        <img src="{{ team.logo.url }}" alt="{{ team.name }} logo" class="pool-profile-photo pool-team-logo" decoding="async">
+        {% else %}
+        <span class="pool-profile-photo pool-profile-photo--fallback" aria-hidden="true">8</span>
+        {% endif %}
+        <div class="pool-profile-copy">
+            <div class="pool-detail-status-row">
+                <span class="pool-status {% if team.is_active %}pool-status--published{% else %}pool-status--cancelled{% endif %}">{% if team.is_active %}Active{% else %}Inactive{% endif %}</span>
+            </div>
+            <h1>{{ team.name }}</h1>
+            {% if team.description %}<p class="pool-team-description">{{ team.description|linebreaksbr }}</p>{% else %}<p class="pool-team-description">No team description has been published.</p>{% endif %}
+        </div>
+    </header>
+
+    <div class="row g-4">
+        <section class="col-12 col-xl-6 pool-section" aria-labelledby="pool-team-roster-title">
+            <div class="pool-section-heading">
+                <div>
+                    <p class="pool-eyebrow">Team members</p>
+                    <h2 id="pool-team-roster-title">{% if request.GET.competition %}Competition roster{% else %}Roster{% endif %}</h2>
+                </div>
+            </div>
+            <div class="pool-roster-list">
+                {% for roster in team_rosters %}
+                <article class="pool-roster-item">
+                    <a class="pool-roster-player" href="{% url 'pool:player_detail' roster.player.public_id %}?competition={{ roster.competition_entry.competition.slug }}&team={{ roster.competition_entry.pk }}">
+                        {% if roster.player.profile_picture %}<img src="{{ roster.player.profile_picture.url }}" alt="" class="pool-participant-image" loading="lazy" decoding="async">{% else %}<span class="pool-participant-fallback" aria-hidden="true">8</span>{% endif %}
+                        <span>{{ roster.player.full_name }}</span>
+                    </a>
+                    {% if not request.GET.competition %}
+                    <a class="pool-roster-competition" href="{% url 'pool:competition_detail' roster.competition_entry.competition.slug %}">{{ roster.competition_entry.competition.name }}</a>
+                    {% endif %}
+                </article>
+                {% empty %}
+                <div class="pool-empty-state pool-empty-state--compact"><p>No roster has been published for this team{% if request.GET.competition %} in this competition{% endif %}.</p></div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="col-12 col-xl-6 pool-section" aria-labelledby="pool-team-competitions-title">
+            <div class="pool-section-heading">
+                <div>
+                    <p class="pool-eyebrow">Participation</p>
+                    <h2 id="pool-team-competitions-title">Competition participation</h2>
+                </div>
+            </div>
+            <div class="pool-stacked-cards">
+                {% for entry in team_entries %}
+                <a class="pool-entry-card" href="{% url 'pool:competition_detail' entry.competition.slug %}">
+                    <span class="pool-entry-card-title">{{ entry.competition.name }}</span>
+                    <span class="pool-entry-card-meta">{{ entry.competition.get_format_type_display }} · {{ entry.competition.get_status_display }}</span>
+                </a>
+                {% empty %}
+                <div class="pool-empty-state pool-empty-state--compact"><p>This team has not been entered into a published competition.</p></div>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+
+    <section class="pool-section" aria-labelledby="pool-team-rack-stats-title">
+        <div class="pool-section-heading">
+            <div>
+                <p class="pool-eyebrow">Team performance</p>
+                <h2 id="pool-team-rack-stats-title">Team statistics</h2>
+            </div>
+            <p class="pool-section-note">Completed team results, including verified manual aggregate results. Individual player rows include only genuinely attributed rack wins.</p>
+        </div>
+        {% for section in team_rack_stats %}
+        <article class="pool-team-stat-section" aria-labelledby="pool-team-stat-competition-{{ section.entry.pk }}">
+            <div class="pool-subsection-heading">
+                <h3 id="pool-team-stat-competition-{{ section.entry.pk }}"><a href="{% url 'pool:competition_detail' section.entry.competition.slug %}?tab=stats">{{ section.entry.competition.name }}</a></h3>
+                <a href="{% url 'pool:competition_detail' section.entry.competition.slug %}?tab=stats">Competition stats <span aria-hidden="true">→</span></a>
+            </div>
+            <dl class="pool-stat-grid pool-stat-grid--compact">
+                <div><dt>Team Racks</dt><dd>{{ section.team_racks }}</dd></div>
+                <div><dt>Racks Won</dt><dd>{{ section.racks_won }}</dd></div>
+                <div><dt>Racks Lost</dt><dd>{{ section.racks_lost }}</dd></div>
+                <div><dt>Rack Win %</dt><dd>{% if section.rack_win_percentage is not None %}{{ section.rack_win_percentage }}%{% else %}&mdash;{% endif %}</dd></div>
+                {% for outcome in section.outcome_values %}<div><dt>{{ outcome.label }}</dt><dd>{{ outcome.value }}</dd></div>{% endfor %}
+                {% comment %}
+                <div><dt>Tracked win rate</dt><dd>{% if section.tracked_rack_win_percentage is not None %}{{ section.tracked_rack_win_percentage }}%{% else %}—{% endif %}</dd></div>
+                <div><dt>Historical unattributed</dt><dd>{{ section.unattributed_racks_won }}</dd></div>
+                {% endcomment %}
+            </dl>
+            {% if section.player_rows %}
+            <div class="pool-table-wrap">
+                <table class="table table-hover align-middle pool-stats-table pool-team-player-stats-table">
+                    <thead><tr><th scope="col">Player</th><th scope="col">Racks Won</th>{% for column in rack_outcome_columns %}<th scope="col">{{ column.short_label }}</th>{% endfor %}</tr></thead>
+                    <tbody>
+                        {% for player_stat in section.player_rows %}
+                        <tr>
+                            <th scope="row" class="pool-stats-participant"><a href="{% url 'pool:player_detail' player_stat.player.public_id %}?competition={{ section.entry.competition.slug }}&team={{ section.entry.pk }}">{{ player_stat.player.full_name }}</a></th>
+                            {% comment %}
+                            <td>{{ player_stat.tracked_racks_played }}</td>
+                            <td>{{ player_stat.tracked_racks_won }}</td>
+                            <td>{{ player_stat.tracked_racks_lost }}</td>
+                            <td>{% if player_stat.tracked_rack_win_percentage is not None %}{{ player_stat.tracked_rack_win_percentage }}%{% else %}—{% endif %}</td>
+                            {% endcomment %}
+                            <td>{{ player_stat.racks_won }}</td>
+                            {% for outcome in player_stat.outcome_values %}<td>{{ outcome.value }}</td>{% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="pool-empty-state pool-empty-state--compact"><p>No registered players or attributed rack wins are available in this competition yet.</p></div>
+            {% endif %}
+        </article>
+        {% empty %}
+        <div class="pool-empty-state pool-empty-state--compact"><p>No published competition rack statistics are available for this team.</p></div>
+        {% endfor %}
+    </section>
+
+    <section class="pool-section" aria-labelledby="pool-team-results-title">
+        <div class="pool-section-heading">
+            <div>
+                <p class="pool-eyebrow">Latest scores</p>
+                <h2 id="pool-team-results-title">Recent results</h2>
+            </div>
+        </div>
+        <div class="pool-stacked-cards">
+            {% for pool_match in team_recent_matches %}
+            <a class="pool-match-card pool-match-card--compact" href="{% url 'pool:match_detail' pool_match.pk %}">
+                <div class="pool-match-card-topline">
+                    <span class="pool-status pool-status--finished">{{ pool_match.get_result_method_display }}</span>
+                    <span class="pool-match-context">{{ pool_match.competition.name }}</span>
+                </div>
+                <div class="pool-match-row">
+                    <span class="pool-participant pool-participant--home">{{ pool_match.home_participant_display_name }}</span>
+                    <strong class="pool-score">{{ pool_match.home_score }} <span>–</span> {{ pool_match.away_score }}</strong>
+                    <span class="pool-participant pool-participant--away">{{ pool_match.away_participant_display_name }}</span>
+                </div>
+                <span class="pool-match-card-footer"><time datetime="{{ pool_match.scheduled_at|date:'c' }}">{{ pool_match.scheduled_at|date:"M j, Y" }}</time></span>
+            </a>
+            {% empty %}
+            <div class="pool-empty-state"><h3>No completed team results yet.</h3><p>Results from this team’s pool competitions will appear here.</p></div>
+            {% endfor %}
+        </div>
+    </section>
+</main>
+{% endblock %}

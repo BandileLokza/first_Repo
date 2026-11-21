@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h3>Abandon Match</h3>
+
+<p>
+{{ match.home_team }} vs {{ match.away_team }}
+</p>
+
+<form method="POST">
+
+{% csrf_token %}
+
+<label>Reason for abandoning match</label>
+
+<textarea name="reason" class="form-control" required></textarea>
+
+<br>
+
+<button class="btn btn-danger">
+Confirm Abandon Match
+</button>
+
+</form>
+
+{% endblock %}

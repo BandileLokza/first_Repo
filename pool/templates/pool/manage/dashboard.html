@@ -1,0 +1,38 @@
+{% extends "pool/manage/base.html" %}
+
+{% block manager_title %}Pool Manager{% endblock %}
+{% block manager_heading %}Pool Manager{% endblock %}
+
+{% block manager_content %}
+<div class="pool-manager-actions justify-content-end mb-3">
+    <a class="btn btn-primary" href="{% url 'pool:manage_money_match_create' %}">Create Money Match</a>
+</div>
+<section class="row g-3" aria-label="Assigned pool competitions">
+    {% for competition in managed_competitions %}
+    <div class="col-12 col-md-6 col-xl-4">
+        <article class="pool-manager-panel h-100 d-flex flex-column">
+            <div class="d-flex flex-wrap align-items-start justify-content-between gap-2">
+                <h2 class="mb-0">{{ competition.name }}</h2>
+                <span class="pool-status pool-status--{{ competition.operational_state|lower }}">{{ competition.get_operational_state_display }}</span>
+            </div>
+            <p class="pool-manager-help mt-2 mb-3">{{ competition.get_format_type_display }} · {{ competition.get_participant_mode_display }}</p>
+            <dl class="pool-card-meta mb-3">
+                <div><dt>Visibility</dt><dd>{{ competition.get_visibility_display }}</dd></div>
+                <div><dt>Dates</dt><dd>{% if competition.start_date %}{{ competition.start_date|date:"M j, Y" }}{% else %}To be confirmed{% endif %}</dd></div>
+            </dl>
+            <div class="row g-2 mb-3">
+                <div class="col-4"><div class="pool-manager-metric"><strong>{{ competition.entry_count }}</strong><span>Entries</span></div></div>
+                <div class="col-4"><div class="pool-manager-metric"><strong>{{ competition.match_count }}</strong><span>Matches</span></div></div>
+                <div class="col-4"><div class="pool-manager-metric"><strong>{{ competition.live_match_count }}</strong><span>Live</span></div></div>
+            </div>
+            <div class="pool-manager-actions mt-auto">
+                <a class="btn btn-primary" href="{% url 'pool:manage_competition_dashboard' competition.slug %}">Manage competition</a>
+                <a class="btn btn-outline-primary" href="{% url 'pool:manage_competition_preview' competition.slug %}">Public preview</a>
+            </div>
+        </article>
+    </div>
+    {% empty %}
+    <div class="col-12"><div class="pool-manager-panel"><p class="pool-manager-empty">No pool competitions are assigned to this account.</p></div></div>
+    {% endfor %}
+</section>
+{% endblock %}

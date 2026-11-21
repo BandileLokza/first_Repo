@@ -1,0 +1,100 @@
+{% extends "pool/manage/base.html" %}
+
+{% block manager_title %}Qualification · {{ competition.name }}{% endblock %}
+
+{% block manager_content %}
+<section class="pool-manager-panel">
+    <div class="pool-manager-section-heading">
+        <div>
+            <p class="pool-eyebrow">Group to knockout</p>
+            <h2>Qualification rules</h2>
+            <p class="pool-manager-help mb-0">Map a group finishing position into a stable first-round knockout slot.</p>
+        </div>
+    </div>
+    {% if group_stages %}
+    <nav class="pool-manager-subnav" aria-label="Qualification source stage selector">
+        {% for stage in group_stages %}
+        <a class="{% if stage.pk == selected_stage.pk %}is-active{% endif %}" href="?stage={{ stage.pk }}">{{ stage.name }}</a>
+        {% endfor %}
+    </nav>
+    {% if selected_stage %}
+    <div class="d-flex flex-wrap justify-content-between gap-2 mb-3">
+        <p class="pool-manager-help mb-0">Source: <strong>{{ selected_stage.name }}</strong></p>
+        <a class="btn btn-primary" href="{% url 'pool:manage_competition_qualification_create' competition.slug selected_stage.pk %}">Add qualification rule</a>
+    </div>
+    {% endif %}
+    <div class="table-responsive">
+        <table class="table pool-manager-table">
+            <thead><tr><th>Group</th><th>Finishing position</th><th>Knockout stage</th><th>Destination slot</th><th>Separation</th><th class="text-end">Actions</th></tr></thead>
+            <tbody>
+                {% for rule in qualification_rules %}
+                <tr>
+                    <td>{{ rule.group.name }}</td><td>#{{ rule.position }}</td><td>{{ rule.knockout_stage.name }}</td><td>{{ rule.destination_slot }}</td><td>{% if rule.keep_groups_apart %}Prefer separate groups{% else %}Standard{% endif %}</td>
+                    <td class="text-end"><a class="btn btn-sm btn-outline-secondary" href="{% url 'pool:manage_competition_qualification_update' competition.slug rule.pk %}">Edit</a> <form class="d-inline" method="post" action="{% url 'pool:manage_competition_qualification_delete' competition.slug rule.pk %}">{% csrf_token %}<button class="btn btn-sm btn-outline-danger" type="submit">Remove</button></form></td>
+                </tr>
+                {% empty %}<tr><td colspan="6" class="text-center">No qualification rules are configured for this source stage.</td></tr>{% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if selected_stage %}
+    <section class="pool-manager-panel mt-4" aria-labelledby="pool-qualification-handoff-title">
+        <p class="pool-eyebrow">Group stage handoff</p>
+        <h2 id="pool-qualification-handoff-title">Apply qualification rules</h2>
+        <p class="pool-manager-help">The qualification rules will be applied to the current group standings. Group completion and rule coverage are validated before a preview is created.</p>
+        {% for handoff in qualification_handoffs %}
+        <article class="pool-manager-callout{% if handoff.bracket %} pool-manager-callout--success{% endif %} mt-3">
+            <strong>{{ handoff.stage.name }}</strong>
+            <span>{{ handoff.source_rule_count }} mapping{{ handoff.source_rule_count|pluralize }} from this group stage · {{ handoff.rule_count }} total mapping{{ handoff.rule_count|pluralize }} · {{ handoff.bracket_size|default:"Unsupported" }} slots</span>
+            {% if handoff.bracket %}
+            <div class="mt-2"><a class="btn btn-outline-primary" href="{% url 'pool:manage_competition_bracket' competition.slug %}?stage={{ handoff.stage.pk }}">View generated bracket</a></div>
+            {% elif handoff.bracket_size %}
+            <form method="post" action="{% url 'pool:manage_competition_qualification_apply' competition.slug %}" class="mt-2">
+                {% csrf_token %}
+                <input type="hidden" name="source_stage" value="{{ selected_stage.pk }}">
+                <input type="hidden" name="knockout_stage" value="{{ handoff.stage.pk }}">
+                <button class="btn btn-primary" type="submit">Apply Qualification Rules</button>
+            </form>
+            {% else %}
+            <p class="text-danger mb-0 mt-2">The configured destination slots exceed the supported bracket size.</p>
+            {% endif %}
+        </article>
+        {% empty %}
+        <p class="pool-manager-empty mb-0">Configure qualification mappings before applying the current standings.</p>
+        {% endfor %}
+    </section>
+
+    {% if qualification_preview %}
+    <section class="pool-manager-panel mt-4" aria-labelledby="pool-qualification-preview-title">
+        <p class="pool-eyebrow">Review required</p>
+        <h2 id="pool-qualification-preview-title">Qualification Preview</h2>
+        <p class="pool-manager-help">Review the qualifiers and knockout pairings before generating the bracket.</p>
+        <h3>Qualified Participants</h3>
+        <div class="table-responsive">
+            <table class="table pool-manager-table">
+                <thead><tr><th>Group</th><th>Position</th><th>Qualifier</th><th>Knockout slot</th></tr></thead>
+                <tbody>
+                    {% for qualifier in qualification_preview_qualifiers %}
+                    <tr><td>{{ qualifier.group.name }}</td><td>#{{ qualifier.position }}</td><td>{{ qualifier.entry.display_name|default:"Bye / unused" }}</td><td>Slot {{ qualifier.destination_slot }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <h3>First Knockout Round</h3>
+        <ol class="pool-manager-preview-slots">
+            {% for pairing in qualification_preview_first_round %}
+            <li><span>Match {{ pairing.number }}</span><strong>{{ pairing.home.display_name|default:"Bye / unused" }} vs {{ pairing.away.display_name|default:"Bye / unused" }}</strong></li>
+            {% endfor %}
+        </ol>
+        <form method="post" action="{% url 'pool:manage_competition_bracket_generate' competition.slug %}" class="pool-manager-form mt-3" novalidate>
+            {% csrf_token %}
+            {% include "pool/manage/_form_fields.html" with form=qualification_confirm_form %}
+            <button class="btn btn-success" type="submit">Confirm &amp; Generate Knockout</button>
+        </form>
+    </section>
+    {% endif %}
+    {% endif %}
+    {% else %}
+    <p class="pool-manager-empty">Add a group stage before configuring qualification to knockout play.</p>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,105 @@
+{% if form.non_field_errors %}
+<div class="alert alert-danger" role="alert">
+    {{ form.non_field_errors }}
+</div>
+{% endif %}
+
+<fieldset class="pool-team-rack-winner-picker mb-3">
+    <legend>Rack winner</legend>
+
+    <p class="pool-manager-help">
+        Select the player who won this rack.
+    </p>
+
+    <div class="pool-team-rack-player-options">
+
+        <div class="pool-team-rack-player-choice">
+            <input
+                class="pool-team-rack-player-input"
+                type="radio"
+                name="{{ form.winner_player.html_name }}"
+                id="rack-{{ scheduled_rack.pk }}-winner-home"
+                value="{{ home_player.pk }}"
+                required
+            >
+
+            <label for="rack-{{ scheduled_rack.pk }}-winner-home">
+                <span>
+                    {{ home_player.full_name }}
+                    <small>
+                        #{{ scheduled_rack.home_position }}
+                    </small>
+                </span>
+            </label>
+        </div>
+
+        <div class="pool-team-rack-player-choice">
+            <input
+                class="pool-team-rack-player-input"
+                type="radio"
+                name="{{ form.winner_player.html_name }}"
+                id="rack-{{ scheduled_rack.pk }}-winner-away"
+                value="{{ away_player.pk }}"
+                required
+            >
+
+            <label for="rack-{{ scheduled_rack.pk }}-winner-away">
+                <span>
+                    {{ away_player.full_name }}
+                    <small>
+                        #{{ scheduled_rack.away_position }}
+                    </small>
+                </span>
+            </label>
+        </div>
+
+    </div>
+
+    {% for error in form.winner_player.errors %}
+    <div class="invalid-feedback d-block">
+        {{ error }}
+    </div>
+    {% endfor %}
+</fieldset>
+
+
+<div class="mb-3">
+    <label
+        class="form-label"
+        for="{{ form.outcome_type.id_for_label }}"
+    >
+        {{ form.outcome_type.label }}
+    </label>
+
+    {{ form.outcome_type }}
+
+    {% for error in form.outcome_type.errors %}
+    <div class="invalid-feedback d-block">
+        {{ error }}
+    </div>
+    {% endfor %}
+</div>
+
+
+<div class="mb-3">
+    <label
+        class="form-label"
+        for="{{ form.reason.id_for_label }}"
+    >
+        {{ form.reason.label }}
+    </label>
+
+    {{ form.reason }}
+
+    {% if form.reason.help_text %}
+    <div class="form-text">
+        {{ form.reason.help_text }}
+    </div>
+    {% endif %}
+
+    {% for error in form.reason.errors %}
+    <div class="invalid-feedback d-block">
+        {{ error }}
+    </div>
+    {% endfor %}
+</div>

@@ -1,0 +1,3483 @@
+/* Pool-only public interface. Keep selectors below .pool-page so football pages
+   continue to use their existing visual system unchanged. */
+.pool-page {
+    --pool-accent: #8bdc1f;
+    --pool-accent-strong: #5d9d10;
+    --pool-ink: #17212b;
+    --pool-muted: #64748b;
+    --pool-border: #dbe3ea;
+    --pool-surface: #ffffff;
+    --pool-surface-muted: #f6f8fa;
+    --pool-surface-strong: #eaf3df;
+    --pool-shadow: 0 12px 30px rgba(22, 34, 46, 0.08);
+    color: var(--pool-ink);
+    min-width: 0;
+}
+
+html.dark-theme .pool-page,
+body.dark-theme .pool-page {
+    --pool-ink: #f5f7f8;
+    --pool-muted: #bdc7d1;
+    --pool-border: #34404b;
+    --pool-surface: #1b232b;
+    --pool-surface-muted: #141a20;
+    --pool-surface-strong: #20361d;
+    --pool-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+}
+
+.pool-page * {
+    min-width: 0;
+}
+
+.pool-page a {
+    color: inherit;
+}
+
+.pool-page a:focus-visible {
+    outline: 3px solid rgba(139, 220, 31, 0.72);
+    outline-offset: 3px;
+}
+
+.pool-page-heading {
+    max-width: 720px;
+    margin: 0 auto 1.4rem;
+    text-align: center;
+}
+
+.pool-home-heading-identity {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.65rem, 2vw, 1rem);
+    min-width: 0;
+    text-align: start;
+}
+
+.pool-association-logo-wrap {
+    display: grid;
+    place-items: center;
+    width: clamp(3.35rem, 10vw, 4.75rem);
+    height: clamp(3.35rem, 10vw, 4.75rem);
+    flex: 0 0 auto;
+}
+
+.pool-association-logo {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.pool-eyebrow {
+    margin: 0 0 0.25rem;
+    color: var(--pool-accent-strong);
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+html.dark-theme .pool-eyebrow,
+body.dark-theme .pool-eyebrow {
+    color: #b6ef6a;
+}
+
+.pool-page h1,
+.pool-page h2,
+.pool-page h3,
+.pool-page p,
+.pool-page dd {
+    overflow-wrap: anywhere;
+}
+
+.pool-page h1,
+.pool-page h2,
+.pool-page h3 {
+    color: var(--pool-ink);
+}
+
+.pool-page-heading h1 {
+    margin: 0;
+    font-size: clamp(1.85rem, 5vw, 2.7rem);
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.pool-page-intro {
+    max-width: 590px;
+    margin: 0.65rem auto 0;
+    color: var(--pool-muted);
+}
+
+.pool-home-page-heading .pool-page-intro {
+    text-align: center;
+}
+
+.pool-filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: center;
+    gap: 0.85rem 1.25rem;
+    margin: 0 auto 2rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--pool-border);
+    border-radius: 1rem;
+    background: var(--pool-surface);
+    box-shadow: var(--pool-shadow);
+}
+
+.pool-filter-group {
+    display: grid;
+    gap: 0.35rem;
+}
+
+.pool-filter-label {
+    color: var(--pool-muted);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.pool-filter-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.pool-filter-link,
+.pool-clear-filter {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.5rem;
+    padding: 0.45rem 0.8rem;
+    border: 1px solid var(--pool-border);
+    border-radius: 999px;
+    color: var(--pool-ink) !important;
+    font-size: 0.9rem;
+    font-weight: 700;
+    line-height: 1.2;
+    text-decoration: none;
+    transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.pool-filter-link:hover,
+.pool-clear-filter:hover {
+    border-color: var(--pool-accent);
+    background: var(--pool-surface-strong);
+    color: var(--pool-ink) !important;
+    transform: translateY(-1px);
+}
+
+.pool-filter-link.is-active {
+    border-color: var(--pool-accent-strong);
+    background: var(--pool-accent);
+    color: #18210f !important;
+}
+
+.pool-clear-filter {
+    color: var(--pool-muted) !important;
+    font-size: 0.82rem;
+}
+
+.pool-section {
+    margin-top: 2rem;
+}
+
+.pool-section-heading,
+.pool-subsection-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: space-between;
+    gap: 0.75rem 1rem;
+    margin-bottom: 0.9rem;
+}
+
+.pool-section-heading h2,
+.pool-subsection-heading h3 {
+    margin: 0;
+    font-size: clamp(1.25rem, 3vw, 1.55rem);
+    font-weight: 800;
+}
+
+.pool-subsection-heading h3 {
+    font-size: 1.1rem;
+}
+
+.pool-subsection-heading a {
+    color: var(--pool-accent-strong) !important;
+    font-size: 0.9rem;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+html.dark-theme .pool-subsection-heading a,
+body.dark-theme .pool-subsection-heading a {
+    color: #b6ef6a !important;
+}
+.pool-subsection-heading .pool-subsection-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+
+    min-height: 36px;
+    padding: 0.45rem 0.8rem;
+
+    border: 1px solid var(--pool-accent-strong);
+    border-radius: 9px;
+
+    background: transparent;
+    color: var(--pool-accent-strong) !important;
+
+    font-size: 0.78rem;
+    font-weight: 800;
+    line-height: 1;
+    text-decoration: none;
+
+    transition:
+        background-color 0.18s ease,
+        color 0.18s ease,
+        border-color 0.18s ease,
+        transform 0.18s ease;
+}
+
+.pool-subsection-heading .pool-subsection-action:hover {
+    background: var(--pool-accent-strong);
+    color: #ffffff !important;
+    text-decoration: none;
+    transform: translateY(-1px);
+}
+
+.pool-subsection-heading .pool-subsection-action:focus-visible {
+    outline: 3px solid rgba(139, 220, 31, 0.45);
+    outline-offset: 2px;
+}
+
+html.dark-theme .pool-subsection-heading .pool-subsection-action,
+body.dark-theme .pool-subsection-heading .pool-subsection-action {
+    border-color: #b6ef6a;
+    color: #b6ef6a !important;
+}
+
+html.dark-theme .pool-subsection-heading .pool-subsection-action:hover,
+body.dark-theme .pool-subsection-heading .pool-subsection-action:hover {
+    background: #b6ef6a;
+    color: #101510 !important;
+}
+
+.pool-section-note {
+    max-width: 26rem;
+    margin: 0;
+    color: var(--pool-muted);
+    font-size: 0.88rem;
+}
+
+.pool-card,
+.pool-match-card,
+.pool-entry-card,
+.pool-empty-state,
+.pool-overview-copy,
+.pool-information-grid,
+.pool-outcome-summary,
+.pool-stat-grid,
+.pool-roster-list {
+    border: 1px solid var(--pool-border);
+    border-radius: 1rem;
+    background: var(--pool-surface);
+    box-shadow: var(--pool-shadow);
+}
+
+.pool-competition-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.pool-competition-card-link {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    color: inherit !important;
+    text-decoration: none;
+}
+
+.pool-competition-card-link:hover .pool-card-action {
+    color: var(--pool-accent-strong);
+}
+
+.pool-competition-card-footer--matches:hover .pool-card-action {
+    color: var(--pool-accent-strong);
+}
+
+.pool-competition-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.9rem 0.95rem 0.45rem;
+}
+
+.pool-competition-media {
+    display: grid;
+    place-items: center;
+    width: 4.25rem;
+    min-width: 4.25rem;
+    height: 4.25rem;
+    overflow: hidden;
+    border: 1px solid var(--pool-border);
+    border-radius: 0.9rem;
+    background: linear-gradient(135deg, #263e2d, #162029);
+}
+
+.pool-competition-logo,
+.pool-competition-fallback {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    border-radius: inherit;
+    background: #fff;
+    object-fit: contain;
+}
+
+.pool-competition-fallback,
+.pool-participant-fallback,
+.pool-scoreboard-fallback,
+.pool-profile-photo--fallback,
+.pool-detail-logo--fallback {
+    display: inline-grid;
+    place-items: center;
+    color: #fff;
+    font-weight: 900;
+}
+
+.pool-competition-fallback {
+    background: radial-gradient(circle at 35% 35%, #4c5e4a, #111 60%);
+    font-size: 1.7rem;
+}
+
+.pool-competition-card-summary {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.pool-competition-card .pool-card-title-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.pool-competition-card .pool-card-title-row h3 {
+    min-width: 0;
+    flex: 1 1 auto;
+    font-size: 1.05rem;
+}
+
+.pool-competition-card .pool-status {
+    flex: 0 0 auto;
+    margin-top: 0.1rem;
+}
+
+.pool-competition-card .pool-card-tags {
+    gap: 0.3rem;
+    margin: 0.4rem 0;
+}
+
+.pool-competition-card .pool-card-tags span {
+    padding: 0.2rem 0.42rem;
+    font-size: 0.7rem;
+}
+
+.pool-competition-card-meta {
+    margin: 0;
+    overflow: hidden;
+    color: var(--pool-muted);
+    font-size: 0.78rem;
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pool-competition-card-footer {
+    margin-top: auto;
+    padding: 0.2rem 0.95rem 0.85rem;
+}
+
+.pool-competition-card-footer--matches {
+    display: block;
+    margin-top: auto;
+    color: inherit !important;
+    text-decoration: none;
+}
+
+.pool-home-match-list {
+    display: grid;
+    margin: 0.35rem 0.95rem 0;
+    border-top: 1px solid var(--pool-border);
+}
+
+.pool-home-match-row {
+    display: grid;
+    gap: 0.3rem;
+    min-width: 0;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--pool-border);
+    color: var(--pool-ink) !important;
+    text-decoration: none;
+}
+
+.pool-home-match-row:hover {
+    color: var(--pool-accent-strong) !important;
+}
+
+.pool-home-match-row-topline,
+.pool-home-match-row-main {
+    display: grid;
+    min-width: 0;
+}
+
+.pool-home-match-row-topline {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 8.5rem);
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.pool-home-match-row-main {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.pool-home-match-state {
+    overflow: hidden;
+    color: var(--pool-muted);
+    font-size: 0.72rem;
+    font-weight: 850;
+    letter-spacing: 0.045em;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.pool-home-match-state--live {
+    color: #c92c3b;
+}
+
+.pool-home-match-state--finished {
+    color: #25516f;
+}
+
+.pool-home-match-state--postponed,
+.pool-home-match-state--cancelled,
+.pool-home-match-state--abandoned {
+    color: #8a5b00;
+}
+
+html.dark-theme .pool-home-match-state--live,
+body.dark-theme .pool-home-match-state--live {
+    color: #ff7783;
+}
+
+html.dark-theme .pool-home-match-state--finished,
+body.dark-theme .pool-home-match-state--finished {
+    color: #9fd4ff;
+}
+
+.pool-home-match-participant {
+    overflow: hidden;
+    font-size: 0.83rem;
+    font-weight: 750;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pool-home-match-participant--away {
+    text-align: end;
+}
+
+.pool-home-match-score,
+.pool-home-match-versus {
+    min-width: 2.9rem;
+    color: var(--pool-ink);
+    font-size: 0.9rem;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    text-align: center;
+}
+
+.pool-home-match-score {
+    font-weight: 900;
+}
+
+.pool-home-match-versus {
+    color: var(--pool-muted);
+    font-size: 0.76rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.pool-card-body {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    padding: 1rem;
+}
+
+.pool-card-title-row h3 {
+    margin: 0;
+    font-size: 1.18rem;
+    font-weight: 800;
+    line-height: 1.25;
+}
+
+.pool-card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0.7rem 0;
+}
+
+.pool-card-tags span {
+    padding: 0.25rem 0.5rem;
+    border-radius: 999px;
+    background: var(--pool-surface-strong);
+    color: var(--pool-ink);
+    font-size: 0.77rem;
+    font-weight: 700;
+}
+
+.pool-card-meta,
+.pool-detail-meta,
+.pool-profile-meta,
+.pool-information-grid,
+.pool-outcome-summary,
+.pool-stat-grid {
+    margin: 0;
+}
+
+.pool-card-meta {
+    display: grid;
+    gap: 0.4rem;
+}
+
+.pool-card-meta div,
+.pool-detail-meta div,
+.pool-profile-meta div,
+.pool-information-grid > div,
+.pool-outcome-summary > div,
+.pool-stat-grid > div {
+    min-width: 0;
+}
+
+.pool-card-meta dt,
+.pool-detail-meta dt,
+.pool-profile-meta dt,
+.pool-information-grid dt,
+.pool-outcome-summary dt,
+.pool-stat-grid dt {
+    margin: 0;
+    color: var(--pool-muted);
+    font-size: 0.74rem;
+    font-weight: 700;
+}
+
+.pool-card-meta dd,
+.pool-detail-meta dd,
+.pool-profile-meta dd,
+.pool-information-grid dd,
+.pool-outcome-summary dd,
+.pool-stat-grid dd {
+    margin: 0.1rem 0 0;
+    color: var(--pool-ink);
+}
+
+.pool-card-meta dd {
+    font-size: 0.86rem;
+}
+
+.pool-card-description {
+    margin: 0.8rem 0;
+    color: var(--pool-muted);
+    font-size: 0.9rem;
+}
+
+.pool-card-action {
+    margin-top: auto;
+    color: var(--pool-accent-strong);
+    font-size: 0.9rem;
+    font-weight: 800;
+}
+
+.pool-status {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    max-width: 100%;
+    min-height: 1.65rem;
+    padding: 0.25rem 0.55rem;
+    border-radius: 999px;
+    background: #e8edf0;
+    color: #26313b;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.035em;
+    line-height: 1.1;
+    text-transform: uppercase;
+}
+
+.pool-status--live {
+    background: #dc3545;
+    color: #fff;
+}
+
+.pool-status--active {
+    background: #dc3545;
+    color: #fff;
+}
+
+.pool-status--published,
+.pool-status--upcoming {
+    background: #d9f2bc;
+    color: #244c0b;
+}
+
+.pool-status--completed,
+.pool-status--finished {
+    background: #dce9f5;
+    color: #173b5b;
+}
+
+.pool-status--postponed,
+.pool-status--draft,
+.pool-status--abandoned {
+    background: #ffe4a8;
+    color: #634300;
+}
+
+.pool-status--cancelled {
+    background: #f5d8dc;
+    color: #711c2b;
+}
+
+html.dark-theme .pool-status--published,
+body.dark-theme .pool-status--published,
+html.dark-theme .pool-status--upcoming,
+body.dark-theme .pool-status--upcoming {
+    background: #31521d;
+    color: #e5ffd2;
+}
+
+html.dark-theme .pool-status--completed,
+body.dark-theme .pool-status--completed,
+html.dark-theme .pool-status--finished,
+body.dark-theme .pool-status--finished {
+    background: #21435f;
+    color: #d9efff;
+}
+
+html.dark-theme .pool-status--postponed,
+body.dark-theme .pool-status--postponed,
+html.dark-theme .pool-status--draft,
+body.dark-theme .pool-status--draft,
+html.dark-theme .pool-status--abandoned,
+body.dark-theme .pool-status--abandoned {
+    background: #67490b;
+    color: #fff0c5;
+}
+
+html.dark-theme .pool-status--cancelled,
+body.dark-theme .pool-status--cancelled {
+    background: #682736;
+    color: #ffe1e6;
+}
+
+.pool-match-card {
+    display: block;
+    padding: 0.85rem 0.95rem;
+    color: var(--pool-ink) !important;
+    text-decoration: none;
+    transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.pool-match-card:hover {
+    border-color: rgba(93, 157, 16, 0.75);
+    box-shadow: 0 15px 34px rgba(67, 105, 28, 0.18);
+    transform: translateY(-2px);
+}
+
+.pool-match-card--compact {
+    padding: 0.75rem 0.85rem;
+}
+
+.pool-stacked-cards {
+    display: grid;
+    gap: 0.7rem;
+}
+
+.pool-match-card-topline,
+.pool-match-card-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.4rem 0.75rem;
+    color: var(--pool-muted);
+    font-size: 0.78rem;
+}
+
+.pool-match-card-topline {
+    margin-bottom: 0.65rem;
+}
+
+.pool-match-card-meta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.4rem;
+    min-width: 0;
+    max-width: 100%;
+    flex: 0 1 auto;
+}
+
+.pool-match-card-footer {
+    margin-top: 0.65rem;
+}
+
+.pool-money-match-prize-pot {
+    color: var(--pool-accent);
+    font-weight: 700;
+}
+
+.pool-match-context {
+    overflow: hidden;
+    min-width: 0;
+    font-weight: 700;
+    text-align: end;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pool-stream-badge {
+    display: inline-flex;
+    flex: 0 1 8.5rem;
+    align-items: center;
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+    min-height: 1.45rem;
+    padding: 0.18rem 0.45rem;
+    border: 1px solid rgba(93, 157, 16, 0.55);
+    border-radius: 999px;
+    background: var(--pool-surface-strong);
+    color: var(--pool-accent-strong);
+    font-size: 0.68rem;
+    font-weight: 850;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.pool-match-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0.55rem;
+}
+
+.pool-participant {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-width: 0;
+    font-size: 0.92rem;
+    font-weight: 750;
+}
+
+.pool-participant span:not(.pool-participant-fallback) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pool-participant--home {
+    justify-content: flex-start;
+}
+
+.pool-participant--away {
+    justify-content: flex-end;
+    text-align: end;
+}
+
+.pool-participant-image,
+.pool-participant-fallback {
+    width: 2rem;
+    height: 2rem;
+    flex: 0 0 2rem;
+    border: 1px solid var(--pool-border);
+    border-radius: 50%;
+    background: var(--pool-surface-muted);
+    object-fit: cover;
+}
+
+.pool-participant-fallback {
+    background: radial-gradient(circle at 35% 35%, #4c5e4a, #111 60%);
+    color: #fff;
+    font-size: 0.83rem;
+}
+
+.pool-score,
+.pool-versus {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    min-width: 3.5rem;
+    color: var(--pool-ink);
+    font-size: 1.05rem;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    text-align: center;
+}
+
+.pool-score {
+    font-weight: 900;
+}
+
+.pool-score span {
+    color: var(--pool-muted);
+}
+
+.pool-versus {
+    color: var(--pool-muted);
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.pool-empty-state {
+    padding: 1.25rem;
+    color: var(--pool-muted);
+    text-align: center;
+}
+
+.pool-empty-state h3 {
+    margin: 0 0 0.35rem;
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.pool-empty-state p {
+    margin: 0;
+}
+
+.pool-empty-state--compact {
+    padding: 0.95rem;
+    box-shadow: none;
+}
+
+.pool-page-navigation {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.55rem;
+    margin: 0 0 1rem;
+}
+
+.pool-page-navigation__back,
+.pool-page-navigation__home {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.5rem;
+    padding: 0.45rem 0.85rem;
+    border: 1px solid var(--pool-border);
+    border-radius: 0.65rem;
+    background: var(--pool-surface);
+    color: var(--pool-ink) !important;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 800;
+    line-height: 1.2;
+    text-decoration: none;
+    transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.pool-page-navigation__back {
+    cursor: pointer;
+}
+
+.pool-page-navigation__back:hover,
+.pool-page-navigation__home:hover {
+    border-color: var(--pool-accent);
+    background: var(--pool-surface-strong);
+    color: var(--pool-ink) !important;
+    transform: translateY(-1px);
+}
+
+.pool-page-navigation__back:focus-visible,
+.pool-page-navigation__home:focus-visible {
+    outline: 3px solid var(--pool-accent);
+    outline-offset: 2px;
+}
+
+html.dark-theme .pool-page-navigation__back,
+html.dark-theme .pool-page-navigation__home,
+body.dark-theme .pool-page-navigation__back,
+body.dark-theme .pool-page-navigation__home {
+    border-color: var(--pool-border);
+    color: #dfffc0 !important;
+}
+
+.pool-detail-hero,
+.pool-profile-hero,
+.pool-match-hero {
+    border: 1px solid var(--pool-border);
+    border-radius: 1.1rem;
+    background: var(--pool-surface);
+    box-shadow: var(--pool-shadow);
+}
+
+.pool-detail-hero,
+.pool-profile-hero {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.1rem;
+}
+
+.pool-detail-branding {
+    flex: 0 0 auto;
+}
+
+.pool-detail-logo {
+    display: block;
+    width: 5.5rem;
+    height: 5.5rem;
+    border: 2px solid var(--pool-border);
+    border-radius: 1rem;
+    background: var(--pool-surface-muted);
+    object-fit: contain;
+}
+
+.pool-detail-logo--cover {
+    object-fit: cover;
+}
+
+.pool-detail-logo--fallback {
+    border: 0;
+    background: radial-gradient(circle at 35% 35%, #4c5e4a, #111 60%);
+    font-size: 2rem;
+}
+
+.pool-detail-copy,
+.pool-profile-copy {
+    flex: 1 1 auto;
+}
+
+.pool-detail-status-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 0.35rem;
+}
+
+.pool-detail-format,
+.pool-detail-mode,
+.pool-profile-nickname,
+.pool-team-description {
+    color: var(--pool-muted);
+}
+
+.pool-detail-hero h1,
+.pool-profile-hero h1 {
+    margin: 0;
+    font-size: clamp(1.55rem, 4vw, 2.25rem);
+    font-weight: 850;
+    line-height: 1.12;
+}
+
+.pool-detail-mode,
+.pool-profile-nickname,
+.pool-team-description {
+    margin: 0.4rem 0 0;
+}
+
+.pool-detail-meta,
+.pool-profile-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem 1.25rem;
+    margin-top: 0.8rem;
+}
+
+.pool-detail-meta dd,
+.pool-profile-meta dd {
+    font-size: 0.88rem;
+}
+
+.pool-profile-meta code {
+    display: inline-block;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    color: var(--pool-ink);
+    font-size: 0.82rem;
+}
+
+.pool-tabs {
+    display: flex;
+    gap: 0.4rem;
+    margin: 1.25rem 0 0;
+    padding: 0.4rem;
+    overflow-x: auto;
+    border: 1px solid var(--pool-border);
+    border-radius: 0.8rem;
+    background: var(--pool-surface);
+    box-shadow: var(--pool-shadow);
+    -webkit-overflow-scrolling: touch;
+}
+
+.pool-tab {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.5rem;
+    padding: 0.5rem 0.85rem;
+    border: 1px solid transparent;
+    border-radius: 0.55rem;
+    color: var(--pool-muted) !important;
+    font-size: 0.9rem;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.pool-tab:hover {
+    border-color: var(--pool-border);
+    color: var(--pool-ink) !important;
+}
+
+.pool-tab.is-active {
+    border-color: rgba(93, 157, 16, 0.64);
+    background: var(--pool-surface-strong);
+    color: var(--pool-ink) !important;
+}
+
+.pool-tab:focus-visible {
+    outline: 3px solid rgba(93, 157, 16, 0.48);
+    outline-offset: 2px;
+}
+
+.pool-tab-panel[hidden] {
+    display: none !important;
+}
+
+.pool-overview-copy {
+    margin-bottom: 1.25rem;
+    padding: 1rem;
+    color: var(--pool-muted);
+}
+
+.pool-overview-copy > p {
+    margin: 0;
+}
+
+.pool-rules {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--pool-border);
+}
+
+.pool-rules h3 {
+    margin: 0 0 0.35rem;
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.pool-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--pool-border);
+    border-radius: 1rem;
+    background: var(--pool-surface);
+    box-shadow: var(--pool-shadow);
+    -webkit-overflow-scrolling: touch;
+}
+
+.pool-page .pool-stats-table,
+.pool-page .pool-rack-table {
+    --bs-table-bg: var(--pool-surface);
+    --bs-table-color: var(--pool-ink);
+    --bs-table-border-color: var(--pool-border);
+    --bs-table-hover-bg: var(--pool-surface-strong);
+    --bs-table-hover-color: var(--pool-ink);
+    min-width: 44rem;
+    margin: 0;
+}
+
+.pool-page .pool-rack-table {
+    min-width: 28rem;
+}
+
+.pool-page .pool-stats-table th,
+.pool-page .pool-stats-table td,
+.pool-page .pool-rack-table th,
+.pool-page .pool-rack-table td {
+    padding: 0.75rem 0.8rem;
+    border-color: var(--pool-border);
+    color: var(--pool-ink);
+    white-space: nowrap;
+}
+
+.pool-page .pool-stats-table thead th,
+.pool-page .pool-rack-table thead th {
+    background: var(--pool-surface-muted);
+    color: var(--pool-muted);
+    font-size: 0.72rem;
+    font-weight: 850;
+    letter-spacing: 0.055em;
+    text-transform: uppercase;
+}
+
+.pool-stats-participant {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+
+    width: 8.5rem;
+    min-width: 8.5rem;
+    max-width: 8.5rem;
+
+    overflow: hidden;
+    background: var(--pool-surface);
+}
+
+.pool-stats-table thead .pool-stats-participant {
+    background: var(--pool-surface-muted);
+}
+
+.pool-stats-participant a {
+    color: var(--pool-accent-strong) !important;
+    font-weight: 800;
+    text-decoration: none;
+}
+.pool-stats-participant a {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+html.dark-theme .pool-stats-participant a,
+body.dark-theme .pool-stats-participant a {
+    color: #b6ef6a !important;
+}
+
+.pool-match-hero {
+    padding: 1rem;
+    text-align: center;
+}
+
+.pool-match-hero-topline {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    text-align: start;
+}
+
+.pool-match-competition {
+    color: var(--pool-accent-strong) !important;
+    font-weight: 850;
+    text-decoration: none;
+}
+
+html.dark-theme .pool-match-competition,
+body.dark-theme .pool-match-competition {
+    color: #b6ef6a !important;
+}
+
+.pool-match-stage {
+    margin: 0.35rem 0 1.1rem;
+    color: var(--pool-muted);
+    font-size: 0.88rem;
+}
+
+.pool-scoreboard {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.pool-scoreboard-participant {
+    min-width: 0;
+}
+
+.pool-scoreboard-participant-link {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 100%;
+    gap: 0.5rem;
+    color: var(--pool-ink) !important;
+    font-size: clamp(0.84rem, 2.5vw, 1.05rem);
+    font-weight: 850;
+    line-height: 1.18;
+    text-decoration: none;
+}
+
+.pool-scoreboard-participant-link > span:last-child {
+    overflow-wrap: anywhere;
+}
+
+.pool-scoreboard-image,
+.pool-scoreboard-fallback {
+    width: clamp(3.5rem, 10vw, 5.5rem);
+    height: clamp(3.5rem, 10vw, 5.5rem);
+    border: 2px solid var(--pool-border);
+    border-radius: 50%;
+    background: var(--pool-surface-muted);
+    object-fit: cover;
+}
+
+.pool-scoreboard-fallback {
+    border: 0;
+    background: radial-gradient(circle at 35% 35%, #4c5e4a, #111 60%);
+    font-size: clamp(1.35rem, 4vw, 2.15rem);
+}
+
+.pool-scoreboard-score {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    min-width: 5rem;
+    color: var(--pool-ink);
+    font-size: clamp(2rem, 8vw, 4.5rem);
+    font-variant-numeric: tabular-nums;
+    font-weight: 900;
+    line-height: 0.95;
+}
+
+.pool-scoreboard-score > span {
+    color: var(--pool-muted);
+    font-weight: 500;
+}
+
+.pool-scoreboard-score small {
+    grid-column: 1 / -1;
+    margin-top: 0.35rem;
+    color: var(--pool-muted);
+    font-size: 0.72rem;
+    font-weight: 800;
+    line-height: 1.2;
+    text-transform: uppercase;
+}
+
+.pool-scoreboard-versus {
+    grid-column: 1 / -1;
+    color: var(--pool-muted) !important;
+    font-size: 1.4rem;
+    font-weight: 850 !important;
+    text-transform: uppercase;
+}
+
+.pool-match-winner {
+    margin: 1rem 0 0;
+    color: var(--pool-muted);
+}
+
+.pool-match-winner strong {
+    color: var(--pool-ink);
+}
+
+.pool-information-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));
+    gap: 0.9rem;
+    padding: 1rem;
+}
+
+.pool-information-grid > div {
+    padding: 0.1rem 0;
+}
+
+.pool-information-grid dd {
+    font-size: 0.92rem;
+    font-weight: 700;
+}
+
+.pool-stream-link {
+    margin-top: 0.9rem;
+    border-color: var(--pool-accent-strong);
+    color: var(--pool-accent-strong);
+    font-weight: 800;
+}
+
+.pool-stream-link:hover {
+    border-color: var(--pool-accent-strong);
+    background: var(--pool-surface-strong);
+    color: var(--pool-ink);
+}
+
+.pool-rack-outcome {
+    display: inline-flex;
+    min-height: 1.6rem;
+    align-items: center;
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+    background: var(--pool-surface-muted);
+    color: var(--pool-ink);
+    font-size: 0.75rem;
+    font-weight: 800;
+}
+
+.pool-rack-outcome--green_apple {
+    background: #d9f2bc;
+    color: #244c0b;
+}
+
+.pool-rack-outcome--red_apple {
+    background: #f5d8dc;
+    color: #711c2b;
+}
+
+.pool-rack-outcome--one_visit {
+    background: #dce9f5;
+    color: #173b5b;
+}
+
+html.dark-theme .pool-rack-outcome--green_apple,
+body.dark-theme .pool-rack-outcome--green_apple {
+    background: #31521d;
+    color: #e5ffd2;
+}
+
+html.dark-theme .pool-rack-outcome--red_apple,
+body.dark-theme .pool-rack-outcome--red_apple {
+    background: #682736;
+    color: #ffe1e6;
+}
+
+html.dark-theme .pool-rack-outcome--one_visit,
+body.dark-theme .pool-rack-outcome--one_visit {
+    background: #21435f;
+    color: #d9efff;
+}
+
+.pool-outcome-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding: 0.6rem;
+}
+
+.pool-outcome-summary > div {
+    padding: 0.8rem 0.55rem;
+    text-align: center;
+}
+
+.pool-outcome-summary > div + div {
+    border-left: 1px solid var(--pool-border);
+}
+
+.pool-outcome-summary dd {
+    font-size: clamp(1.35rem, 6vw, 2rem);
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+}
+
+.pool-profile-photo {
+    width: 6.25rem;
+    height: 6.25rem;
+    flex: 0 0 6.25rem;
+    border: 2px solid var(--pool-border);
+    border-radius: 50%;
+    background: var(--pool-surface-muted);
+    object-fit: cover;
+}
+
+.pool-profile-photo--fallback {
+    border: 0;
+    background: radial-gradient(circle at 35% 35%, #4c5e4a, #111 60%);
+    font-size: 2.25rem;
+}
+
+.pool-team-logo {
+    border-radius: 1rem;
+    object-fit: contain;
+}
+
+.pool-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0;
+    overflow: hidden;
+}
+
+.pool-stat-grid > div {
+    min-height: 5.5rem;
+    padding: 0.85rem;
+    border-bottom: 1px solid var(--pool-border);
+}
+
+.pool-stat-grid > div:not(:nth-child(4n + 1)) {
+    border-left: 1px solid var(--pool-border);
+}
+
+.pool-stat-grid dd {
+    margin-top: 0.35rem;
+    font-size: clamp(1.35rem, 5vw, 2rem);
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+}
+
+.pool-overview-entrants {
+    margin: 1.15rem 0;
+    padding: 1rem;
+    border: 1px solid var(--pool-border);
+    border-radius: 0.95rem;
+    background: var(--pool-surface);
+    box-shadow: var(--pool-shadow);
+}
+
+.pool-entrant-summary {
+    margin: -0.25rem 0 0.9rem;
+    color: var(--pool-muted);
+    font-size: 0.9rem;
+}
+
+.pool-entrant-search {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(11rem, 0.5fr) auto;
+    gap: 0.75rem;
+    align-items: end;
+    margin: 0 0 1rem;
+    padding: 0.85rem;
+    border: 1px solid var(--pool-border);
+    border-radius: 0.85rem;
+    background: var(--pool-surface);
+    box-shadow: var(--pool-shadow);
+}
+
+.pool-entrant-search label {
+    display: block;
+    margin: 0 0 0.35rem;
+    color: var(--pool-ink);
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+
+.pool-entrant-search .form-control,
+.pool-entrant-search .form-select {
+    min-height: 2.7rem;
+}
+
+.pool-entrant-search-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+}
+
+.pool-entrant-search-actions .btn {
+    min-height: 2.7rem;
+    white-space: nowrap;
+}
+
+.pool-entrant-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+    gap: 0.75rem;
+}
+
+.pool-entrant-card {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.7rem;
+    align-items: center;
+    min-width: 0;
+    padding: 0.8rem;
+    border: 1px solid var(--pool-border);
+    border-radius: 0.8rem;
+    background: var(--pool-surface);
+    box-shadow: var(--pool-shadow);
+}
+
+.pool-entrant-avatar-link {
+    display: inline-flex;
+    flex: 0 0 auto;
+    border-radius: 50%;
+}
+
+.pool-entrant-avatar {
+    display: block;
+    width: 3.2rem;
+    height: 3.2rem;
+    border: 1px solid var(--pool-border);
+    border-radius: 50%;
+    background: var(--pool-surface-muted);
+    object-fit: cover;
+}
+
+.pool-entrant-avatar--fallback {
+    display: inline-grid;
+    place-items: center;
+    border: 0;
+    background: radial-gradient(circle at 35% 35%, #4c5e4a, #111 60%);
+    color: #fff;
+    font-size: 1.05rem;
+    font-weight: 850;
+}
+
+.pool-entrant-copy {
+    min-width: 0;
+}
+
+.pool-entrant-copy h3 {
+    margin: 0;
+    color: var(--pool-ink);
+    font-size: 1rem;
+    font-weight: 850;
+    overflow-wrap: anywhere;
+}
+
+.pool-entrant-copy h3 a {
+    color: inherit !important;
+    text-decoration: none;
+}
+
+.pool-entrant-copy h3 a:hover {
+    color: var(--pool-accent-strong) !important;
+    text-decoration: underline;
+    text-underline-offset: 0.16em;
+}
+
+.pool-entrant-nickname,
+.pool-entrant-meta {
+    margin: 0.22rem 0 0;
+    color: var(--pool-muted);
+    font-size: 0.84rem;
+    overflow-wrap: anywhere;
+}
+
+.pool-entrant-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.2rem 0.55rem;
+}
+
+.pool-entrant-meta span + span::before {
+    margin-right: 0.55rem;
+    color: var(--pool-border-strong);
+    content: "\00b7";
+}
+
+.pool-entrant-avatar-link:focus-visible,
+.pool-entrant-copy h3 a:focus-visible {
+    outline: 3px solid rgba(93, 157, 16, 0.48);
+    outline-offset: 3px;
+}
+
+.pool-entry-card {
+    display: grid;
+    gap: 0.2rem;
+    padding: 0.9rem;
+    color: var(--pool-ink) !important;
+    text-decoration: none;
+    transition: border-color 160ms ease, transform 160ms ease;
+}
+
+.pool-entry-card:hover {
+    border-color: rgba(93, 157, 16, 0.75);
+    transform: translateY(-1px);
+}
+
+.pool-entry-card-title {
+    font-weight: 850;
+}
+
+.pool-entry-card-meta,
+.pool-roster-competition {
+    color: var(--pool-muted);
+    font-size: 0.82rem;
+}
+
+.pool-roster-list {
+    overflow: hidden;
+}
+
+.pool-roster-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem 0.85rem;
+    padding: 0.75rem 0.9rem;
+}
+
+.pool-roster-item + .pool-roster-item {
+    border-top: 1px solid var(--pool-border);
+}
+
+.pool-roster-player {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    gap: 0.55rem;
+    color: var(--pool-ink) !important;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.pool-roster-player > span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pool-roster-competition {
+    max-width: 100%;
+    text-align: end;
+    text-decoration: none;
+}
+
+.pool-roster-competition:hover {
+    color: var(--pool-accent-strong);
+}
+
+@media (max-width: 767.98px) {
+    .pool-filter-bar {
+        justify-content: flex-start;
+    }
+
+    .pool-clear-filter {
+        width: fit-content;
+    }
+
+    .pool-detail-hero,
+    .pool-profile-hero {
+        align-items: flex-start;
+    }
+
+    .pool-scoreboard {
+        gap: 0.45rem;
+    }
+
+    .pool-scoreboard-score {
+        min-width: 4.25rem;
+    }
+
+    .pool-outcome-summary > div {
+        padding: 0.75rem 0.35rem;
+    }
+
+    .pool-outcome-summary dt {
+        font-size: 0.68rem;
+    }
+
+    .pool-stat-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .pool-stat-grid > div:not(:nth-child(4n + 1)) {
+        border-left: 0;
+    }
+
+    .pool-stat-grid > div:nth-child(even) {
+        border-left: 1px solid var(--pool-border);
+    }
+
+    .pool-entrant-search {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .pool-entrant-search-actions .btn {
+        flex: 1 1 auto;
+    }
+}
+
+@media (max-width: 479.98px) {
+    .pool-page-heading {
+        text-align: start;
+    }
+
+    .pool-home-heading-identity {
+        justify-content: flex-start;
+    }
+
+    .pool-home-page-heading .pool-page-intro {
+        text-align: start;
+    }
+
+    .pool-competition-card-header {
+        align-items: flex-start;
+        gap: 0.7rem;
+        padding: 0.8rem 0.8rem 0.35rem;
+    }
+
+    .pool-competition-media {
+        width: 3.75rem;
+        min-width: 3.75rem;
+        height: 3.75rem;
+    }
+
+    .pool-competition-card-footer {
+        padding: 0.2rem 0.8rem 0.8rem;
+    }
+
+    .pool-home-match-list {
+        margin-inline: 0.8rem;
+    }
+
+    .pool-home-match-row-main {
+        gap: 0.3rem;
+    }
+
+    .pool-home-match-participant {
+        font-size: 0.78rem;
+    }
+
+    .pool-home-match-score,
+    .pool-home-match-versus {
+        min-width: 2.5rem;
+    }
+
+    .pool-stream-badge {
+        flex-basis: 6.5rem;
+        font-size: 0.61rem;
+    }
+
+    .pool-filter-bar {
+        gap: 0.75rem;
+        padding: 0.75rem;
+    }
+
+    .pool-filter-link,
+    .pool-clear-filter {
+        min-height: 2.35rem;
+        padding-inline: 0.65rem;
+        font-size: 0.82rem;
+    }
+
+    .pool-page-navigation__back,
+    .pool-page-navigation__home {
+        flex: 1 1 auto;
+        min-height: 2.5rem;
+    }
+
+    .pool-match-card {
+        padding: 0.75rem;
+    }
+
+    .pool-match-row {
+        gap: 0.35rem;
+    }
+
+    .pool-participant {
+        font-size: 0.82rem;
+    }
+
+    .pool-participant-image,
+    .pool-participant-fallback {
+        width: 1.65rem;
+        height: 1.65rem;
+        flex-basis: 1.65rem;
+    }
+
+    .pool-score {
+        min-width: 2.85rem;
+        font-size: 0.95rem;
+    }
+
+    .pool-detail-hero,
+    .pool-profile-hero {
+        gap: 0.75rem;
+        padding: 0.85rem;
+    }
+
+    .pool-detail-logo {
+        width: 4.25rem;
+        height: 4.25rem;
+    }
+
+    .pool-profile-photo {
+        width: 4.75rem;
+        height: 4.75rem;
+        flex-basis: 4.75rem;
+    }
+
+    .pool-detail-meta,
+    .pool-profile-meta {
+        display: grid;
+        gap: 0.5rem;
+    }
+
+    .pool-scoreboard {
+    grid-template-columns: minmax(0, 1fr) 5rem minmax(0, 1fr);
+    gap: 0.3rem;
+}
+
+@media (max-width: 359.98px) {
+    .pool-match-hero {
+        padding: 0.75rem;
+    }
+
+    .pool-scoreboard {
+        grid-template-columns: minmax(0, 1fr) 4.7rem minmax(0, 1fr);
+        gap: 0.2rem;
+    }
+
+    .pool-scoreboard-score {
+        font-size: 1.6rem;
+        gap: 0.08rem;
+    }
+
+    .pool-scoreboard-score small {
+        font-size: 0.6rem;
+    }
+
+    .pool-scoreboard-image,
+    .pool-scoreboard-fallback {
+        width: 2.8rem;
+        height: 2.8rem;
+    }
+
+    .pool-scoreboard-participant-link {
+        font-size: 0.7rem;
+    }
+}
+
+.pool-scoreboard-score {
+    min-width: 0;
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 0.1rem;
+    font-size: 1.75rem;
+    line-height: 1;
+}
+
+.pool-scoreboard-score strong:first-child {
+    text-align: right;
+}
+
+.pool-scoreboard-score strong:last-of-type {
+    text-align: left;
+}
+
+.pool-scoreboard-score small {
+    margin-top: 0.3rem;
+    font-size: 0.64rem;
+    white-space: nowrap;
+}
+
+.pool-scoreboard-participant-link {
+    width: 100%;
+    min-width: 0;
+    font-size: 0.76rem;
+}
+
+.pool-scoreboard-participant-link > span:last-child {
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pool-scoreboard-image,
+.pool-scoreboard-fallback {
+    width: 3rem;
+    height: 3rem;
+}
+
+    .pool-information-grid {
+        grid-template-columns: 1fr;
+        padding: 0.85rem;
+    }
+
+    .pool-roster-item {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .pool-roster-competition {
+        padding-left: 2.2rem;
+        text-align: start;
+    }
+
+    .pool-entrant-card {
+        padding: 0.7rem;
+    }
+
+    .pool-entrant-avatar {
+        width: 2.8rem;
+        height: 2.8rem;
+    }
+}
+
+/* Pool manager and result-entry controls.  These remain scoped to the pool
+   pages so the football manager and public site keep their existing layout. */
+.pool-manager-page {
+    --pool-manager-control: minmax(2.75rem, auto);
+}
+
+.pool-manager-header,
+.pool-manager-panel,
+.pool-manager-metric,
+.pool-manager-scoreboard {
+    border: 1px solid var(--pool-border);
+    border-radius: 1rem;
+    background: var(--pool-surface);
+    box-shadow: var(--pool-shadow);
+}
+
+.pool-manager-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.pool-manager-header h1,
+.pool-manager-header h2 {
+    margin: 0.2rem 0 0;
+    color: var(--pool-ink);
+    font-size: clamp(1.35rem, 4vw, 2rem);
+    font-weight: 850;
+}
+
+.pool-manager-header p {
+    margin: 0.35rem 0 0;
+    color: var(--pool-muted);
+}
+
+.pool-manager-nav {
+    display: flex;
+    gap: 0.4rem;
+    overflow-x: auto;
+    margin-bottom: 1rem;
+    padding: 0.4rem;
+    border: 1px solid var(--pool-border);
+    border-radius: 0.85rem;
+    background: var(--pool-surface);
+    box-shadow: var(--pool-shadow);
+    -webkit-overflow-scrolling: touch;
+}
+
+.pool-manager-nav a {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.65rem;
+    padding: 0.55rem 0.8rem;
+    border: 1px solid transparent;
+    border-radius: 0.6rem;
+    color: var(--pool-muted) !important;
+    font-size: 0.87rem;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.pool-manager-nav a:hover,
+.pool-manager-nav a.is-active {
+    border-color: rgba(93, 157, 16, 0.6);
+    background: var(--pool-surface-strong);
+    color: var(--pool-ink) !important;
+}
+
+.pool-manager-metric {
+    min-height: 100%;
+    padding: 0.8rem;
+    text-align: center;
+}
+
+.pool-manager-metric strong {
+    display: block;
+    color: var(--pool-ink);
+    font-size: clamp(1.35rem, 5vw, 2rem);
+    font-variant-numeric: tabular-nums;
+}
+
+.pool-manager-metric span {
+    color: var(--pool-muted);
+    font-size: 0.78rem;
+    font-weight: 750;
+}
+
+.pool-manager-panel {
+    padding: 1rem;
+}
+
+.pool-manager-panel + .pool-manager-panel {
+    margin-top: 1rem;
+}
+
+.pool-manager-panel h2,
+.pool-manager-panel h3 {
+    margin: 0 0 0.9rem;
+    color: var(--pool-ink);
+    font-size: 1.1rem;
+    font-weight: 850;
+}
+
+.pool-manager-table {
+    --bs-table-bg: var(--pool-surface);
+    --bs-table-color: var(--pool-ink);
+    --bs-table-border-color: var(--pool-border);
+    --bs-table-hover-bg: var(--pool-surface-strong);
+    --bs-table-hover-color: var(--pool-ink);
+    min-width: 39rem;
+    margin: 0;
+}
+
+.pool-manager-table th,
+.pool-manager-table td {
+    color: var(--pool-ink);
+    border-color: var(--pool-border);
+    vertical-align: middle;
+}
+
+.pool-manager-table th {
+    color: var(--pool-muted);
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.pool-manager-table a {
+    color: var(--pool-accent-strong) !important;
+    font-weight: 750;
+}
+
+.pool-manager-form .form-label {
+    color: var(--pool-ink);
+    font-weight: 750;
+}
+
+.pool-manager-form .form-text,
+.pool-manager-help {
+    color: var(--pool-muted);
+}
+
+.pool-manager-form .form-control,
+.pool-manager-form .form-select {
+    min-height: var(--pool-manager-control);
+}
+
+.pool-manager-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+}
+
+.pool-manager-actions .btn {
+    min-height: 2.7rem;
+    font-weight: 750;
+}
+
+.pool-manager-section-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.pool-manager-section-heading > div > h2 {
+    margin-bottom: 0.25rem;
+}
+
+.pool-manager-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+    gap: 0.9rem;
+}
+
+.pool-manager-link-card {
+    display: flex;
+    min-height: 8rem;
+    flex-direction: column;
+    justify-content: center;
+    margin: 0;
+    color: inherit;
+    text-decoration: none;
+    transition: border-color 0.16s ease, transform 0.16s ease;
+}
+
+.pool-manager-link-card:hover,
+.pool-manager-link-card:focus-visible {
+    border-color: rgba(93, 157, 16, 0.7);
+    color: inherit;
+    transform: translateY(-1px);
+}
+
+.pool-manager-subnav {
+    display: flex;
+    gap: 0.45rem;
+    overflow-x: auto;
+    margin: 0 0 1rem;
+    padding-bottom: 0.2rem;
+    -webkit-overflow-scrolling: touch;
+}
+
+.pool-manager-subnav a {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    min-height: 2.35rem;
+    padding: 0.4rem 0.7rem;
+    border: 1px solid var(--pool-border);
+    border-radius: 999px;
+    color: var(--pool-muted) !important;
+    font-size: 0.82rem;
+    font-weight: 750;
+    text-decoration: none;
+}
+
+.pool-manager-subnav a:hover,
+.pool-manager-subnav a.is-active {
+    border-color: var(--pool-accent);
+    background: var(--pool-surface-strong);
+    color: var(--pool-ink) !important;
+}
+
+.pool-manager-membership-list,
+.pool-manager-preview-slots,
+.pool-manager-audit-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.pool-manager-membership-list {
+    border-top: 1px solid var(--pool-border);
+}
+
+.pool-manager-membership-list li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--pool-border);
+    color: var(--pool-ink);
+}
+
+.pool-manager-inline-actions {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.45rem;
+    color: var(--pool-muted);
+    font-size: 0.8rem;
+}
+
+.pool-manager-inline-actions a,
+.pool-manager-inline-actions button {
+    border: 0;
+    background: transparent;
+    color: var(--pool-accent-strong);
+    font: inherit;
+    font-weight: 750;
+    text-decoration: none;
+}
+
+.pool-manager-inline-actions button {
+    color: #bd3d3d;
+}
+
+.pool-manager-definition-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+    gap: 0.65rem;
+    margin: 0 0 1rem;
+}
+
+.pool-manager-definition-list > div,
+.pool-manager-callout {
+    padding: 0.75rem;
+    border: 1px solid var(--pool-border);
+    border-radius: 0.75rem;
+    background: var(--pool-surface-strong);
+}
+
+.pool-manager-definition-list dt {
+    margin-bottom: 0.2rem;
+    color: var(--pool-muted);
+    font-size: 0.72rem;
+    font-weight: 750;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.pool-manager-definition-list dd {
+    margin: 0;
+    color: var(--pool-ink);
+    font-weight: 800;
+}
+
+.pool-manager-callout {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem 0.75rem;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.pool-manager-callout--success {
+    border-color: rgba(93, 157, 16, 0.65);
+}
+
+.pool-manager-callout span {
+    color: var(--pool-muted);
+}
+
+.pool-manager-preview-slots {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+    gap: 0.55rem;
+    margin-bottom: 1rem;
+}
+
+.pool-manager-preview-slots li {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid var(--pool-border);
+    border-radius: 0.7rem;
+    background: var(--pool-surface-strong);
+}
+
+.pool-manager-preview-slots span {
+    color: var(--pool-muted);
+    font-size: 0.72rem;
+    font-weight: 750;
+    text-transform: uppercase;
+}
+
+.pool-manager-preview-slots strong {
+    overflow-wrap: anywhere;
+    color: var(--pool-ink);
+}
+
+.pool-manager-danger-zone {
+    border-color: rgba(189, 61, 61, 0.5);
+}
+
+.pool-manager-audit-list {
+    display: grid;
+    gap: 0.65rem;
+}
+
+.pool-manager-audit-list li {
+    padding: 0.75rem;
+    border-left: 3px solid var(--pool-border);
+    background: var(--pool-surface-strong);
+}
+
+.pool-manager-audit-list strong,
+.pool-manager-audit-list span {
+    display: block;
+}
+
+.pool-manager-audit-list strong {
+    color: var(--pool-ink);
+}
+
+.pool-manager-audit-list span,
+.pool-manager-audit-list p {
+    margin: 0.2rem 0 0;
+    color: var(--pool-muted);
+    font-size: 0.83rem;
+}
+
+/* The bracket is deliberately pool-scoped: football's existing bracket
+   classes keep their own layout and visual language. */
+.pool-bracket-scroll {
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    -webkit-overflow-scrolling: touch;
+}
+
+.pool-bracket-display {
+    min-width: 0;
+}
+
+.pool-bracket-half-selector {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0 0 0.8rem;
+    padding: 0.65rem;
+    border: 1px solid var(--pool-border);
+    border-radius: 0.75rem;
+    background: var(--pool-surface-muted);
+}
+
+.pool-bracket-half-selector-label {
+    margin-right: 0.15rem;
+    color: var(--pool-muted);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.pool-bracket-half-selector [aria-pressed="true"] {
+    border-color: var(--pool-accent, #5d9d10);
+    background: var(--pool-accent, #5d9d10);
+    color: #fff;
+}
+
+.pool-bracket-display [data-pool-bracket-half][hidden] {
+    display: none !important;
+}
+
+.pool-bracket-grid {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(14rem, 1fr);
+    gap: 0.9rem;
+    min-width: max-content;
+}
+
+.pool-bracket-round {
+    display: grid;
+    align-content: start;
+    gap: 0.75rem;
+}
+
+.pool-bracket-round > h3 {
+    margin: 0;
+    color: var(--pool-muted);
+    font-size: 0.78rem;
+    font-weight: 850;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.pool-bracket-half-heading {
+    margin: 0.6rem 0 -0.2rem;
+    padding: 0.4rem 0.55rem;
+    border-left: 3px solid var(--pool-accent, #5d9d10);
+    color: var(--pool-ink);
+    font-size: 0.76rem;
+    font-weight: 850;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.pool-bracket-tie--bottom:first-of-type,
+.pool-bracket-half-heading + .pool-bracket-tie {
+    scroll-margin-top: 1rem;
+}
+
+#pool-large-manual-draw .pool-bracket-half {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem 0.8rem;
+    margin-top: 1rem;
+    padding: 0.85rem;
+    border: 1px solid var(--pool-border);
+    border-radius: 0.75rem;
+    background: var(--pool-surface-muted);
+}
+
+#pool-large-manual-draw .pool-bracket-half > h4 {
+    grid-column: 1 / -1;
+    margin: 0;
+    color: var(--pool-ink);
+    font-size: 0.9rem;
+}
+
+.pool-bracket-tie {
+    overflow: hidden;
+    border: 1px solid var(--pool-border);
+    border-radius: 0.75rem;
+    background: var(--pool-surface-strong);
+    box-shadow: var(--pool-shadow);
+}
+
+.pool-bracket-tie-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.45rem 0.6rem;
+    border-bottom: 1px solid var(--pool-border);
+    color: var(--pool-muted);
+    font-size: 0.7rem;
+    font-weight: 750;
+}
+
+.pool-bracket-slot {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.5rem;
+    align-items: center;
+    min-height: 2.5rem;
+    padding: 0.5rem 0.6rem;
+    color: var(--pool-ink);
+}
+
+.pool-bracket-slot + .pool-bracket-slot {
+    border-top: 1px solid var(--pool-border);
+}
+
+.pool-bracket-slot span {
+    overflow-wrap: anywhere;
+}
+
+.pool-bracket-slot strong {
+    font-variant-numeric: tabular-nums;
+}
+
+.pool-bracket-slot.is-winner {
+    background: rgba(93, 157, 16, 0.12);
+    font-weight: 800;
+}
+
+.pool-standings-section + .pool-standings-section,
+.pool-bracket-section + .pool-bracket-section {
+    margin-top: 1.5rem;
+}
+
+.pool-standings-section > h3,
+.pool-third-place > h3 {
+    margin: 0 0 0.7rem;
+    color: var(--pool-ink);
+    font-size: 1.05rem;
+}
+
+/* =========================
+   PUBLIC STANDINGS TABLE
+   ========================= */
+
+.pool-page .pool-standings-table {
+    --bs-table-bg: var(--pool-surface);
+    --bs-table-color: var(--pool-ink);
+    --bs-table-border-color: var(--pool-border);
+    --bs-table-hover-bg: var(--pool-surface-strong);
+    --bs-table-hover-color: var(--pool-ink);
+
+    min-width: 43rem;
+    margin: 0;
+}
+
+.pool-page .pool-standings-table th,
+.pool-page .pool-standings-table td {
+    padding: 0.72rem 0.7rem;
+    border-color: var(--pool-border);
+    color: var(--pool-ink);
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+/* Header */
+.pool-page .pool-standings-table thead th {
+    background: var(--pool-surface-muted);
+    color: var(--pool-muted);
+    font-size: 0.76rem;
+    font-weight: 850;
+}
+
+/* -------------------------
+   Sticky position column
+   ------------------------- */
+.pool-standings-position {
+    position: sticky;
+    left: 0;
+    z-index: 3;
+
+    width: 2.6rem;
+    min-width: 2.6rem !important;
+    max-width: 2.6rem;
+
+    padding-left: 0.45rem !important;
+    padding-right: 0.35rem !important;
+
+    background: var(--pool-surface);
+    text-align: center;
+}
+
+/* -------------------------
+   Sticky player/team column
+   ------------------------- */
+.pool-standings-participant {
+    position: sticky;
+    left: 2.6rem;
+    z-index: 2;
+
+    width: 9.5rem;
+    min-width: 9.5rem !important;
+    max-width: 9.5rem;
+
+    padding-left: 0.35rem !important;
+    padding-right: 0.65rem !important;
+
+    background: var(--pool-surface);
+
+    overflow-wrap: anywhere;
+    white-space: normal !important;
+
+    border-right: 1px solid var(--pool-border);
+}
+
+/* Sticky header cells need the header background */
+.pool-standings-table thead .pool-standings-position,
+.pool-standings-table thead .pool-standings-participant {
+    z-index: 5;
+    background: var(--pool-surface-muted);
+}
+
+/* Player/team links */
+.pool-standings-participant a {
+    color: var(--pool-accent-strong) !important;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.pool-standings-participant a:hover {
+    text-decoration: underline;
+}
+
+/* Slight separator showing where horizontal scrolling begins */
+.pool-standings-participant::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: -7px;
+    bottom: 0;
+    width: 7px;
+    pointer-events: none;
+    box-shadow: 5px 0 7px -7px rgba(0, 0, 0, 0.45);
+}
+
+
+/* =========================
+   DARK THEME STANDINGS
+   ========================= */
+
+html.dark-theme .pool-page .pool-standings-table,
+body.dark-theme .pool-page .pool-standings-table {
+    --bs-table-bg: #0f1113;
+    --bs-table-color: #f5f7f8;
+    --bs-table-border-color: #2d353d;
+    --bs-table-hover-bg: #181c20;
+    --bs-table-hover-color: #ffffff;
+}
+
+html.dark-theme .pool-standings-position,
+html.dark-theme .pool-standings-participant,
+body.dark-theme .pool-standings-position,
+body.dark-theme .pool-standings-participant {
+    background: #0f1113;
+    color: #f5f7f8;
+}
+
+html.dark-theme .pool-standings-table thead th,
+body.dark-theme .pool-standings-table thead th,
+html.dark-theme .pool-standings-table thead .pool-standings-position,
+html.dark-theme .pool-standings-table thead .pool-standings-participant,
+body.dark-theme .pool-standings-table thead .pool-standings-position,
+body.dark-theme .pool-standings-table thead .pool-standings-participant {
+    background: #15191d;
+    color: #d5dce2;
+}
+
+html.dark-theme .pool-standings-participant a,
+body.dark-theme .pool-standings-participant a {
+    color: #b6ef6a !important;
+}
+/* Margin-points configuration stays scoped to the pool manager so the
+   football manager and other shared Bootstrap tables retain their layout.
+   These are cards rather than a wide table: a manager describes thresholds,
+   while the server derives the actual consecutive margin ranges. */
+.pool-manager-points-mode-picker {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 0.7rem;
+    margin: 0 0 1.25rem;
+    padding: 0.9rem;
+    border: 1px solid var(--pool-border, rgba(0, 0, 0, 0.14));
+    border-radius: 0.75rem;
+    background: var(--pool-surface-muted);
+}
+
+.pool-manager-points-mode-picker .form-label {
+    margin-bottom: 0.35rem;
+    color: var(--pool-ink);
+    font-weight: 750;
+}
+
+.pool-manager-points-mode-picker .btn {
+    min-height: var(--pool-manager-control);
+    white-space: nowrap;
+}
+
+.pool-manager-points-section {
+    margin: 1.25rem 0;
+    padding: 1rem;
+    border: 1px solid var(--pool-border, rgba(0, 0, 0, 0.14));
+    border-radius: 0.75rem;
+    background: var(--pool-surface-muted);
+}
+
+.pool-manager-points-section > h3 {
+    margin-bottom: 0.35rem;
+}
+
+.pool-manager-points-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+    margin-top: 0.9rem;
+}
+
+.pool-manager-margin-rules {
+    margin: 1.5rem 0;
+}
+
+.pool-manager-margin-rules > h3 {
+    margin-bottom: 0.35rem;
+}
+
+.pool-manager-margin-rule-list {
+    display: grid;
+    gap: 0.85rem;
+    margin: 1rem 0;
+}
+
+.pool-manager-margin-rule-card {
+    padding: 0.95rem;
+    border: 1px solid var(--pool-border, rgba(0, 0, 0, 0.14));
+    border-radius: 0.75rem;
+    background: var(--pool-surface);
+}
+
+.pool-manager-margin-rule-card.is-final {
+    border-color: var(--pool-accent);
+    background: var(--pool-surface-strong);
+}
+
+.pool-manager-margin-rule-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.4rem 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.pool-manager-margin-rule-heading h4 {
+    margin: 0;
+    color: var(--pool-ink);
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.pool-manager-margin-rule-range {
+    margin: 0;
+    color: var(--pool-muted);
+    font-size: 0.9rem;
+}
+
+.pool-manager-margin-rule-threshold {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(5rem, 8rem) minmax(0, 1fr);
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0 0 0.85rem;
+    color: var(--pool-ink);
+    font-weight: 700;
+}
+
+.pool-manager-margin-rule-threshold .form-control {
+    min-width: 0;
+}
+
+.pool-manager-margin-rule-points {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.pool-manager-margin-rule-points .form-label {
+    margin-bottom: 0.3rem;
+    color: var(--pool-ink);
+    font-size: 0.88rem;
+    font-weight: 750;
+}
+
+.pool-manager-margin-rule-remove {
+    margin-top: 0.8rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--pool-border);
+}
+
+.pool-manager-margin-rule-add {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.5rem;
+    padding: 0.45rem 0;
+    color: var(--pool-accent-strong) !important;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.pool-manager-margin-rule-add:hover {
+    color: var(--pool-ink) !important;
+    text-decoration: underline;
+}
+
+.pool-manager-allocation-preview {
+    margin: 1rem 0 0;
+    padding: 0.9rem;
+    border-left: 3px solid var(--pool-accent);
+    border-radius: 0 0.65rem 0.65rem 0;
+    background: var(--pool-surface-muted);
+}
+
+.pool-manager-allocation-preview h4 {
+    margin: 0 0 0.45rem;
+    color: var(--pool-ink);
+    font-size: 0.95rem;
+    font-weight: 800;
+}
+
+.pool-manager-allocation-preview ul {
+    margin: 0;
+    padding-left: 1.2rem;
+}
+
+.pool-manager-allocation-preview li + li {
+    margin-top: 0.3rem;
+}
+
+.pool-points-rule-list {
+    margin: 0.65rem 0 0.8rem;
+    padding-left: 1.25rem;
+}
+
+.pool-points-rule-list li + li {
+    margin-top: 0.35rem;
+}
+
+.pool-form {
+    display: inline-flex;
+    gap: 0.2rem;
+}
+
+.pool-form-result {
+    display: inline-grid;
+    width: 1.35rem;
+    height: 1.35rem;
+    place-items: center;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 800;
+}
+
+.pool-form-result--w {
+    background: #4c8711;
+}
+
+.pool-form-result--l {
+    background: #a64545;
+}
+
+.pool-muted {
+    color: var(--pool-muted);
+}
+
+.pool-bracket-note {
+    margin: 0;
+    padding: 0.45rem 0.6rem;
+    border-top: 1px solid var(--pool-border);
+    color: var(--pool-muted);
+    font-size: 0.78rem;
+}
+
+.pool-third-place {
+    width: min(100%, 18rem);
+    margin-top: 1.25rem;
+}
+
+.pool-bracket-tie > a {
+    display: block;
+    padding: 0.45rem 0.6rem;
+    border-top: 1px solid var(--pool-border);
+    color: var(--pool-accent-strong) !important;
+    font-size: 0.78rem;
+    font-weight: 750;
+    text-decoration: none;
+}
+
+.pool-manager-scoreboard {
+    padding: 1rem;
+    text-align: center;
+}
+
+.pool-manager-scoreboard .pool-scoreboard-score {
+    font-size: clamp(2.65rem, 11vw, 5.5rem);
+}
+
+.pool-scoring-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.pool-scoring-grid .pool-manager-panel {
+    margin: 0;
+}
+
+.pool-rack-history-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.65rem;
+    padding: 0.75rem 0;
+}
+
+.pool-rack-history-item + .pool-rack-history-item {
+    border-top: 1px solid var(--pool-border);
+}
+
+.pool-rack-history-item strong {
+    color: var(--pool-ink);
+}
+
+.pool-manager-empty {
+    margin: 0;
+    color: var(--pool-muted);
+}
+
+html.dark-theme .pool-manager-table a,
+body.dark-theme .pool-manager-table a {
+    color: #b6ef6a !important;
+}
+
+@media (max-width: 575.98px) {
+    .pool-manager-header,
+    .pool-manager-panel,
+    .pool-manager-scoreboard {
+        padding: 0.8rem;
+    }
+
+    .pool-manager-header .pool-manager-actions,
+    .pool-manager-header .btn {
+        width: 100%;
+    }
+
+    .pool-manager-header .pool-manager-actions .btn {
+        flex: 1 1 auto;
+    }
+
+    .pool-scoring-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pool-manager-table {
+        min-width: 32rem;
+    }
+
+    .pool-manager-points-mode-picker,
+    .pool-manager-points-grid,
+    .pool-manager-margin-rule-points {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .pool-manager-points-mode-picker .btn {
+        width: 100%;
+    }
+
+    .pool-manager-margin-rule-threshold {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0.35rem;
+    }
+
+    .pool-manager-membership-list li {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .pool-manager-inline-actions {
+        justify-content: flex-start;
+    }
+
+    .pool-bracket-grid {
+        grid-auto-columns: minmax(12.5rem, 1fr);
+    }
+
+    #pool-large-manual-draw .pool-bracket-half {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .pool-bracket-half-selector {
+        position: sticky;
+        left: 0;
+        z-index: 1;
+    }
+
+    .pool-bracket-half-selector .btn {
+        flex: 1 1 auto;
+    }
+    .pool-stats-participant {
+    width: 6.75rem;
+    min-width: 6.75rem;
+    max-width: 6.75rem;
+}
+}
+
+/* Team-match operations use a fixed position schedule, rather than the
+   legacy free-form rack picker. Keep every selector inside the pool shell so
+   the football manager and shared Bootstrap forms remain untouched. */
+.pool-page .pool-team-operations-card,
+.pool-page .pool-team-live-rack,
+.pool-page .pool-lineup-editor {
+    padding: 1rem;
+    border: 1px solid var(--pool-border);
+    border-radius: 0.9rem;
+    background: var(--pool-surface);
+    box-shadow: var(--pool-shadow);
+}
+
+.pool-page .pool-team-operations-card h3,
+.pool-page .pool-team-live-rack h3 {
+    margin: 0;
+    color: var(--pool-ink);
+    font-size: 1.05rem;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+.pool-page .pool-lineup-starters {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.pool-page .pool-lineup-position {
+    min-width: 0;
+    padding: 0.8rem;
+    border: 1px solid var(--pool-border);
+    border-radius: 0.75rem;
+    background: var(--pool-surface-muted);
+}
+
+.pool-page .pool-lineup-position .form-label,
+.pool-page .pool-lineup-substitutes > legend {
+    margin-bottom: 0.4rem;
+    color: var(--pool-ink);
+    font-size: 0.87rem;
+    font-weight: 800;
+}
+
+.pool-page .pool-lineup-substitutes {
+    padding: 0.9rem;
+    border: 1px solid var(--pool-border);
+    border-radius: 0.8rem;
+    background: var(--pool-surface-muted);
+}
+
+.pool-page .pool-lineup-substitutes > div {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: 0.55rem;
+}
+
+.pool-page .pool-lineup-substitutes .form-check {
+    min-width: 0;
+    margin: 0;
+    padding: 0.6rem 0.7rem 0.6rem 2rem;
+    border: 1px solid var(--pool-border);
+    border-radius: 0.65rem;
+    background: var(--pool-surface);
+}
+
+.pool-page .pool-lineup-substitutes .form-check-label {
+    color: var(--pool-ink);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.pool-page .pool-lineup-list {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.pool-page .pool-lineup-list li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.45rem 0.8rem;
+    min-height: 2.7rem;
+    padding: 0.55rem 0.7rem;
+    border: 1px solid var(--pool-border);
+    border-radius: 0.65rem;
+    background: var(--pool-surface-muted);
+    color: var(--pool-ink);
+}
+
+.pool-page .pool-lineup-list li > span {
+    color: var(--pool-muted);
+    font-size: 0.83rem;
+    font-weight: 750;
+}
+
+.pool-page .pool-lineup-list li > strong {
+    overflow-wrap: anywhere;
+    text-align: end;
+}
+
+.pool-page .pool-lineup-list--compact li {
+    min-height: 2.25rem;
+    padding: 0.4rem 0.55rem;
+}
+
+.pool-page .pool-team-rack-pairing {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0.55rem;
+    margin: 0.8rem 0 1rem;
+    color: var(--pool-ink);
+    text-align: center;
+}
+
+.pool-page .pool-team-rack-pairing strong {
+    overflow-wrap: anywhere;
+}
+
+.pool-page .pool-team-rack-pairing span {
+    color: var(--pool-muted);
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.pool-page .pool-team-schedule-table {
+    min-width: 48rem;
+}
+
+.pool-page .pool-team-schedule-table td,
+.pool-page .pool-team-schedule-table th {
+    vertical-align: middle;
+}
+
+.pool-page .pool-status--pending,
+.pool-page .pool-status--not_required {
+    background: #e8edf0;
+    color: #26313b;
+}
+
+html.dark-theme .pool-page .pool-status--pending,
+body.dark-theme .pool-page .pool-status--pending,
+html.dark-theme .pool-page .pool-status--not_required,
+body.dark-theme .pool-page .pool-status--not_required {
+    background: #37424c;
+    color: #edf3f7;
+}
+
+@media (max-width: 991.98px) {
+    .pool-page .pool-lineup-starters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 575.98px) {
+    .pool-page .pool-lineup-starters,
+    .pool-page .pool-lineup-substitutes > div {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .pool-page .pool-team-operations-card,
+    .pool-page .pool-team-live-rack,
+    .pool-page .pool-lineup-editor {
+        padding: 0.8rem;
+    }
+
+    .pool-page .pool-lineup-list li > strong {
+        text-align: start;
+    }
+}
+/* Match-lineup substitute selector */
+
+.pool-page .pool-lineup-substitute-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
+    margin-top: 0.75rem;
+}
+
+.pool-page .pool-lineup-substitute-option {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    min-width: 0;
+    min-height: 3rem;
+    margin: 0;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid var(--pool-border);
+    border-radius: 0.7rem;
+    background: var(--pool-surface);
+    color: var(--pool-ink);
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.pool-page .pool-lineup-substitute-option:hover {
+    border-color: rgba(93, 157, 16, 0.7);
+}
+
+.pool-page .pool-lineup-substitute-option .form-check-input {
+    float: none;
+    flex: 0 0 auto;
+    width: 1.15rem;
+    height: 1.15rem;
+    margin: 0;
+}
+
+.pool-page .pool-lineup-substitute-option span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 575.98px) {
+    .pool-page .pool-lineup-substitute-grid {
+        grid-template-columns: 1fr;
+    }
+}
+/* Team rack scoring is deliberately player-first.  These controls remain
+   scoped to pool pages so they cannot affect football's manager forms. */
+.pool-page .pool-team-rack-winner-picker {
+    min-width: 0;
+    margin: 0;
+    padding: 1rem;
+    border: 1px solid var(--pool-border);
+    border-radius: 0.9rem;
+    background: var(--pool-surface-muted);
+}
+
+.pool-page .pool-team-rack-winner-picker > legend {
+    float: none;
+    width: auto;
+    margin: 0;
+    padding: 0;
+    color: var(--pool-ink);
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.pool-team-rack-roster-groups {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.8rem;
+}
+
+.pool-team-rack-roster-group {
+    min-width: 0;
+    padding: 0.75rem;
+    border: 1px solid var(--pool-border);
+    border-radius: 0.75rem;
+    background: var(--pool-surface);
+}
+
+.pool-team-rack-roster-group--historic {
+    grid-column: 1 / -1;
+    background: var(--pool-surface-muted);
+}
+
+.pool-team-rack-roster-group h3 {
+    margin: 0 0 0.6rem;
+    color: var(--pool-ink);
+    font-size: 0.92rem;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+.pool-team-rack-player-options {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.pool-team-rack-player-choice {
+    position: relative;
+    min-width: 0;
+}
+
+.pool-team-rack-player-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+.pool-team-rack-player-choice label {
+    display: flex;
+    min-height: 3.1rem;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.55rem 0.65rem;
+    border: 1px solid var(--pool-border);
+    border-radius: 0.65rem;
+    color: var(--pool-ink);
+    cursor: pointer;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+    transition: border-color 0.16s ease, background-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.pool-team-rack-player-choice label:hover {
+    border-color: rgba(93, 157, 16, 0.7);
+}
+
+.pool-team-rack-player-input:checked + label {
+    border-color: var(--pool-accent-strong);
+    background: var(--pool-surface-strong);
+    box-shadow: 0 0 0 2px rgba(139, 220, 31, 0.28);
+}
+
+.pool-team-rack-player-input:focus-visible + label {
+    outline: 3px solid rgba(139, 220, 31, 0.72);
+    outline-offset: 2px;
+}
+
+.pool-page .pool-position-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.65rem;
+    margin-left: 0.25rem;
+    padding: 0.12rem 0.35rem;
+    border: 1px solid var(--pool-border);
+    border-radius: 999px;
+    background: var(--pool-surface-muted);
+    color: var(--pool-muted);
+    font-size: 0.72rem;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.pool-page .pool-up-next-list {
+    display: grid;
+    gap: 0.65rem;
+}
+
+.pool-page .pool-up-next-rack {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border: 1px solid var(--pool-border);
+    border-radius: 0.75rem;
+    background: var(--pool-surface-muted);
+}
+
+.pool-page .pool-up-next-rack > div {
+    display: grid;
+    gap: 0.1rem;
+    flex: 0 0 auto;
+}
+
+.pool-page .pool-up-next-rack > div > strong {
+    color: var(--pool-ink);
+}
+
+.pool-page .pool-up-next-rack > div > span {
+    color: var(--pool-muted);
+    font-size: 0.75rem;
+}
+
+.pool-page .pool-up-next-rack > p {
+    margin: 0;
+    color: var(--pool-ink);
+    text-align: end;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 575.98px) {
+    .pool-page .pool-up-next-rack {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .pool-page .pool-up-next-rack > p {
+        text-align: start;
+    }
+}
+.pool-team-rack-player-choice label small {
+    margin-left: auto;
+    color: var(--pool-muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+.pool-page .pool-team-live-rack
+.pool-team-rack-player-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.pool-page .pool-team-live-rack
+.pool-team-rack-player-choice label {
+    justify-content: center;
+    min-height: 3.5rem;
+    text-align: center;
+}
+
+.pool-page .pool-team-live-rack
+.pool-team-rack-player-choice label span {
+    display: grid;
+    gap: 0.15rem;
+}
+
+.pool-page .pool-team-live-rack
+.pool-team-rack-player-choice label small {
+    color: var(--pool-muted);
+    font-size: 0.72rem;
+}
+
+@media (max-width: 420px) {
+    .pool-page .pool-team-live-rack
+    .pool-team-rack-player-options {
+        grid-template-columns: 1fr;
+    }
+}
+
+.pool-page .pool-team-stat-section + .pool-team-stat-section {
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--pool-border);
+}
+
+.pool-page .pool-stat-grid--compact {
+    margin: 0 0 1rem;
+}
+
+@media (max-width: 575.98px) {
+    .pool-team-rack-roster-groups {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .pool-team-rack-roster-group--historic {
+        grid-column: auto;
+    }
+    .pool-stats-participant {
+    width: 6.75rem;
+    min-width: 6.75rem;
+    max-width: 6.75rem;
+}
+}
+/* Collapsible team-match sections */
+
+.pool-page .pool-details,
+.pool-manager-page .pool-details {
+    border: 1px solid var(--pool-border);
+    border-radius: 0.85rem;
+    background: var(--pool-surface);
+    overflow: hidden;
+}
+
+.pool-page .pool-details-summary,
+.pool-manager-page .pool-details-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem;
+    cursor: pointer;
+    color: var(--pool-ink);
+    list-style: none;
+    user-select: none;
+}
+
+.pool-page .pool-details-summary::-webkit-details-marker,
+.pool-manager-page .pool-details-summary::-webkit-details-marker {
+    display: none;
+}
+
+.pool-page .pool-details-summary > div,
+.pool-manager-page .pool-details-summary > div {
+    display: grid;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
+.pool-page .pool-details-summary strong,
+.pool-manager-page .pool-details-summary strong {
+    color: var(--pool-ink);
+    font-size: 1rem;
+}
+
+.pool-competition-overview-disclosure .pool-details-summary h2 {
+    margin: 0;
+    color: var(--pool-ink);
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.pool-page .pool-details-summary small,
+.pool-manager-page .pool-details-summary small {
+    color: var(--pool-muted);
+}
+
+.pool-page .pool-details-toggle-text,
+.pool-manager-page .pool-details-toggle-text {
+    flex: 0 0 auto;
+    font-size: 0.8rem;
+    font-weight: 800;
+}
+
+.pool-page .pool-details[open] .pool-details-toggle-text,
+.pool-manager-page .pool-details[open] .pool-details-toggle-text {
+    opacity: 0.7;
+}
+
+.pool-page .pool-details-content,
+.pool-manager-page .pool-details-content {
+    padding: 0 1rem 1rem;
+}
+
+.pool-page .pool-rack-history-actions,
+.pool-manager-page .pool-rack-history-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 0.85rem;
+}
+
+@media (max-width: 575.98px) {
+    .pool-page .pool-details-summary,
+    .pool-manager-page .pool-details-summary {
+        align-items: flex-start;
+    }
+
+    .pool-page .pool-details-summary small,
+    .pool-manager-page .pool-details-summary small {
+        font-size: 0.78rem;
+    }
+}

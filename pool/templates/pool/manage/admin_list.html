@@ -1,0 +1,10 @@
+{% extends "pool/manage/base.html" %}
+
+{% block manager_title %}Administrators · {{ competition.name }}{% endblock %}
+
+{% block manager_content %}
+<section class="pool-manager-panel">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3"><div><h2 class="mb-1">Competition administrators</h2><p class="pool-manager-help mb-0">Only the competition owner can change administrator access.</p></div><a class="btn btn-primary" href="{% url 'pool:manage_competition_admin_add' competition.slug %}">Add administrator</a></div>
+    <div class="table-responsive"><table class="table pool-manager-table"><thead><tr><th>Account</th><th>Role</th><th>Active</th><th class="text-end">Actions</th></tr></thead><tbody>{% for membership in memberships %}<tr><td>{{ membership.user.get_username }}</td><td>{{ membership.get_role_display }}</td><td>{% if membership.is_active %}Yes{% else %}No{% endif %}</td><td class="text-end">{% if membership.role == 'ADMIN' %}<form class="d-inline" method="post" action="{% url 'pool:manage_competition_admin_toggle' competition.slug membership.pk %}">{% csrf_token %}<button class="btn btn-sm btn-outline-secondary" type="submit">{% if membership.is_active %}Deactivate{% else %}Reactivate{% endif %}</button></form>{% else %}<span class="text-muted">Owner access is managed in Django admin.</span>{% endif %}</td></tr>{% empty %}<tr><td colspan="4" class="text-center">No administrator memberships exist.</td></tr>{% endfor %}</tbody></table></div>
+</section>
+{% endblock %}

@@ -1,0 +1,344 @@
+{% extends "pool/manage/base.html" %}
+
+{% block manager_title %}Knockout bracket · {{ competition.name }}{% endblock %}
+
+{% block manager_content %}
+{% if knockout_stages %}
+<section class="pool-manager-panel">
+    <div class="pool-manager-section-heading">
+        <div>
+            <p class="pool-eyebrow">Knockout draw</p>
+            <h2>Bracket setup</h2>
+            <p class="pool-manager-help mb-0">Manual, seeded, and qualification draws can be reviewed before generation. A random draw is generated only once after confirmation and is revealed only after its official bracket is saved.</p>
+        </div>
+    </div>
+
+    {% if bracket %}
+    <div class="pool-manager-callout pool-manager-callout--success">
+        <strong>{{ bracket.stage.name }} bracket is generated.</strong>
+        <span>{{ bracket.size }} slots · {{ bracket.get_draw_method_display }} draw{% if bracket.third_place_enabled %} · third-place match enabled{% endif %}</span>
+    </div>
+    {% else %}
+    <form method="post" action="{% url 'pool:manage_competition_bracket_preview' competition.slug %}" class="pool-manager-form" novalidate data-pool-bracket-draw-form>
+        {% csrf_token %}
+        <div class="alert alert-warning" id="pool-random-draw-explanation" hidden role="status">
+            <strong>Random draw is final.</strong> The bracket will be randomised only after you confirm. You will not see the draw beforehand and it cannot be randomised again.
+        </div>
+        {% if draw_form.large_manual_slots %}
+            {% if draw_form.non_field_errors %}
+            <div class="alert alert-danger" role="alert">{{ draw_form.non_field_errors }}</div>
+            {% endif %}
+            {% for field in draw_form.hidden_fields %}
+                {{ field }}
+                {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+            {% endfor %}
+            {% for field in draw_form.visible_fields %}
+                {% if field.field.widget.input_type == 'checkbox' %}
+                <div class="form-check mb-3">
+                    {{ field }}
+                    <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+                    {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                </div>
+                {% else %}
+                <div class="mb-3">
+                    <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+                    {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                </div>
+                {% endif %}
+            {% endfor %}
+            <section class="pool-manager-panel mt-3" id="pool-large-manual-draw">
+                <h3>{% if draw_form.life_aware %}Searchable tournament-life placement{% else %}Searchable entry placement{% endif %}</h3>
+                <p class="pool-manager-help">{% if draw_form.life_aware %}Top-half slots accept Life 1 only; bottom-half slots accept Life 2 only. The server verifies every life, bye, and bracket-half rule when you preview the draw.{% else %}Type a player or team name, then choose the exact competition entry. The selected hidden ID is verified against this competition when you preview the draw.{% endif %}</p>
+                {% if draw_form.life_aware %}
+                <datalist id="pool-manual-slot-options-life-one">
+                    {% for option in draw_form.manual_top_life_slot_options %}
+                    <option value="{{ option.search_label }}"></option>
+                    {% endfor %}
+                </datalist>
+                <datalist id="pool-manual-slot-options-life-two">
+                    {% for option in draw_form.manual_bottom_life_slot_options %}
+                    <option value="{{ option.search_label }}"></option>
+                    {% endfor %}
+                </datalist>
+                {% else %}
+                <datalist id="pool-manual-slot-options">
+                    {% for option in draw_form.manual_slot_options %}
+                    <option value="{{ option.search_label }}"></option>
+                    {% endfor %}
+                </datalist>
+                {% endif %}
+                {% for slot in draw_form.large_manual_slot_fields %}
+                    {% if forloop.counter == 1 %}<div class="pool-bracket-half"><h4>Top half</h4>{% endif %}
+                    <div class="mb-2">
+                        <label class="form-label" for="pool-manual-slot-label-{{ forloop.counter }}">{% if draw_form.life_aware %}{% if forloop.counter <= draw_form.manual_half_size %}Life 1{% else %}Life 2{% endif %}{% else %}Entry{% endif %} slot {{ forloop.counter }}</label>
+                        <input
+                            class="form-control"
+                            id="pool-manual-slot-label-{{ forloop.counter }}"
+                            type="search"
+                            list="{% if draw_form.life_aware %}{% if forloop.counter <= draw_form.manual_half_size %}pool-manual-slot-options-life-one{% else %}pool-manual-slot-options-life-two{% endif %}{% else %}pool-manual-slot-options{% endif %}"
+                            autocomplete="off"
+                            placeholder="Bye / unused slot"
+                            data-pool-manual-slot-label
+                            data-pool-manual-slot-target="{{ slot.id_for_label }}"
+                            {% if draw_form.life_aware %}data-pool-manual-slot-life="{% if forloop.counter <= draw_form.manual_half_size %}1{% else %}2{% endif %}"{% endif %}
+                        >
+                    </div>
+                    {% if forloop.counter == draw_form.manual_half_size %}</div><div class="pool-bracket-half"><h4>Bottom half</h4>{% endif %}
+                    {% if forloop.counter == draw_form.selected_size %}</div>{% endif %}
+                {% endfor %}
+            </section>
+            {{ draw_form.manual_slot_options|json_script:"pool-manual-slot-data" }}
+            <script>
+            (function () {
+                const dataNode = document.getElementById("pool-manual-slot-data");
+                const panel = document.getElementById("pool-large-manual-draw");
+                const method = document.getElementById("id_draw_method");
+                if (!dataNode || !panel) { return; }
+                const choices = JSON.parse(dataNode.textContent);
+                const byId = new Map(choices.map(function (choice) { return [String(choice.id), choice]; }));
+                const byLabel = new Map(choices.map(function (choice) { return [choice.search_label, choice]; }));
+                function syncInput(input) {
+                    const hidden = document.getElementById(input.dataset.poolManualSlotTarget);
+                    const choice = byLabel.get(input.value.trim());
+                    const expectedLife = input.dataset.poolManualSlotLife;
+                    const allowed = choice && (!expectedLife || String(choice.life_number) === expectedLife);
+                    if (hidden) { hidden.value = allowed ? choice.id : ""; }
+                }
+                document.querySelectorAll("[data-pool-manual-slot-label]").forEach(function (input) {
+                    const hidden = document.getElementById(input.dataset.poolManualSlotTarget);
+                    if (hidden && hidden.value && byId.has(hidden.value)) {
+                        input.value = byId.get(hidden.value).search_label;
+                    }
+                    input.addEventListener("input", function () { syncInput(input); });
+                    input.addEventListener("change", function () { syncInput(input); });
+                });
+                function toggleSlots() {
+                    panel.hidden = method && method.value !== "MANUAL";
+                }
+                if (method) { method.addEventListener("change", toggleSlots); }
+                toggleSlots();
+            }());
+            </script>
+        {% else %}
+        {% include "pool/manage/_form_fields.html" with form=draw_form %}
+        {% endif %}
+        <button class="btn btn-primary" id="pool-bracket-draw-submit" type="submit">Preview draw</button>
+    </form>
+    {% if handoff_rounds_available %}
+    <section class="pool-manager-panel mt-4" aria-labelledby="pool-bracket-handoff-title">
+        <div class="pool-manager-section-heading">
+            <div>
+                <p class="pool-eyebrow">Continue tournament</p>
+                <h3 id="pool-bracket-handoff-title">Use a bracket after completed manual rounds</h3>
+                <p class="pool-manager-help mb-0">Choose a fully completed manual round. Its exact winners are checked again when the draw is generated; earlier results stay untouched.</p>
+            </div>
+        </div>
+        <form method="post" action="{% url 'pool:manage_competition_bracket_handoff_preview' competition.slug %}" class="pool-manager-form" novalidate>
+            {% csrf_token %}
+            {% include "pool/manage/_form_fields.html" with form=handoff_form %}
+            <button class="btn btn-outline-primary" type="submit">Prepare bracket handoff</button>
+        </form>
+    </section>
+    {% endif %}
+    <script>
+    (function () {
+        const form = document.querySelector("[data-pool-bracket-draw-form]");
+        if (!form) { return; }
+        const method = form.querySelector("#id_draw_method");
+        const bracketSize = form.querySelector("#id_bracket_size");
+        const stage = form.querySelector("#id_stage");
+        const notice = form.querySelector("#pool-random-draw-explanation");
+        const submit = form.querySelector("#pool-bracket-draw-submit");
+        const largeManual = form.querySelector("#pool-large-manual-draw");
+        const randomConfirmation = form.querySelector("#id_confirm_random_draw");
+        const smallManualFields = form.querySelectorAll("[id^='id_slot_']");
+        function setHidden(field, hidden) {
+            const wrapper = field.closest(".mb-3, .form-check");
+            if (wrapper) { wrapper.hidden = hidden; }
+        }
+        function update() {
+            const isRandom = method && method.value === "RANDOM";
+            const isManual = method && method.value === "MANUAL";
+            if (notice) { notice.hidden = !isRandom; }
+            if (submit) { submit.textContent = isRandom ? "Confirm random draw" : "Preview draw"; }
+            if (largeManual) { largeManual.hidden = !isManual; }
+            smallManualFields.forEach(function (field) { setHidden(field, !isManual); });
+            if (randomConfirmation) { setHidden(randomConfirmation, !isRandom); }
+        }
+        if (method) { method.addEventListener("change", update); }
+        if (bracketSize) {
+            bracketSize.addEventListener("change", function () {
+                if (!method || method.value !== "MANUAL") { return; }
+                const refreshUrl = new URL(window.location.href);
+                refreshUrl.searchParams.set("bracket_size", bracketSize.value);
+                refreshUrl.searchParams.set("draw_method", "MANUAL");
+                if (stage && stage.value) {
+                    refreshUrl.searchParams.set("stage", stage.value);
+                }
+                window.location.assign(refreshUrl.toString());
+            });
+        }
+        update();
+    }());
+    </script>
+    {% endif %}
+</section>
+
+{% if preview and not bracket %}
+<section class="pool-manager-panel">
+    <div class="pool-manager-section-heading"><div><p class="pool-eyebrow">Review required</p><h2>Saved draw preview</h2><p class="pool-manager-help mb-0">This preview belongs to your account and will be reproduced exactly when confirmed.</p></div></div>
+    <dl class="pool-manager-definition-list"><div><dt>Stage</dt><dd>{{ preview.stage.name }}</dd></div><div><dt>Method</dt><dd>{{ preview.get_draw_method_display }}</dd></div><div><dt>Size</dt><dd>{{ preview.bracket_size }} slots</dd></div>{% if preview.handoff_from_round %}<div><dt>Source</dt><dd>Manual {{ preview.handoff_from_round.name }} winners</dd></div>{% endif %}</dl>
+    {% if preview.draw_method == 'RANDOM' %}
+    <div class="alert alert-warning mb-0" role="status">This legacy random preview cannot be revealed or confirmed. Discard it and use the one-shot random draw confirmation.</div>
+    {% elif preview_draw_order %}
+    <ol class="pool-manager-preview-slots">
+        {% for item in preview_draw_order %}<li><span>Slot {{ forloop.counter }}</span><strong>{{ item|default:"Bye / unused" }}</strong></li>{% endfor %}
+    </ol>
+    {% endif %}
+    <div class="d-flex flex-wrap align-items-end gap-2">
+        {% if preview.draw_method != 'RANDOM' %}
+        <form method="post" action="{% url 'pool:manage_competition_bracket_generate' competition.slug %}" class="pool-manager-form mb-0">
+            {% csrf_token %}
+            {% include "pool/manage/_form_fields.html" with form=confirm_form %}
+            <button class="btn btn-success" type="submit">Generate bracket</button>
+        </form>
+        {% endif %}
+        <form method="post" action="{% url 'pool:manage_competition_bracket_preview_discard' competition.slug preview.stage.pk preview.token %}">
+            {% csrf_token %}
+            <button class="btn btn-outline-danger" type="submit">Discard preview</button>
+        </form>
+    </div>
+</section>
+{% endif %}
+
+{% if is_owner and other_unconfirmed_previews and not bracket %}
+<section class="pool-manager-panel">
+    <div class="pool-manager-section-heading"><div><p class="pool-eyebrow">Owner action</p><h2>Other unconfirmed previews</h2><p class="pool-manager-help mb-0">These private drafts are not shown for review, but you can discard a stale one so it cannot block entry, life, or competition settings.</p></div></div>
+    <ul class="pool-manager-list">
+        {% for other_preview in other_unconfirmed_previews %}
+        <li class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <span>{{ other_preview.created_by|default:"Former organiser" }} &middot; {{ other_preview.get_draw_method_display }} &middot; {{ other_preview.bracket_size }} slots</span>
+            <form method="post" action="{% url 'pool:manage_competition_bracket_preview_discard' competition.slug other_preview.stage.pk other_preview.token %}">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-outline-danger" type="submit">Discard stale preview</button>
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+</section>
+{% endif %}
+
+{% if bracket %}
+<section class="pool-manager-panel">
+    <div class="pool-manager-section-heading"><div><p class="pool-eyebrow">Race targets</p><h2>Bracket round settings</h2></div></div>
+    <form method="post" action="{% url 'pool:manage_competition_bracket_round_targets' competition.slug bracket.stage.pk %}" class="pool-manager-form">
+        {% csrf_token %}
+        {% include "pool/manage/_form_fields.html" with form=round_targets_form %}
+        <button class="btn btn-outline-primary" type="submit">Save round targets</button>
+    </form>
+</section>
+
+<section class="pool-manager-panel">
+    <div class="pool-manager-section-heading"><div><p class="pool-eyebrow">Generated layout</p><h2>{{ bracket.stage.name }} bracket</h2></div></div>
+    {% if bracket_display.rounds %}
+    <div class="pool-bracket-display" data-pool-bracket-display>
+        {% if bracket_display.large_draw %}
+        <div class="pool-bracket-half-selector" data-pool-bracket-half-controls role="group" aria-label="Large bracket view">
+            <span class="pool-bracket-half-selector-label">View</span>
+            <button class="btn btn-sm btn-outline-primary" type="button" data-pool-bracket-half-filter="top" aria-pressed="false">Top half</button>
+            <button class="btn btn-sm btn-outline-primary" type="button" data-pool-bracket-half-filter="bottom" aria-pressed="false">Bottom half</button>
+            <button class="btn btn-sm btn-outline-primary" type="button" data-pool-bracket-half-filter="all" aria-pressed="true">Full bracket</button>
+        </div>
+        {% endif %}
+    <div class="pool-bracket-scroll" tabindex="0" aria-label="{{ bracket.stage.name }} bracket">
+        <div class="pool-bracket-grid">
+            {% for round in bracket_display.rounds %}
+            <section class="pool-bracket-round">
+                <h3>{{ round.name }}{% if round.is_third_place %} · Third place{% endif %}</h3>
+                {% for item in round.ties %}
+                {% if item.half_heading %}<h4 class="pool-bracket-half-heading" data-pool-bracket-half="{{ item.draw_half }}">{{ item.half_heading }}</h4>{% endif %}
+                <article class="pool-bracket-tie{% if item.draw_half %} pool-bracket-tie--{{ item.draw_half }}{% endif %}" data-pool-bracket-half="{{ item.draw_half|default:'shared' }}">
+                    <div class="pool-bracket-tie-meta"><span>{{ item.tie.round_name }} {{ item.tie.position }}</span><span>Race to {{ item.tie.race_target }}</span></div>
+                    <div class="pool-bracket-slot {% if item.home_slot.entry_life_id %}{% if item.tie.resolved_winner_life_id == item.home_slot.entry_life_id %}is-winner{% endif %}{% elif item.tie.resolved_winner_id == item.home_slot.entry_id %}is-winner{% endif %}"><span>{{ item.home_label|default:"TBD" }}</span>{% if item.tie.match %}<strong>{{ item.tie.match.home_score }}</strong>{% endif %}</div>
+                    <div class="pool-bracket-slot {% if item.away_slot.entry_life_id %}{% if item.tie.resolved_winner_life_id == item.away_slot.entry_life_id %}is-winner{% endif %}{% elif item.tie.resolved_winner_id == item.away_slot.entry_id %}is-winner{% endif %}"><span>{{ item.away_label|default:"TBD" }}</span>{% if item.tie.match %}<strong>{{ item.tie.match.away_score }}</strong>{% endif %}</div>
+                    {% if item.same_entry_final %}<p class="pool-bracket-note">Both tournament lives reached the final. Champion: {{ item.champion_label }}.</p>{% endif %}
+                    {% if item.tie.match %}<a href="{% url 'pool:manage_match' competition.slug item.tie.match.pk %}">Manage fixture</a>{% endif %}
+                </article>
+                {% endfor %}
+            </section>
+            {% endfor %}
+        </div>
+    </div>
+    </div>
+    {% if bracket_display.same_entry_third_place %}
+    <p class="pool-bracket-note mt-3"><strong>Third place: {{ bracket_display.third_place_label|default:"Shared entry" }}.</strong> No third-place fixture is needed because the same entry reached both third-place paths.</p>
+    {% endif %}
+    {% else %}<p class="pool-manager-empty">The generated bracket does not contain any ties yet.</p>{% endif %}
+</section>
+
+<script>
+(function () {
+    function initialiseBracketHalfSelector(display) {
+        if (display.dataset.poolBracketHalfReady) { return; }
+        const controls = display.querySelector("[data-pool-bracket-half-controls]");
+        if (!controls) { return; }
+        display.dataset.poolBracketHalfReady = "true";
+        const buttons = controls.querySelectorAll("[data-pool-bracket-half-filter]");
+        const items = display.querySelectorAll("[data-pool-bracket-half]");
+        function applyFilter(filter) {
+            items.forEach(function (item) {
+                const half = item.dataset.poolBracketHalf;
+                item.hidden = filter !== "all" && (half === "top" || half === "bottom") && half !== filter;
+            });
+            buttons.forEach(function (button) {
+                button.setAttribute("aria-pressed", String(button.dataset.poolBracketHalfFilter === filter));
+            });
+        }
+        buttons.forEach(function (button) {
+            button.addEventListener("click", function () {
+                applyFilter(button.dataset.poolBracketHalfFilter);
+            });
+        });
+        applyFilter(window.matchMedia && window.matchMedia("(max-width: 767px)").matches ? "top" : "all");
+    }
+    document.querySelectorAll("[data-pool-bracket-display]").forEach(initialiseBracketHalfSelector);
+}());
+</script>
+
+{% if is_owner and bracket.draw_method != 'RANDOM' %}
+<section class="pool-manager-panel pool-manager-danger-zone">
+    <p class="pool-eyebrow">Owner-only operation</p>
+    <h2>Reset generated bracket</h2>
+    <p class="pool-manager-help">A reset is blocked once result history means the bracket can no longer be safely regenerated.</p>
+    <form method="post" action="{% url 'pool:manage_competition_bracket_reset' competition.slug bracket.stage.pk %}" class="pool-manager-form">
+        {% csrf_token %}
+        {% include "pool/manage/_form_fields.html" with form=reset_form %}
+        <button class="btn btn-outline-danger" type="submit">Reset bracket</button>
+    </form>
+</section>
+{% endif %}
+
+{% if audit_events and bracket %}
+<section class="pool-manager-panel">
+    <div class="pool-manager-section-heading"><div><p class="pool-eyebrow">Audit history</p><h2>Bracket activity</h2></div></div>
+    <ol class="pool-manager-audit-list">
+        {% for event in audit_events %}<li><strong>{{ event.get_action_display }}</strong><span>{{ event.created_at|date:"M j, Y H:i" }}{% if event.actor %} · {{ event.actor.get_username }}{% endif %}</span>{% if event.message %}<p>{{ event.message }}</p>{% endif %}</li>{% endfor %}
+    </ol>
+</section>
+{% endif %}
+{% endif %}
+{% if audit_events and not bracket %}
+<section class="pool-manager-panel">
+    <div class="pool-manager-section-heading"><div><p class="pool-eyebrow">Audit history</p><h2>Bracket activity</h2></div></div>
+    <ol class="pool-manager-audit-list">
+        {% for event in audit_events %}<li><strong>{{ event.get_action_display }}</strong><span>{{ event.created_at|date:"M j, Y H:i" }}{% if event.actor %} · {{ event.actor.get_username }}{% endif %}</span>{% if event.message %}<p>{{ event.message }}</p>{% endif %}</li>{% endfor %}
+    </ol>
+</section>
+{% endif %}
+{% else %}
+<section class="pool-manager-panel"><h2>Knockout bracket</h2><p class="pool-manager-empty">Add a knockout stage from <a href="{% url 'pool:manage_competition_stages' competition.slug %}">Stages</a> before configuring a bracket.</p></section>
+{% endif %}
+{% endblock %}

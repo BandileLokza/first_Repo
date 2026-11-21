@@ -1,0 +1,10 @@
+{% extends "pool/manage/base.html" %}
+
+{% block manager_title %}{{ team.name }} roster{% endblock %}
+
+{% block manager_content %}
+<section class="pool-manager-panel">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3"><div><h2 class="mb-1">{{ team.name }} roster</h2><p class="pool-manager-help mb-0">{{ competition.name }} only.</p></div><a class="btn btn-primary" href="{% url 'pool:manage_competition_team_roster_add' competition.slug entry.pk %}">Add player</a></div>
+    <div class="table-responsive"><table class="table pool-manager-table"><thead><tr><th>Player</th><th>Active</th><th>Order</th><th class="text-end">Actions</th></tr></thead><tbody>{% for roster in roster_memberships %}<tr><td>{{ roster.player.full_name }}</td><td>{% if roster.is_active %}Yes{% else %}No{% endif %}</td><td>{{ roster.sort_order }}</td><td class="text-end"><a class="btn btn-sm btn-outline-secondary" href="{% url 'pool:manage_competition_team_roster_update' competition.slug entry.pk roster.pk %}">Edit</a> <form class="d-inline" method="post" action="{% url 'pool:manage_competition_team_roster_delete' competition.slug entry.pk roster.pk %}">{% csrf_token %}<button class="btn btn-sm btn-outline-danger" type="submit">Remove</button></form></td></tr>{% empty %}<tr><td colspan="4" class="text-center">No players are on this competition roster.</td></tr>{% endfor %}</tbody></table></div>
+</section>
+{% endblock %}

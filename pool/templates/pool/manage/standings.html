@@ -1,0 +1,214 @@
+{% extends "pool/manage/base.html" %}
+
+{% block manager_title %}Standings settings · {{ competition.name }}{% endblock %}
+
+{% block manager_content %}
+<section class="pool-manager-panel">
+    <div class="pool-manager-section-heading">
+        <div>
+            <p class="pool-eyebrow">League and group play</p>
+            <h2>Standings settings</h2>
+            <p class="pool-manager-help mb-0">Tables are calculated from completed pool fixtures. A superuser may optionally seed a league or group table with imported pre-eSportsLive totals.</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-12 col-xl-7">
+            <form method="get" class="pool-manager-points-mode-picker" aria-label="Choose points system">
+                {% if request.GET.stage %}<input type="hidden" name="stage" value="{{ request.GET.stage }}">{% endif %}
+                {% if request.GET.group %}<input type="hidden" name="group" value="{{ request.GET.group }}">{% endif %}
+                <div>
+                    <label class="form-label" for="pool-points-mode">Points system</label>
+                    <select class="form-select" id="pool-points-mode" name="points_mode">
+                        <option value="FIXED" {% if display_points_mode == "FIXED" %}selected{% endif %}>Fixed points</option>
+                        <option value="MARGIN_BASED" {% if display_points_mode == "MARGIN_BASED" %}selected{% endif %}>Margin-based / bonus points</option>
+                    </select>
+                </div>
+                <button class="btn btn-outline-primary" type="submit">Change</button>
+            </form>
+
+            <form method="post" class="pool-manager-form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="points">
+                <input type="hidden" name="{{ standings_form.points_mode.html_name }}" value="{{ display_points_mode }}">
+                {% if standings_form.non_field_errors %}
+                <div class="alert alert-danger" role="alert">{{ standings_form.non_field_errors }}</div>
+                {% endif %}
+                {% for error in standings_form.points_mode.errors %}
+                <div class="alert alert-danger" role="alert">{{ error }}</div>
+                {% endfor %}
+
+                {% if display_points_mode == "MARGIN_BASED" %}
+                <section class="pool-manager-points-section" aria-labelledby="pool-non-played-points-heading">
+                    <h3 id="pool-non-played-points-heading">Non-played result points</h3>
+                    <p class="pool-manager-help mb-0">Used for walkovers, withdrawals and disqualifications. Played matches use the margin rules below. Byes do not award table points.</p>
+                    <div class="pool-manager-points-grid">
+                        <div>
+                            <label class="form-label" for="{{ standings_form.points_for_win.id_for_label }}">Winner points</label>
+                            {{ standings_form.points_for_win }}
+                            {% for error in standings_form.points_for_win.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div>
+                            <label class="form-label" for="{{ standings_form.points_for_loss.id_for_label }}">Loser points</label>
+                            {{ standings_form.points_for_loss }}
+                            {% for error in standings_form.points_for_loss.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                    </div>
+                </section>
+
+                <section id="pool-margin-points-editor" class="pool-manager-margin-rules" aria-labelledby="pool-margin-rules-heading" data-rule-count="{{ margin_rule_count }}">
+                    <h3 id="pool-margin-rules-heading">Played-match points</h3>
+                    <p class="pool-manager-help mb-0">Set points for each possible winning margin. The next rule starts automatically after the previous one, and the final rule ends at this competition’s maximum table race target of {{ maximum_margin }}.</p>
+                    {{ margin_rule_formset.management_form }}
+                    {% if margin_rule_formset.non_form_errors %}
+                    <div class="alert alert-danger" role="alert">{{ margin_rule_formset.non_form_errors }}</div>
+                    {% endif %}
+                    <div class="pool-manager-margin-rule-list">
+                        {% for rule_form in margin_rule_formset %}
+                        <article class="pool-margin-rule-card pool-manager-margin-rule-card {% if rule_form.is_final %}is-final{% endif %}">
+                            {% for hidden in rule_form.hidden_fields %}{{ hidden }}{% endfor %}
+                            <div class="pool-manager-margin-rule-heading">
+                                <h4>{% if rule_form.is_final %}Final possible margin{% elif forloop.first %}Close result{% else %}Rule {{ forloop.counter }}{% endif %}</h4>
+                                {% if rule_form.is_final %}
+                                <p class="pool-manager-margin-rule-range">{{ rule_form.final_label }}</p>
+                                {% else %}
+                                <p class="pool-manager-margin-rule-range">Starts at a winning margin of {{ rule_form.range_start }} rack{{ rule_form.range_start|pluralize }}.</p>
+                                {% endif %}
+                            </div>
+
+                            <div class="pool-manager-margin-rule-threshold">
+                                <span>{{ rule_form.threshold_prefix }}</span>
+                                <div>
+                                    <label class="visually-hidden" for="{{ rule_form.up_to_margin.id_for_label }}">Winning-margin threshold</label>
+                                    {{ rule_form.up_to_margin }}
+                                    {% for error in rule_form.up_to_margin.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                                </div>
+                                <span>rack{{ rule_form.up_to_margin.value|pluralize }}</span>
+                            </div>
+                            {% if rule_form.is_final %}
+                            <p class="pool-manager-help mb-0">This value follows the applicable table race target and cannot be increased here.</p>
+                            {% endif %}
+
+                            <div class="pool-manager-margin-rule-points">
+                                <div>
+                                    <label class="form-label" for="{{ rule_form.winner_points.id_for_label }}">Winner gets</label>
+                                    {{ rule_form.winner_points }}
+                                    {% for error in rule_form.winner_points.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                                </div>
+                                <div>
+                                    <label class="form-label" for="{{ rule_form.loser_points.id_for_label }}">Loser gets</label>
+                                    {{ rule_form.loser_points }}
+                                    {% for error in rule_form.loser_points.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                                </div>
+                            </div>
+
+                            {% if not rule_form.is_final %}
+                            <div class="pool-manager-margin-rule-remove">
+                                <div class="form-check mb-0">
+                                    {{ rule_form.DELETE }}
+                                    <label class="form-check-label" for="{{ rule_form.DELETE.id_for_label }}">Remove this rule</label>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% for error in rule_form.non_field_errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </article>
+                        {% endfor %}
+                    </div>
+
+                    {% if margin_rule_count < maximum_margin %}
+                    <a id="pool-add-margin-rule" class="pool-manager-margin-rule-add" href="{% url 'pool:manage_competition_standings' competition.slug %}?points_mode=MARGIN_BASED&amp;margin_rule_count={{ margin_rule_count|add:'1' }}&amp;add_margin_rule=1{% if request.GET.stage %}&amp;stage={{ request.GET.stage }}{% endif %}{% if request.GET.group %}&amp;group={{ request.GET.group }}{% endif %}">+ Add another rule</a>
+                    {% endif %}
+
+                    {% if margin_allocation_preview %}
+                    <aside class="pool-manager-allocation-preview" aria-labelledby="pool-margin-allocation-heading">
+                        <h4 id="pool-margin-allocation-heading">Current allocation</h4>
+                        <p class="pool-manager-help mb-2">A plain-language preview only; saved results and the central standings service remain authoritative.</p>
+                        <ul>
+                            {% for allocation in margin_allocation_preview %}
+                            <li>{{ allocation }}</li>
+                            {% endfor %}
+                        </ul>
+                    </aside>
+                    {% endif %}
+                </section>
+                {% else %}
+                <section class="pool-manager-points-section" aria-labelledby="pool-fixed-points-heading">
+                    <h3 id="pool-fixed-points-heading">Fixed points</h3>
+                    <p class="pool-manager-help mb-0">Use the same allocation after every eligible result.</p>
+                    <div class="pool-manager-points-grid">
+                        <div>
+                            <label class="form-label" for="{{ standings_form.points_for_win.id_for_label }}">Points for a win</label>
+                            {{ standings_form.points_for_win }}
+                            {% for error in standings_form.points_for_win.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div>
+                            <label class="form-label" for="{{ standings_form.points_for_loss.id_for_label }}">Points for a loss</label>
+                            {{ standings_form.points_for_loss }}
+                            {% for error in standings_form.points_for_loss.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                        </div>
+                    </div>
+                </section>
+                {% endif %}
+
+                <button class="btn btn-primary" type="submit">Save points system</button>
+            </form>
+        </div>
+        <div class="col-12 col-xl-5">
+            <form method="post" class="pool-manager-form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="tie_breakers">
+                <h3>Ordered tie-breakers</h3>
+                <p class="pool-manager-help">Points are always first. Leave unused rows blank.</p>
+                {% include "pool/manage/_form_fields.html" with form=tie_breaker_form %}
+                <button class="btn btn-primary" type="submit">Save tie-breakers</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<section class="pool-manager-panel">
+    <div class="pool-manager-section-heading">
+        <div>
+            <p class="pool-eyebrow">Calculated view</p>
+            <h2>Current standings</h2>
+        </div>
+        {% if group_stages %}
+        <a class="btn btn-outline-primary btn-sm" href="{% url 'pool:manage_competition_groups' competition.slug %}">Manage groups</a>
+        {% endif %}
+    </div>
+    {% if standings_stage_choices %}
+    <nav class="pool-manager-subnav" aria-label="Standing stage selector">
+        {% for choice in standings_stage_choices %}
+        <a class="{% if choice.is_selected %}is-active{% endif %}" href="?stage={{ choice.stage.pk }}{% if choice.group %}&amp;group={{ choice.group.pk }}{% endif %}">{{ choice.label }}</a>
+        {% endfor %}
+    </nav>
+    {% endif %}
+    {% if baseline_head_to_head_warning %}
+    <div class="alert alert-info" role="status">
+        Baseline standings do not contain historical head-to-head match data. Head-to-head tie-breakers can use only matches recorded on eSportsLive unless historical fixtures and results are entered.
+    </div>
+    {% endif %}
+    {% if standings_error %}
+    <div class="alert alert-warning" role="status">{{ standings_error }}</div>
+    {% elif standings_rows %}
+    <div class="table-responsive">
+        <table class="table pool-manager-table pool-manager-standings-table">
+            <thead>
+                <tr><th>#</th><th>Participant</th><th>P</th><th>W</th><th>L</th><th>RF</th><th>RA</th><th>RD</th><th>Pts</th></tr>
+            </thead>
+            <tbody>
+                {% for row in standings_rows %}
+                <tr>
+                    <td>{{ row.position }}</td>
+                    <th scope="row">{{ row.entry.display_name|default:row.participant }}</th>
+                    <td>{{ row.played }}</td><td>{{ row.won }}</td><td>{{ row.lost }}</td><td>{{ row.racks_for }}</td><td>{{ row.racks_against }}</td><td>{{ row.rack_difference }}</td><td><strong>{{ row.points }}</strong></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="pool-manager-empty">No completed fixtures are available for the selected table yet.</p>
+    {% endif %}
+</section>
+{% endblock %}

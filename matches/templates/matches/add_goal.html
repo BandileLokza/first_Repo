@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Add Goal{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-7">
+        <div class="mb-3">
+            <a href="{% url 'match_detail' match.id %}" class="back-btn">&larr; BACK</a>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="mb-1">Add Goal - {{ team.name }}</h2>
+                <p class="text-muted">{{ match.home_team }} vs {{ match.away_team }}</p>
+
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.new_player_requested }}{{ form.idempotency_key }}
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                    {% endif %}
+
+                    <fieldset class="mb-3">
+                        <legend class="form-label mb-2">{{ form.goal_type.label }}</legend>
+                        <div class="d-flex flex-column gap-2">
+                            {% for radio in form.goal_type %}
+                                <div class="form-check">
+                                    {{ radio.tag }}
+                                    <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        {% for error in form.goal_type.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                    </fieldset>
+
+                    <div class="alert alert-info py-2 small">
+                        {{ team.name }} receives the goal. For an own goal, choose or enter a player from {{ opposing_team.name }}.
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.player.id_for_label }}" class="form-label">{{ form.player.label }}</label>
+                        {{ form.player }}
+                        {% for error in form.player.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                        <div class="form-text">The list includes players from both teams; their team is shown beside each name.</div>
+                    </div>
+
+                    <div class="mb-4 new-player-name" hidden>
+                        <label for="{{ form.player_name.id_for_label }}" class="form-label">{{ form.player_name.label }}</label>
+                        {{ form.player_name }}
+                        {% for error in form.player_name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                        <div class="form-text">The new player is registered with the appropriate team for this goal.</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="{{ form.minute.id_for_label }}" class="form-label">{{ form.minute.label }}</label>
+                        {{ form.minute }}
+                        {% for error in form.minute.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                        <div class="form-text">Leave empty to use the current live match minute.</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-success px-sm-4" data-save-goal>Add Goal</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll("form").forEach((form) => {
+    const select = form.querySelector("select[name='player']");
+    const newPlayer = form.querySelector(".new-player-name");
+    const input = newPlayer && newPlayer.querySelector("input");
+    const requested = form.querySelector("input[name='new_player_requested']");
+    if (!select || !newPlayer || !input) return;
+    const addOption = document.createElement("option");
+    addOption.value = "__new__";
+    addOption.textContent = "+ Add new player";
+    select.appendChild(addOption);
+    const update = () => {
+        const adding = select.value === "__new__" || requested.value === "1";
+        newPlayer.hidden = !adding;
+        input.disabled = !adding;
+        requested.value = adding ? "1" : "";
+    };
+    select.addEventListener("change", update);
+    form.addEventListener("submit", () => {
+        if (select.value === "__new__") select.value = "";
+        const button = form.querySelector("[data-save-goal]");
+        if (button) { button.disabled = true; button.textContent = "Saving..."; }
+    });
+    update();
+});
+</script>
+{% endblock %}

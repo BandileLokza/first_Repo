@@ -1,0 +1,22 @@
+{% extends "pool/manage/base.html" %}
+
+{% block manager_title %}Teams · {{ competition.name }}{% endblock %}
+
+{% block manager_content %}
+<section class="pool-manager-panel">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <div><h2 class="mb-1">Teams and rosters</h2><p class="pool-manager-help mb-0">Rosters belong to this competition entry, not a club or room.</p></div>
+        <a class="btn btn-primary" href="{% url 'pool:manage_competition_team_create' competition.slug %}">Add team</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table pool-manager-table">
+            <thead><tr><th>Team</th><th>Active</th><th>Roster</th><th class="text-end">Actions</th></tr></thead>
+            <tbody>
+                {% for entry in team_entries %}
+                <tr><td>{{ entry.team.name }}</td><td>{% if entry.team.is_active %}Yes{% else %}No{% endif %}</td><td>{{ entry.roster_count }}</td><td class="text-end"><a class="btn btn-sm btn-outline-primary" href="{% url 'pool:manage_competition_team_roster' competition.slug entry.pk %}">Roster</a> <a class="btn btn-sm btn-outline-secondary" href="{% url 'pool:manage_competition_team_staff' competition.slug entry.pk %}">Staff</a> <a class="btn btn-sm btn-outline-secondary" href="{% url 'pool:manage_competition_team_update' competition.slug entry.pk %}">Edit</a></td></tr>
+                {% empty %}<tr><td colspan="4" class="text-center">No teams have been entered yet.</td></tr>{% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "pool/manage/base.html" %}
+
+{% block manager_title %}Stages · {{ competition.name }}{% endblock %}
+
+{% block manager_content %}
+<section class="pool-manager-panel">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3"><div><h2 class="mb-1">Competition stages</h2><p class="pool-manager-help mb-0">Stages remain explicit for future tables and brackets.</p></div><a class="btn btn-primary" href="{% url 'pool:manage_competition_stage_create' competition.slug %}">Add stage</a></div>
+    <div class="table-responsive"><table class="table pool-manager-table"><thead><tr><th>Order</th><th>Name</th><th>Type</th><th>Fixtures</th><th class="text-end">Actions</th></tr></thead><tbody>{% for stage in stages %}<tr><td>{{ stage.order }}</td><td>{{ stage.name }}</td><td>{{ stage.get_stage_type_display }}</td><td>{{ stage.match_count }}</td><td class="text-end"><a class="btn btn-sm btn-outline-secondary" href="{% url 'pool:manage_competition_stage_update' competition.slug stage.pk %}">Edit</a> <form class="d-inline" method="post" action="{% url 'pool:manage_competition_stage_delete' competition.slug stage.pk %}">{% csrf_token %}<button class="btn btn-sm btn-outline-danger" type="submit">Remove</button></form></td></tr>{% empty %}<tr><td colspan="5" class="text-center">No stages have been configured.</td></tr>{% endfor %}</tbody></table></div>
+</section>
+{% endblock %}

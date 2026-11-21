@@ -1,0 +1,34 @@
+{% extends "pool/manage/base.html" %}
+
+{% block manager_title %}Entries · {{ competition.name }}{% endblock %}
+
+{% block manager_content %}
+<section class="pool-manager-panel">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <div><h2 class="mb-1">Competition entries</h2><p class="pool-manager-help mb-0">{{ competition.get_participant_mode_display }} entries only.</p></div>
+        <div class="pool-manager-actions">
+            <a class="btn btn-primary" href="{% url 'pool:manage_competition_entry_create' competition.slug %}">Select existing player</a>
+            {% if competition.participant_mode == 'SINGLES' %}
+            <a class="btn btn-outline-primary" href="{% url 'pool:manage_competition_entry_register_player' competition.slug %}">Register new player</a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table pool-manager-table">
+            <thead><tr><th>Participant</th><th>Seed</th>{% if competition.allow_two_lives %}<th>Lives</th>{% endif %}{% if competition.participant_mode == 'TEAMS' %}<th>Roster</th>{% endif %}<th class="text-end">Actions</th></tr></thead>
+            <tbody>
+                {% for entry in entries %}
+                <tr>
+                    <td>{{ entry.display_name }}</td><td>{{ entry.seed|default:"—" }}</td>
+                    {% if competition.allow_two_lives %}<td>{{ entry.life_count|default:1 }} / 2</td>{% endif %}
+                    {% if competition.participant_mode == 'TEAMS' %}<td>{{ entry.roster_count }}</td>{% endif %}
+                    <td class="text-end"><a class="btn btn-sm btn-outline-primary" href="{% url 'pool:manage_competition_entry_update' competition.slug entry.pk %}">Edit</a>
+                        <form class="d-inline" method="post" action="{% url 'pool:manage_competition_entry_delete' competition.slug entry.pk %}">{% csrf_token %}<button class="btn btn-sm btn-outline-danger" type="submit">Remove</button></form>
+                    </td>
+                </tr>
+                {% empty %}<tr><td colspan="4" class="text-center">No participants have been entered yet.</td></tr>{% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

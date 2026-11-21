@@ -1,0 +1,389 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}8-Ball Pool | EsportsLive{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'pool/css/pool.css' %}">
+{% endblock %}
+
+{% block content %}
+<main class="pool-page pool-home-page">
+    {% include "includes/sport_selector.html" %}
+
+    {% if homepage_banners %}
+    <section class="homepage-hero-banner" id="poolHomepageHeroBanner" data-slide-count="{{ homepage_banners|length }}" aria-label="Featured announcements">
+        {% for banner in homepage_banners %}
+        <div class="homepage-hero-slide {% if forloop.first %}active{% endif %}" data-slide-index="{{ forloop.counter0 }}">
+            <img
+                src="{{ banner.image.url }}"
+                alt="{{ banner.title|default:'EsportsLive announcement' }}"
+                class="homepage-hero-image"
+                decoding="async"
+            >
+
+            {% if banner.sponsor_name or banner.title or banner.subtitle or banner.button_text and banner.button_link %}
+            <div class="homepage-hero-overlay"></div>
+            <div class="homepage-hero-content">
+                {% if banner.sponsor_name %}
+                <div class="homepage-hero-sponsored">Sponsored by {{ banner.sponsor_name }}</div>
+                {% endif %}
+                {% if banner.title %}
+                <h1 class="homepage-hero-title">{{ banner.title }}</h1>
+                {% endif %}
+                {% if banner.subtitle %}
+                <p class="homepage-hero-subtitle">{{ banner.subtitle }}</p>
+                {% endif %}
+                {% if banner.button_text and banner.button_link %}
+                <a href="{{ banner.button_link }}" class="homepage-hero-btn">{{ banner.button_text }}</a>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% if banner.sponsor_logo %}
+            <div class="homepage-hero-logo-wrap">
+                <img src="{{ banner.sponsor_logo.url }}" alt="{{ banner.sponsor_name|default:'Sponsor logo' }}" class="homepage-hero-logo" decoding="async">
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        {% if homepage_banners|length > 1 %}
+        <div class="homepage-hero-dots" aria-hidden="true">
+            {% for banner in homepage_banners %}
+            <span class="homepage-hero-dot {% if forloop.first %}active{% endif %}" data-dot-index="{{ forloop.counter0 }}"></span>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </section>
+    {% endif %}
+
+    <header class="pool-page-heading pool-home-page-heading">
+        <div class="pool-home-heading-identity">
+            {% if pool_association_logo_url %}
+            <div class="pool-association-logo-wrap">
+                <img src="{{ pool_association_logo_url }}" alt="Cue Sports Association logo" class="pool-association-logo" decoding="async">
+            </div>
+            {% endif %}
+            <div>
+                <p class="pool-eyebrow">Cue sports</p>
+                <h1>8-Ball Pool</h1>
+            </div>
+        </div>
+        <p class="pool-page-intro">Follow published leagues and tournaments, their fixtures, and completed results.</p>
+    </header>
+
+    <nav
+        class="pool-filter-bar"
+        aria-label="Filter pool competitions"
+        data-pool-home-filters
+    >
+        <div class="pool-filter-group">
+            <span class="pool-filter-label">Competition</span>
+            <div class="pool-filter-links">
+                <a
+                    class="pool-filter-link {% if home_filter_category == 'leagues' %}is-active{% endif %}"
+                    href="{% url 'pool:home' %}?category=leagues&amp;status={{ current_status }}{% if home_filter_mode %}&amp;mode={{ home_filter_mode }}{% endif %}"
+                    data-pool-home-filter
+                    data-pool-home-filter-key="category"
+                    data-pool-home-filter-value="leagues"
+                    {% if home_filter_category == 'leagues' %}aria-current="page"{% endif %}
+                >Leagues</a>
+                <a
+                    class="pool-filter-link {% if home_filter_category == 'tournaments' %}is-active{% endif %}"
+                    href="{% url 'pool:home' %}?category=tournaments&amp;status={{ current_status }}{% if home_filter_mode %}&amp;mode={{ home_filter_mode }}{% endif %}"
+                    data-pool-home-filter
+                    data-pool-home-filter-key="category"
+                    data-pool-home-filter-value="tournaments"
+                    {% if home_filter_category == 'tournaments' %}aria-current="page"{% endif %}
+                >Tournaments</a>
+                <a
+                    class="pool-filter-link {% if home_filter_category == 'money_matches' %}is-active{% endif %}"
+                    href="{% url 'pool:home' %}?category=money_matches&amp;status={{ current_status }}{% if home_filter_mode %}&amp;mode={{ home_filter_mode }}{% endif %}"
+                    data-pool-home-filter
+                    data-pool-home-filter-key="category"
+                    data-pool-home-filter-value="money_matches"
+                    {% if home_filter_category == 'money_matches' %}aria-current="page"{% endif %}
+                >Money Matches</a>
+            </div>
+        </div>
+        <div class="pool-filter-group">
+            <span class="pool-filter-label">Participants</span>
+            <div class="pool-filter-links">
+                <a
+                    class="pool-filter-link {% if home_filter_mode == 'singles' %}is-active{% endif %}"
+                    href="{% url 'pool:home' %}?mode=singles&amp;status={{ current_status }}{% if home_filter_category %}&amp;category={{ home_filter_category }}{% endif %}"
+                    data-pool-home-filter
+                    data-pool-home-filter-key="mode"
+                    data-pool-home-filter-value="singles"
+                    {% if home_filter_mode == 'singles' %}aria-current="page"{% endif %}
+                >Singles</a>
+                <a
+                    class="pool-filter-link {% if home_filter_mode == 'teams' %}is-active{% endif %}"
+                    href="{% url 'pool:home' %}?mode=teams&amp;status={{ current_status }}{% if home_filter_category %}&amp;category={{ home_filter_category }}{% endif %}"
+                    data-pool-home-filter
+                    data-pool-home-filter-key="mode"
+                    data-pool-home-filter-value="teams"
+                    {% if home_filter_mode == 'teams' %}aria-current="page"{% endif %}
+                >Teams</a>
+            </div>
+        </div>
+        <div class="pool-filter-group">
+            <span class="pool-filter-label">Status</span>
+            <div class="pool-filter-links">
+                <a
+                    class="pool-filter-link {% if current_status == 'active' %}is-active{% endif %}"
+                    href="{% url 'pool:home' %}?status=active{% if home_filter_category %}&amp;category={{ home_filter_category }}{% endif %}{% if home_filter_mode %}&amp;mode={{ home_filter_mode }}{% endif %}"
+                    data-pool-home-filter
+                    data-pool-home-filter-key="status"
+                    data-pool-home-filter-value="active"
+                    {% if current_status == 'active' %}aria-current="page"{% endif %}
+                >Active</a>
+                <a
+                    class="pool-filter-link {% if current_status == 'upcoming' %}is-active{% endif %}"
+                    href="{% url 'pool:home' %}?status=upcoming{% if home_filter_category %}&amp;category={{ home_filter_category }}{% endif %}{% if home_filter_mode %}&amp;mode={{ home_filter_mode }}{% endif %}"
+                    data-pool-home-filter
+                    data-pool-home-filter-key="status"
+                    data-pool-home-filter-value="upcoming"
+                    {% if current_status == 'upcoming' %}aria-current="page"{% endif %}
+                >Upcoming</a>
+                <a
+                    class="pool-filter-link {% if current_status == 'finished' %}is-active{% endif %}"
+                    href="{% url 'pool:home' %}?status=finished{% if home_filter_category %}&amp;category={{ home_filter_category }}{% endif %}{% if home_filter_mode %}&amp;mode={{ home_filter_mode }}{% endif %}"
+                    data-pool-home-filter
+                    data-pool-home-filter-key="status"
+                    data-pool-home-filter-value="finished"
+                    {% if current_status == 'finished' %}aria-current="page"{% endif %}
+                >Finished</a>
+                <a
+                    class="pool-filter-link {% if current_status == 'all' %}is-active{% endif %}"
+                    href="{% url 'pool:home' %}?status=all{% if home_filter_category %}&amp;category={{ home_filter_category }}{% endif %}{% if home_filter_mode %}&amp;mode={{ home_filter_mode }}{% endif %}"
+                    data-pool-home-filter
+                    data-pool-home-filter-key="status"
+                    data-pool-home-filter-value="all"
+                    {% if current_status == 'all' %}aria-current="page"{% endif %}
+                >All</a>
+            </div>
+        </div>
+        <a
+            class="pool-clear-filter"
+            href="{% url 'pool:home' %}"
+            data-pool-home-clear
+            {% if not home_has_requested_filters %}hidden{% endif %}
+        >Clear filters</a>
+    </nav>
+
+    <section class="pool-section" aria-labelledby="pool-competitions-title">
+        <div class="pool-section-heading">
+            <div>
+                <p class="pool-eyebrow">Explore</p>
+                <h2 id="pool-competitions-title">Published competitions</h2>
+            </div>
+        </div>
+
+        <p class="visually-hidden" data-pool-home-filter-status role="status" aria-live="polite">
+            {% if visible_competition_count %}
+            Showing {{ visible_competition_count }} competition{{ visible_competition_count|pluralize }}.
+            {% else %}
+            No competitions match these filters.
+            {% endif %}
+        </p>
+        <div id="pool-competition-grid" class="row g-3" data-pool-home-card-grid>
+            {% for competition in competitions %}
+            <div
+                class="col-12 col-md-6 col-xl-4"
+                data-pool-home-card
+                data-category="{{ competition.public_filter_category }}"
+                data-mode="{{ competition.public_filter_mode }}"
+                data-status="{{ competition.public_filter_status }}"
+                {% if not competition.public_filter_initially_visible %}hidden{% endif %}
+            >
+                <article class="pool-card pool-competition-card h-100">
+                    <a class="pool-competition-card-link" href="{% url 'pool:competition_detail' competition.slug %}">
+                        <div class="pool-competition-card-header">
+                            <div class="pool-competition-media">
+                            {% if competition.logo %}
+                            <img src="{{ competition.logo.url }}" alt="{{ competition.name }} logo" class="pool-competition-logo" loading="lazy" decoding="async">
+                            {% else %}
+                            <span class="pool-competition-fallback" aria-hidden="true">8</span>
+                            {% endif %}
+                            </div>
+                            <div class="pool-competition-card-summary">
+                                <div class="pool-card-title-row">
+                                <h3>{{ competition.name }}</h3>
+                                <span class="pool-status pool-status--{{ competition.operational_state|lower }}">{{ competition.public_state_label }}</span>
+                                </div>
+                                <div class="pool-card-tags">
+                                    <span>{% if competition.is_money_match %}MONEY MATCH{% else %}{{ competition.get_format_type_display }}{% endif %}</span>
+                                    <span>{{ competition.get_participant_mode_display }}</span>
+                                </div>
+                                <p class="pool-competition-card-meta">
+                                    {{ competition.entrant_count }} {% if competition.participant_mode == 'SINGLES' %}player{{ competition.entrant_count|pluralize }}{% else %}team{{ competition.entrant_count|pluralize }}{% endif %}
+                                    {% if competition.is_money_match and competition.money_match_fixture %} &middot; Race to {{ competition.money_match_fixture.race_target }}{% endif %}
+                                    {% if competition.start_date %} &middot; {% if competition.operational_state == 'UPCOMING' %}Starts{% else %}Started{% endif %} {{ competition.start_date|date:"M j" }}{% endif %}
+                                </p>
+                                {% include "pool/_money_match_prize_pot.html" with prize_competition=competition %}
+                            </div>
+                        </div>
+                    </a>
+                    {% if competition.homepage_match_rows %}
+                    <div class="pool-home-match-list" aria-label="Selected matches for {{ competition.name }}">
+                        {% for row in competition.homepage_match_rows %}
+                        <a class="pool-home-match-row" href="{% url 'pool:match_detail' row.match.pk %}">
+                            <div class="pool-home-match-row-topline">
+                                <span class="pool-home-match-state pool-home-match-state--{{ row.state_kind }}">{{ row.state_label }}</span>
+                                {% if row.match.has_stream %}<span class="pool-stream-badge">Stream available</span>{% endif %}
+                            </div>
+                            <div class="pool-home-match-row-main">
+                                <span class="pool-home-match-participant pool-home-match-participant--home">{{ row.match.home_participant_display_name }}</span>
+                                {% if row.show_score %}
+                                <strong class="pool-home-match-score">{{ row.match.home_score }} <span>&ndash;</span> {{ row.match.away_score }}</strong>
+                                {% else %}
+                                <strong class="pool-home-match-versus">{{ row.centre_label }}</strong>
+                                {% endif %}
+                                <span class="pool-home-match-participant pool-home-match-participant--away">{{ row.match.away_participant_display_name }}</span>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    <a class="pool-competition-card-footer pool-competition-card-footer--matches" href="{% url 'pool:competition_detail' competition.slug %}">
+                        <span class="pool-card-action">View all matches <span aria-hidden="true">&rarr;</span></span>
+                    </a>
+                    {% else %}
+                    <a class="pool-competition-card-footer pool-competition-card-footer--matches" href="{% url 'pool:competition_detail' competition.slug %}">
+                        <span class="pool-card-action">View competition <span aria-hidden="true">&rarr;</span></span>
+                    </a>
+                    {% endif %}
+                </article>
+            </div>
+            {% endfor %}
+            <div class="col-12" data-pool-home-empty{% if visible_competition_count %} hidden{% endif %}>
+                <div class="pool-empty-state">
+                    <h3>No published pool competitions match these filters.</h3>
+                    <p>Try another competition type or check back when the next event is published.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% comment %}
+    The public home is competition-centric. The legacy global feeds remain
+    intentionally disabled while their card markup is retired.
+    {% endcomment %}
+    {% comment %}
+    <section class="pool-section" aria-labelledby="pool-live-title">
+        <div class="pool-section-heading">
+            <div>
+                <p class="pool-eyebrow">Now playing</p>
+                <h2 id="pool-live-title">Live matches</h2>
+            </div>
+        </div>
+        <div class="row g-3">
+            {% for pool_match in live_matches %}
+            <div class="col-12 col-lg-6">
+                <a class="pool-match-card" href="{% url 'pool:match_detail' pool_match.pk %}">
+                    <div class="pool-match-card-topline">
+                        <span class="pool-status pool-status--live">Live</span>
+                        <span class="pool-match-card-meta"><span class="pool-match-context">{{ pool_match.competition.name }}</span>{% if pool_match.has_stream %}<span class="pool-stream-badge">Stream available</span>{% endif %}</span>
+                    </div>
+                    <div class="pool-match-row">
+                        <div class="pool-participant pool-participant--home">
+                            {% if pool_match.home_entry.display_image %}<img src="{{ pool_match.home_entry.display_image.url }}" alt="" class="pool-participant-image">{% else %}<span class="pool-participant-fallback" aria-hidden="true">8</span>{% endif %}
+                            <span>{{ pool_match.home_participant_display_name }}</span>
+                        </div>
+                        <strong class="pool-score" aria-label="Current score">{{ pool_match.home_score }} <span>–</span> {{ pool_match.away_score }}</strong>
+                        <div class="pool-participant pool-participant--away">
+                            <span>{{ pool_match.away_participant_display_name }}</span>
+                            {% if pool_match.away_entry.display_image %}<img src="{{ pool_match.away_entry.display_image.url }}" alt="" class="pool-participant-image">{% else %}<span class="pool-participant-fallback" aria-hidden="true">8</span>{% endif %}
+                        </div>
+                    </div>
+                    <span class="pool-match-card-footer">{{ pool_match.stage_context_label }}</span>
+                </a>
+            </div>
+            {% empty %}
+            <div class="col-12"><div class="pool-empty-state pool-empty-state--compact"><p>No pool matches are live right now.</p></div></div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <div class="row g-4">
+        <section class="col-12 col-xl-6 pool-section" aria-labelledby="pool-upcoming-title">
+            <div class="pool-section-heading">
+                <div>
+                    <p class="pool-eyebrow">Coming up</p>
+                    <h2 id="pool-upcoming-title">Upcoming fixtures</h2>
+                </div>
+            </div>
+            <div class="pool-stacked-cards">
+                {% for pool_match in upcoming_matches %}
+                <a class="pool-match-card pool-match-card--compact" href="{% url 'pool:match_detail' pool_match.pk %}">
+                    <div class="pool-match-card-topline">
+                        <span class="pool-status pool-status--{{ pool_match.status|lower }}">{{ pool_match.get_status_display }}</span>
+                        <time datetime="{{ pool_match.scheduled_at|date:'c' }}">{{ pool_match.scheduled_at|date:"D, M j · H:i" }}</time>
+                    </div>
+                    <div class="pool-match-card-meta"><span class="pool-match-context">{{ pool_match.competition.name }}</span>{% if pool_match.has_stream %}<span class="pool-stream-badge">Stream available</span>{% endif %}</div>
+                    <div class="pool-match-row">
+                        <span class="pool-participant pool-participant--home">{{ pool_match.home_participant_display_name }}</span>
+                        <strong class="pool-versus">vs</strong>
+                        <span class="pool-participant pool-participant--away">{{ pool_match.away_participant_display_name }}</span>
+                    </div>
+                </a>
+                {% empty %}
+                <div class="pool-empty-state pool-empty-state--compact"><p>No upcoming fixtures have been scheduled.</p></div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="col-12 col-xl-6 pool-section" aria-labelledby="pool-results-title">
+            <div class="pool-section-heading">
+                <div>
+                    <p class="pool-eyebrow">Latest scores</p>
+                    <h2 id="pool-results-title">Recent results</h2>
+                </div>
+            </div>
+            <div class="pool-stacked-cards">
+                {% for pool_match in recent_results %}
+                <a class="pool-match-card pool-match-card--compact" href="{% url 'pool:match_detail' pool_match.pk %}">
+                    <div class="pool-match-card-topline">
+                        <span class="pool-status pool-status--finished">{{ pool_match.get_result_method_display }}</span>
+                        <time datetime="{{ pool_match.scheduled_at|date:'c' }}">{{ pool_match.scheduled_at|date:"M j" }}</time>
+                    </div>
+                    <div class="pool-match-card-meta"><span class="pool-match-context">{{ pool_match.competition.name }}</span>{% if pool_match.has_stream %}<span class="pool-stream-badge">Stream available</span>{% endif %}</div>
+                    <div class="pool-match-row">
+                        <span class="pool-participant pool-participant--home">{{ pool_match.home_participant_display_name }}</span>
+                        <strong class="pool-score">{{ pool_match.home_score }} <span>–</span> {{ pool_match.away_score }}</strong>
+                        <span class="pool-participant pool-participant--away">{{ pool_match.away_participant_display_name }}</span>
+                    </div>
+                </a>
+                {% empty %}
+                <div class="pool-empty-state pool-empty-state--compact"><p>Completed pool results will appear here.</p></div>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+    {% endcomment %}
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'pool/js/home_filters.js' %}" defer></script>
+<script>
+    (function () {
+        const banner = document.getElementById("poolHomepageHeroBanner");
+        if (!banner) return;
+
+        const slides = Array.from(banner.querySelectorAll(".homepage-hero-slide"));
+        const dots = Array.from(banner.querySelectorAll(".homepage-hero-dot"));
+        if (slides.length <= 1) return;
+
+        let index = 0;
+        window.setInterval(function () {
+            slides[index].classList.remove("active");
+            if (dots[index]) dots[index].classList.remove("active");
+            index = (index + 1) % slides.length;
+            slides[index].classList.add("active");
+            if (dots[index]) dots[index].classList.add("active");
+        }, 10000);
+    })();
+</script>
+{% endblock %}

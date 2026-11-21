@@ -1,0 +1,297 @@
+{% extends "base.html" %}
+
+{% block title %}Fixtures - {{ league.name }}{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+
+    <div>
+        <a
+            href="{% url 'league_manager:league_dashboard' league.slug %}"
+            class="back-btn"
+        >
+            ← BACK
+        </a>
+
+        <h2 class="mt-3 mb-1">
+            Fixtures and Matches
+        </h2>
+
+        <p class="text-muted mb-0">
+            {{ league.name }}
+        </p>
+        {% if schedule_locked %}
+            <span class="badge text-bg-warning mt-2">🔒 Schedule Locked</span>
+        {% endif %}
+    </div>
+
+    <div class="d-flex flex-wrap gap-2">
+
+        <a
+            href="{% url 'league_manager:result_update' league.slug %}"
+            class="btn btn-outline-success"
+        >
+            Update Results
+        </a>
+
+        {% if not schedule_locked %}
+            <a
+                href="{% url 'league_manager:fixture_create' league.slug %}"
+                class="btn btn-primary"
+            >
+                + Create Fixture
+            </a>
+
+            {% if can_generate_first_round %}
+                <form method="post" action="{% url 'league_manager:fixture_generation_preview' league.slug 'first' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-primary">Preview First Round</button>
+                </form>
+            {% endif %}
+            {% if can_generate_remaining_first_round %}
+                <form method="post" action="{% url 'league_manager:fixture_generation_preview' league.slug 'remaining_first' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-primary">Preview Remaining First Round</button>
+                </form>
+            {% endif %}
+            {% if can_generate_second_round %}
+                <form method="post" action="{% url 'league_manager:fixture_generation_preview' league.slug 'second' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-secondary">Preview Second Round</button>
+                </form>
+            {% endif %}
+        {% else %}
+            <span class="small text-muted align-self-center">Fixture structure is protected; dates, times and venues remain editable.</span>
+        {% endif %}
+
+        {% if can_manage_schedule_lock %}
+            {% if schedule_locked %}
+                <a href="{% url 'league_manager:schedule_unlock' league.slug %}" class="btn btn-outline-warning">🔓 Unlock Schedule</a>
+            {% else %}
+                <a href="{% url 'league_manager:schedule_lock' league.slug %}" class="btn btn-outline-dark">🔒 Lock Schedule</a>
+            {% endif %}
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+<div class="d-flex flex-wrap gap-2 mb-4">
+
+    <a
+        href="?status=upcoming"
+        class="btn {% if current_filter == 'upcoming' %}btn-primary{% else %}btn-outline-primary{% endif %}"
+    >
+        Upcoming ({{ counts.upcoming }})
+    </a>
+
+    <a
+        href="?status=live"
+        class="btn {% if current_filter == 'live' %}btn-danger{% else %}btn-outline-danger{% endif %}"
+    >
+        Live ({{ counts.live }})
+    </a>
+
+    <a
+        href="?status=completed"
+        class="btn {% if current_filter == 'completed' %}btn-secondary{% else %}btn-outline-secondary{% endif %}"
+    >
+        Completed ({{ counts.completed }})
+    </a>
+
+    <a
+        href="?status=all"
+        class="btn {% if current_filter == 'all' %}btn-dark{% else %}btn-outline-dark{% endif %}"
+    >
+        All ({{ counts.all }})
+    </a>
+
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+
+        <div class="table-responsive">
+            <table class="table table-striped align-middle mb-0 league-manager-table">
+
+                <thead class="table-dark">
+                    <tr>
+                        <th>Date</th>
+                        {% if league.format_type == "TABLE" %}<th>Gameweek</th>{% endif %}
+                        <th>Fixture</th>
+                        <th>Stage</th>
+                        <th>Venue</th>
+                        <th>Status</th>
+                        <th>Agent</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for match in matches %}
+                        <tr>
+
+                            <td>
+                                {% if match.match_date %}
+                                    <strong>{{ match.match_date|date:"M d, Y" }}</strong>
+                                    <div class="small text-muted">{{ match.match_date|date:"H:i" }}</div>
+                                {% else %}
+                                    <span class="text-muted">Unscheduled</span>
+                                {% endif %}
+                            </td>
+
+                            {% if league.format_type == "TABLE" %}
+                                <td>{% if match.gameweek %}GW{{ match.gameweek }}{% else %}<span class="text-muted">Unassigned</span>{% endif %}</td>
+                            {% endif %}
+
+                            <td>
+                                {% if match.status == "UPCOMING" %}
+                                    <a href="{% url 'league_manager:fixture_update' league.slug match.id %}" class="fixture-edit-link">
+                                {% endif %}
+                                    <strong>{{ match.home_team.name }}</strong>
+                                    <span class="mx-1">vs</span>
+                                    <strong>{{ match.away_team.name }}</strong>
+                                {% if match.status == "UPCOMING" %}</a>{% endif %}
+
+                                {% if match.status == "LIVE" or match.status == "FINISHED" or match.status == "ABANDONED" %}
+                                    <div class="small">
+                                        {% if match.status == "ABANDONED" %}Recorded score:{% else %}Score:{% endif %}
+                                        {{ match.abandoned_home_score|default:match.home_score }}
+                                        -
+                                        {{ match.abandoned_away_score|default:match.away_score }}
+                                    </div>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {{ match.get_stage_label }}
+
+                                {% if match.leg %}
+                                    <div class="small text-muted">
+                                        Leg {{ match.leg }}
+                                    </div>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {{ match.location|default:"—" }}
+                            </td>
+
+                            <td>
+                                {% if match.status == "UPCOMING" %}
+                                    <span class="badge bg-info text-dark">
+                                        Upcoming
+                                    </span>
+
+                                {% elif match.status == "LIVE" %}
+                                    <span class="badge bg-danger">
+                                        Live
+                                    </span>
+
+                                {% elif match.status == "FINISHED" %}
+                                    <span class="badge bg-secondary">
+                                        Finished
+                                    </span>
+
+                                {% elif match.status == "ABANDONED" %}
+                                    <span class="badge bg-dark">
+                                        {% if match.abandonment_resolution == "VOID" %}Voided{% else %}Abandoned{% endif %}
+                                    </span>
+                                {% endif %}
+                            </td>
+
+
+                            <td>
+                                {% with assignment=match.agent_assignment_rows.0 %}
+                                    {% if assignment %}
+                                        <strong>
+                                            {{ assignment.admin.get_full_name|default:assignment.admin.username }}
+                                        </strong>
+
+                                        {% if assignment.admin.email %}
+                                            <div class="small text-muted">
+                                                {{ assignment.admin.email }}
+                                            </div>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-muted">
+                                            Not assigned
+                                        </span>
+                                    {% endif %}
+                                {% endwith %}
+                            </td>
+
+
+                            <td class="text-end">
+
+                                {% if match.status == "UPCOMING" or match.status == "LIVE" %}
+                                    <a
+                                        href="{% url 'league_manager:assign_agent' league.slug match.id %}"
+                                        class="btn btn-outline-success btn-sm"
+                                    >
+                                        {% if match.agent_assignment_rows %}
+                                            Change Agent
+                                        {% else %}
+                                            Assign Agent
+                                        {% endif %}
+                                    </a>
+                                {% endif %}
+
+                                <a
+                                    href="{% url 'match_detail' match.id %}"
+                                    class="btn btn-outline-secondary btn-sm"
+                                >
+                                    View
+                                </a>
+
+                                {% if match.status == "UPCOMING" %}
+                                    <a
+                                        href="{% url 'league_manager:fixture_update' league.slug match.id %}"
+                                        class="btn btn-outline-primary btn-sm"
+                                    >
+                                        Edit
+                                    </a>
+                                {% endif %}
+
+                                {% if match.status == "ABANDONED" and can_manage_abandonment_decisions %}
+                                    <a
+                                        href="{% url 'league_manager:resolve_abandoned_match' league.slug match.id %}"
+                                        class="btn btn-outline-warning btn-sm"
+                                    >
+                                        {% if match.abandonment_resolution %}View Decision{% else %}Resolve{% endif %}
+                                    </a>
+                                {% endif %}
+
+                                {% if can_delete_fixtures %}
+                                    <a
+                                        href="{% url 'league_manager:fixture_delete' league.slug match.id %}"
+                                        class="btn btn-outline-danger btn-sm"
+                                    >
+                                        Delete
+                                    </a>
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td
+                                colspan="{% if league.format_type == 'TABLE' %}8{% else %}7{% endif %}"
+                                class="text-center text-muted py-4"
+                            >
+                                No matches were found for this filter.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

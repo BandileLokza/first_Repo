@@ -1,0 +1,8 @@
+{% if can_manage_scorers %}
+<section class="pool-manager-panel mb-3" aria-labelledby="match-scorers-title">
+    <h2 id="match-scorers-title">Match scorers</h2>
+    <p class="pool-manager-help">Assign an active account to operate only this fixture's live score.</p>
+    <form method="post" action="{% url 'pool:manage_match_scorer_add' competition.slug match.pk %}" class="pool-manager-form" novalidate>{% csrf_token %}{% include "pool/manage/_scoring_surface_field.html" %}{% include "pool/manage/_form_fields.html" with form=scorer_form %}<button class="btn btn-primary" type="submit">Assign scorer</button></form>
+    {% if scorer_assignments %}<ul class="pool-manager-membership-list mt-3">{% for assignment in scorer_assignments %}<li><div><strong>{{ assignment.user.get_username }}</strong></div><div class="pool-manager-actions"><span class="pool-status {% if assignment.is_active %}pool-status--published{% else %}pool-status--draft{% endif %}">{% if assignment.is_active %}Active{% else %}Inactive{% endif %}</span><form method="post" action="{% url 'pool:manage_match_scorer_toggle' competition.slug match.pk assignment.pk %}">{% csrf_token %}{% include "pool/manage/_scoring_surface_field.html" %}<button class="btn btn-sm btn-outline-secondary" type="submit">{% if assignment.is_active %}Deactivate{% else %}Reactivate{% endif %}</button></form></div></li>{% endfor %}</ul>{% endif %}
+</section>
+{% endif %}

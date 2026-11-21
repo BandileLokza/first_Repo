@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Create Next Season - {{ league.name }}{% endblock %}
+
+{% block content %}
+
+<div class="mb-4">
+    <a
+        href="{% url 'league_manager:league_dashboard' league.slug %}"
+        class="back-btn"
+    >
+        ← BACK
+    </a>
+
+    <h2 class="mt-3 mb-1">Create Next Season</h2>
+    <p class="text-muted mb-0">
+        {{ league.name }} — source season {{ league.season }}
+    </p>
+</div>
+
+<div class="alert alert-info">
+    This creates a new clean competition in the same league series. Teams and
+    players are copied as new season records; fixtures, results, standings,
+    goals, cards, lineups, predictions and activity history are not copied.
+</div>
+
+<form method="post" novalidate>
+    {% csrf_token %}
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            {% for field in form %}
+                <div class="mb-3">
+                    <label for="{{ field.id_for_label }}" class="form-label">
+                        {{ field.label }}
+                    </label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <div class="form-text">{{ field.help_text }}</div>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <div class="text-danger small mt-1">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+
+            <button type="submit" class="btn btn-primary">Create Clean Season</button>
+        </div>
+    </div>
+</form>
+
+{% endblock %}

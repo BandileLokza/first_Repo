@@ -1,0 +1,37 @@
+{% extends "pool/manage/base.html" %}
+
+{% block manager_title %}{{ stage.name }} groups · {{ competition.name }}{% endblock %}
+
+{% block manager_content %}
+<section class="pool-manager-panel">
+    <div class="pool-manager-section-heading">
+        <div>
+            <p class="pool-eyebrow">{{ stage.get_stage_type_display }} stage</p>
+            <h2>{{ stage.name }} groups</h2>
+            <p class="pool-manager-help mb-0">A participant can be assigned to only one group in this stage.</p>
+        </div>
+        <div class="pool-manager-actions">
+            <a class="btn btn-outline-secondary" href="{% url 'pool:manage_competition_groups' competition.slug %}">All group stages</a>
+            <a class="btn btn-primary" href="{% url 'pool:manage_competition_group_create' competition.slug stage.pk %}">Add group</a>
+        </div>
+    </div>
+    <div class="pool-manager-card-grid">
+        {% for group in groups %}
+        <article class="pool-manager-panel pool-group-card">
+            <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-2">
+                <div><h3 class="mb-1">{{ group.name }}</h3><p class="pool-manager-help mb-0">Order {{ group.order }} · {{ group.qualifiers }} qualifier{{ group.qualifiers|pluralize }}</p></div>
+                <div class="d-flex gap-2"><a class="btn btn-sm btn-outline-secondary" href="{% url 'pool:manage_competition_group_update' competition.slug stage.pk group.pk %}">Edit</a><form method="post" action="{% url 'pool:manage_competition_group_delete' competition.slug stage.pk group.pk %}">{% csrf_token %}<button class="btn btn-sm btn-outline-danger" type="submit">Remove</button></form></div>
+            </div>
+            <ul class="pool-manager-membership-list">
+                {% for membership in group.memberships.all %}
+                <li><span>{{ membership.entry.display_name }}</span><span class="pool-manager-inline-actions">Order {{ membership.sort_order }} <a href="{% url 'pool:manage_competition_group_entry_update' competition.slug stage.pk group.pk membership.pk %}">Edit</a> <form method="post" action="{% url 'pool:manage_competition_group_entry_delete' competition.slug stage.pk group.pk membership.pk %}">{% csrf_token %}<button type="submit">Remove</button></form></span></li>
+                {% empty %}<li class="pool-manager-empty">No participants assigned.</li>{% endfor %}
+            </ul>
+            <a class="btn btn-sm btn-outline-primary mt-3" href="{% url 'pool:manage_competition_group_entry_create' competition.slug stage.pk group.pk %}">Add participants</a>
+        </article>
+        {% empty %}
+        <p class="pool-manager-empty">No groups have been configured for this stage.</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

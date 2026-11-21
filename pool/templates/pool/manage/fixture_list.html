@@ -1,0 +1,53 @@
+{% extends "pool/manage/base.html" %}
+{% load static %}
+
+{% block manager_title %}Fixtures &amp; results · {{ competition.name }}{% endblock %}
+
+{% block manager_content %}
+<section class="pool-manager-panel" data-pool-match-filters data-pool-match-filter-default="{{ current_filter }}">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <div>
+            <h2 class="mb-1">{% if competition.is_money_match %}Money Match{% else %}Fixtures and results{% endif %}</h2>
+            <p class="pool-manager-help mb-0">{% if competition.is_money_match %}This competition has one protected fixture. Open it to score, correct, or record a non-played result.{% else %}Open any fixture to start, score, correct, or record a non-played result.{% endif %}</p>
+        </div>
+        {% if not competition.is_money_match %}
+        <a class="btn btn-primary" href="{% url 'pool:manage_competition_fixture_create' competition.slug %}">Create fixture</a>
+        {% endif %}
+    </div>
+
+    <nav class="pool-filter-links mb-3" aria-label="Fixture status filters">
+        <a class="pool-filter-link {% if current_filter == 'upcoming' %}is-active{% endif %}" href="?status=upcoming" data-pool-match-filter="upcoming"{% if current_filter == 'upcoming' %} aria-current="page"{% endif %}>Upcoming ({{ counts.upcoming }})</a>
+        <a class="pool-filter-link {% if current_filter == 'live' %}is-active{% endif %}" href="?status=live" data-pool-match-filter="live"{% if current_filter == 'live' %} aria-current="page"{% endif %}>Live ({{ counts.live }})</a>
+        <a class="pool-filter-link {% if current_filter == 'completed' %}is-active{% endif %}" href="?status=completed" data-pool-match-filter="completed"{% if current_filter == 'completed' %} aria-current="page"{% endif %}>Completed ({{ counts.completed }})</a>
+        <a class="pool-filter-link {% if current_filter == 'all' %}is-active{% endif %}" href="?status=all" data-pool-match-filter="all"{% if current_filter == 'all' %} aria-current="page"{% endif %}>All ({{ counts.all }})</a>
+    </nav>
+    <p class="pool-manager-help mb-3" aria-live="polite" data-pool-match-filter-status>Showing {{ visible_count }} fixture{{ visible_count|pluralize }}.</p>
+
+    <div class="table-responsive">
+        <table class="table pool-manager-table">
+            <thead>
+                <tr><th>Fixture</th><th>Stage</th><th>Gameweek</th><th>Scheduled</th><th>Status</th><th>Score</th><th class="text-end">Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for match in matches %}
+                <tr data-pool-match-row data-match-status="{{ match.fixture_filter_status }}"{% if not match.fixture_filter_initially_visible %} hidden{% endif %}>
+                    <td>{{ match.home_participant_display_name }}<br><span class="text-muted">vs {{ match.away_participant_display_name }}</span>{% if match.has_stream %}<br><span class="pool-stream-badge">Stream available</span>{% endif %}</td>
+                    <td>{{ match.stage_context_label }}</td>
+                    <td>{% if match.gameweek %}{{ match.fixture_round_display }}{% else %}&mdash;{% endif %}</td>
+                    <td>{% if match.scheduled_at %}{{ match.scheduled_at|date:"M j, Y H:i" }}{% else %}&mdash;{% endif %}</td>
+                    <td><span class="pool-status pool-status--{{ match.status|lower }}">{{ match.get_status_display }}</span></td>
+                    <td>{{ match.home_score }} &ndash; {{ match.away_score }}</td>
+                    <td class="text-end"><a class="btn btn-sm btn-primary" href="{% url 'pool:manage_match' competition.slug match.pk %}">Manage</a>{% if match.status == 'UPCOMING' %} <a class="btn btn-sm btn-outline-secondary" href="{% if competition.is_money_match %}{% url 'pool:manage_money_match_edit' competition.slug %}{% else %}{% url 'pool:manage_competition_fixture_update' competition.slug match.pk %}{% endif %}">Edit</a>{% endif %}{% if match.status == 'UPCOMING' or match.status == 'POSTPONED' %} <a class="btn btn-sm btn-outline-success" href="{% url 'pool:manage_match_manual_final_result' competition.slug match.pk %}">Enter final result</a>{% elif match.status == 'FINISHED' and match.result_entry_method == 'MANUAL_FINAL_RESULT' %} <a class="btn btn-sm btn-outline-secondary" href="{% url 'pool:manage_match_manual_final_result' competition.slug match.pk %}">Update result</a>{% endif %}</td>
+                </tr>
+                {% empty %}
+                <tr data-pool-match-empty><td colspan="7" class="text-center">No fixtures have been created.</td></tr>
+                {% endfor %}
+                {% if matches %}
+                <tr data-pool-match-empty hidden><td colspan="7" class="text-center">No fixtures match this filter.</td></tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</section>
+<script src="{% static 'pool/js/fixture_filters.js' %}"></script>
+{% endblock %}

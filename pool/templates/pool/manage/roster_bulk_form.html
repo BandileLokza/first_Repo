@@ -1,0 +1,50 @@
+{% extends "pool/manage/base.html" %}
+{% load static %}
+
+{% block manager_title %}{{ page_title }}{% endblock %}
+
+{% block manager_content %}
+<section class="pool-manager-panel">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <div><h2 class="mb-1">{{ page_title }}</h2><p class="pool-manager-help mb-0">Team: {{ team.name }}</p></div>
+        <a class="btn btn-outline-primary" href="{% url 'pool:manage_competition_team_roster_register_player' competition.slug entry.pk %}">Register new player</a>
+    </div>
+    <form method="post" class="pool-manager-form" novalidate data-pool-roster-picker>
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="alert alert-danger" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+        {% for hidden in form.hidden_fields %}
+            {{ hidden }}
+            {% for error in hidden.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+        {% endfor %}
+        <div
+            class="mb-3"
+            id="pool-roster-player-picker"
+            data-search-url="{{ player_search_url }}"
+            data-player-field="{{ form.player_ids.html_name }}"
+            data-base-input-id="{{ form.player_ids.id_for_label }}"
+        >
+            <label class="form-label" for="pool-roster-player-search">Search active players</label>
+            <input class="form-control" id="pool-roster-player-search" type="search" autocomplete="off" placeholder="Search by full name or nickname" aria-describedby="pool-roster-player-search-help">
+            <div id="pool-roster-player-search-help" class="form-text">Search by full name, surname, or nickname, then add one or more players to this roster basket.</div>
+            <label class="form-label mt-2" for="pool-roster-player-region">Region filter</label>
+            <input class="form-control" id="pool-roster-player-region" type="search" autocomplete="off" placeholder="Optional region">
+            <div id="pool-roster-player-results" class="list-group mt-2" role="listbox" aria-label="Roster player search results"></div>
+        </div>
+        <section class="mb-3" aria-labelledby="pool-roster-selected-title">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <h3 id="pool-roster-selected-title" class="h5 mb-0">Selected players</h3>
+                <p id="pool-roster-selected-count" class="pool-manager-help mb-0" aria-live="polite">No players selected.</p>
+            </div>
+            <div id="pool-roster-selected" class="list-group mt-2"></div>
+            {% for error in form.player_ids.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+        </section>
+        <div class="pool-manager-actions">
+            <button class="btn btn-primary" type="submit"><span id="pool-roster-submit-label">Add selected players</span></button>
+            {% if can_save_and_add_another %}<button class="btn btn-outline-primary" type="submit" name="save_and_add_another" value="1">Save &amp; add another</button>{% endif %}
+            <a class="btn btn-outline-secondary" href="{% url 'pool:manage_competition_team_roster' competition.slug entry.pk %}">Cancel</a>
+        </div>
+    </form>
+</section>
+{{ selected_players|json_script:"pool-roster-selected-players-data" }}
+<script src="{% static 'pool/js/team_roster_picker.js' %}"></script>
+{% endblock %}

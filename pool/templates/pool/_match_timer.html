@@ -1,0 +1,115 @@
+{% if match.timer_is_active and match.timer_deadline %}
+<aside class="alert {% if match.time_expired_tied %}alert-warning{% else %}alert-info{% endif %} mt-3 mb-0" data-pool-match-timer data-deadline="{{ match.timer_deadline|date:'c' }}" data-time-expired-tied="{{ match.time_expired_tied|yesno:'true,false' }}" role="status">
+    <strong>{% if match.time_expired_tied %}Time expired — deciding rack{% else %}Time remaining{% endif %}:</strong>
+    <span data-pool-match-countdown>{% if match.time_expired_tied %}Awaiting one deciding rack{% else %}{{ match.timer_remaining_seconds|default:0 }} seconds{% endif %}</span>
+    {% if not match.time_expired_tied %}<span class="pool-muted"> · deadline {{ match.timer_deadline|date:"H:i" }}</span>{% endif %}
+    {% if can_expire_match %}
+    <form method="post" action="{% url 'pool:match_expire' match.pk %}" data-pool-match-expiry-poll hidden>
+        {% csrf_token %}
+        {% include "pool/manage/_scoring_surface_field.html" %}
+    </form>
+    {% endif %}
+</aside>
+<script>
+(function () {
+    const timer = document.querySelector("[data-pool-match-timer]");
+    if (!timer) {
+        return;
+    }
+    const countdown = timer.querySelector("[data-pool-match-countdown]");
+    const deadline = new Date(timer.dataset.deadline);
+    const pollForm = document.querySelector("[data-pool-match-expiry-poll]");
+    const decidingRack = timer.dataset.timeExpiredTied === "true";
+
+    let expiryInFlight = false;
+    let zeroReconciliationRequested = false;
+    let reloadQueued = false;
+
+    // Once the authoritative service has put a tied match into deciding-rack
+    // state, keep this scorer page stable. Repeated expiry polls used to
+    // reload the page every 30 seconds and interrupt the deciding-rack form.
+    function pollExpiry() {
+        if (
+            !pollForm
+            || decidingRack
+            || document.hidden
+            || expiryInFlight
+            || reloadQueued
+        ) {
+            return false;
+        }
+        expiryInFlight = true;
+        fetch(pollForm.action, {
+            method: "POST",
+            body: new FormData(pollForm),
+            headers: {"Accept": "application/json"},
+            credentials: "same-origin"
+        })
+            .then(function (response) {
+                return response.ok ? response.json() : null;
+            })
+            .then(function (payload) {
+                // The backend remains authoritative. Reload once for a
+                // completed/non-live status or the persisted deciding-rack
+                // state; the new page then stops polling when appropriate.
+                if (
+                    payload
+                    && (
+                        payload.status !== "LIVE"
+                        || payload.time_expired_tied
+                    )
+                ) {
+                    reloadQueued = true;
+                    window.location.reload();
+                }
+            })
+            .catch(function () {
+                // Do not retry immediately. The modest safety poll below, or
+                // a normal scoring action, performs the next server check.
+            })
+            .finally(function () {
+                expiryInFlight = false;
+            });
+        return true;
+    }
+
+    function requestZeroReconciliation() {
+        if (!zeroReconciliationRequested && pollExpiry()) {
+            zeroReconciliationRequested = true;
+        }
+    }
+
+    function drawCountdown() {
+        if (decidingRack) {
+            countdown.textContent = "Awaiting one deciding rack";
+            return;
+        }
+        const remaining = Math.max(0, Math.floor((deadline.getTime() - Date.now()) / 1000));
+        const minutes = Math.floor(remaining / 60);
+        const seconds = String(remaining % 60).padStart(2, "0");
+        countdown.textContent = remaining ? minutes + ":" + seconds : "Time expired";
+        if (!remaining) {
+            // Reconcile immediately at 00:00. `pollExpiry` is guarded so the
+            // one-second renderer and the safety interval cannot overlap.
+            requestZeroReconciliation();
+        }
+    }
+
+    drawCountdown();
+    window.setInterval(drawCountdown, 1000);
+
+    if (!pollForm || decidingRack) {
+        return;
+    }
+    // This intentionally remains modest: it covers a failed zero-second
+    // request and browser/server clock drift without occupying workers with
+    // aggressive retries.
+    window.setInterval(pollExpiry, 30000);
+    document.addEventListener("visibilitychange", function () {
+        if (!document.hidden) {
+            drawCountdown();
+        }
+    });
+}());
+</script>
+{% endif %}

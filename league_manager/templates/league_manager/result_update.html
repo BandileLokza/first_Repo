@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+
+{% block title %}Update Results - {{ league.name }}{% endblock %}
+
+{% block content %}
+{% include "league_manager/_report_messages.html" %}
+{% if delayed_result_processing %}
+    <div class="alert alert-warning" role="alert">
+        Some results are saved and still waiting for standings and prediction updates.
+    </div>
+{% endif %}
+
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+
+    <div>
+        <a
+            href="{% url 'league_manager:fixture_list' league.slug %}"
+            class="back-btn"
+        >
+            ← BACK
+        </a>
+
+        <h2 class="mt-3 mb-1">
+            Update Results
+        </h2>
+
+        <p class="text-muted mb-0">
+            {{ league.name }}
+        </p>
+    </div>
+
+</div>
+
+
+<div class="d-flex flex-wrap gap-2 mb-4">
+
+    <a
+        href="?tab=pending"
+        class="btn {% if current_tab == 'pending' %}btn-primary{% else %}btn-outline-primary{% endif %}"
+    >
+        Add Final Scores ({{ pending_count }})
+    </a>
+
+    <a
+        href="?tab=finished"
+        class="btn {% if current_tab == 'finished' %}btn-success{% else %}btn-outline-success{% endif %}"
+    >
+        Correct Finished Scores ({{ finished_count }})
+    </a>
+
+</div>
+
+
+{% if current_tab == "finished" %}
+    {% include "league_manager/_finished_result_list.html" %}
+{% else %}
+    <div class="alert alert-info">
+        This tab shows matches whose scheduled time has passed
+        but which have not yet been marked as finished.
+        Leave rows blank when you do not want to update them.
+    </div>
+
+<form
+    method="post"
+    action="?tab={{ current_tab }}"
+>
+    {% csrf_token %}
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <div class="table-responsive">
+                <table class="table table-striped align-middle mb-0 league-manager-table">
+
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Date</th>
+                            <th>Match</th>
+                            <th>Stage</th>
+                            <th class="text-center">Final Score</th>
+                            <th>Status</th>
+                            <th>View</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for row in result_rows %}
+                            <tr>
+
+                                <td>
+                                    <strong>
+                                        {{ row.match.match_date|date:"M d, Y" }}
+                                    </strong>
+
+                                    <div class="small text-muted">
+                                        {{ row.match.match_date|date:"H:i" }}
+                                    </div>
+                                </td>
+
+
+                                <td>
+                                    <strong>
+                                        {{ row.match.home_team.name }}
+                                    </strong>
+
+                                    <span class="mx-1">
+                                        vs
+                                    </span>
+
+                                    <strong>
+                                        {{ row.match.away_team.name }}
+                                    </strong>
+                                </td>
+
+
+                                <td>
+                                    {{ row.match.get_stage_label }}
+
+                                    {% if row.match.leg %}
+                                        <div class="small text-muted">
+                                            Leg {{ row.match.leg }}
+                                        </div>
+                                    {% endif %}
+                                </td>
+
+
+                                <td>
+                                    <div class="d-flex align-items-center justify-content-center gap-2">
+
+                                        <div style="min-width: 82px;">
+                                            <label
+                                                for="home-score-{{ row.match.id }}"
+                                                class="small text-muted d-block text-center"
+                                            >
+                                                {{ row.match.home_team.name|truncatechars:12 }}
+                                            </label>
+
+                                            <input
+                                                type="number"
+                                                name="home_score_{{ row.match.id }}"
+                                                id="home-score-{{ row.match.id }}"
+                                                value="{{ row.home_value }}"
+                                                min="0"
+                                                class="form-control text-center"
+                                                inputmode="numeric"
+                                            >
+                                        </div>
+
+                                        <strong class="mt-4">
+                                            –
+                                        </strong>
+
+                                        <div style="min-width: 82px;">
+                                            <label
+                                                for="away-score-{{ row.match.id }}"
+                                                class="small text-muted d-block text-center"
+                                            >
+                                                {{ row.match.away_team.name|truncatechars:12 }}
+                                            </label>
+
+                                            <input
+                                                type="number"
+                                                name="away_score_{{ row.match.id }}"
+                                                id="away-score-{{ row.match.id }}"
+                                                value="{{ row.away_value }}"
+                                                min="0"
+                                                class="form-control text-center"
+                                                inputmode="numeric"
+                                            >
+                                        </div>
+
+                                    </div>
+
+                                    {% if row.match.stage.stage_type == "KNOCKOUT" %}
+                                        <div class="border-top mt-3 pt-2">
+                                            <div class="small text-muted text-center mb-2">
+                                                Knockout details — leave the 90-minute score blank
+                                                when it is the same as the final score.
+                                            </div>
+                                            <div class="row g-2">
+                                                <div class="col-6">
+                                                    <label class="small" for="reg-home-{{ row.match.id }}">Home after 90</label>
+                                                    <input type="number" min="0"
+                                                           name="regulation_home_score_{{ row.match.id }}"
+                                                           id="reg-home-{{ row.match.id }}"
+                                                           value="{{ row.regulation_home_value|default_if_none:'' }}"
+                                                           class="form-control form-control-sm">
+                                                </div>
+                                                <div class="col-6">
+                                                    <label class="small" for="reg-away-{{ row.match.id }}">Away after 90</label>
+                                                    <input type="number" min="0"
+                                                           name="regulation_away_score_{{ row.match.id }}"
+                                                           id="reg-away-{{ row.match.id }}"
+                                                           value="{{ row.regulation_away_value|default_if_none:'' }}"
+                                                           class="form-control form-control-sm">
+                                                </div>
+                                                <div class="col-6">
+                                                    <label class="small" for="pen-home-{{ row.match.id }}">Home penalties</label>
+                                                    <input type="number" min="0"
+                                                           name="penalty_home_score_{{ row.match.id }}"
+                                                           id="pen-home-{{ row.match.id }}"
+                                                           value="{{ row.penalty_home_value|default_if_none:'' }}"
+                                                           class="form-control form-control-sm">
+                                                </div>
+                                                <div class="col-6">
+                                                    <label class="small" for="pen-away-{{ row.match.id }}">Away penalties</label>
+                                                    <input type="number" min="0"
+                                                           name="penalty_away_score_{{ row.match.id }}"
+                                                           id="pen-away-{{ row.match.id }}"
+                                                           value="{{ row.penalty_away_value|default_if_none:'' }}"
+                                                           class="form-control form-control-sm">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+
+                                    {% if row.error %}
+                                        <div class="text-danger small text-center mt-2">
+                                            {{ row.error }}
+                                        </div>
+                                    {% endif %}
+                                </td>
+
+
+                                <td>
+                                    {% if row.match.status == "UPCOMING" %}
+                                        <span class="badge bg-info text-dark">
+                                            Upcoming
+                                        </span>
+
+                                    {% elif row.match.status == "LIVE" %}
+                                        <span class="badge bg-danger">
+                                            Live
+                                        </span>
+
+                                    {% elif row.match.status == "FINISHED" %}
+                                        <span class="badge bg-secondary">
+                                            Finished
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+
+                                <td>
+                                    <a
+                                        href="{% url 'match_detail' row.match.id %}"
+                                        class="btn btn-outline-secondary btn-sm"
+                                    >
+                                        View
+                                    </a>
+                                </td>
+
+                            </tr>
+
+                        {% empty %}
+
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-5">
+                                    There are no pending results to enter.
+                                </td>
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+
+    {% if result_rows %}
+        <div class="d-flex justify-content-end mt-3">
+
+            <button type="submit" class="btn btn-primary">Save Final Scores</button>
+
+        </div>
+    {% endif %}
+
+</form>
+{% endif %}
+
+{% endblock %}

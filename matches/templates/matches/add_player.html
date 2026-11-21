@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h2 class="h4 mb-3">Add Player to {{ team.name }}</h2>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                {% endif %}
+
+                <div class="mb-3">
+                    {{ form.name.label_tag }}
+                    {{ form.name }}
+                    {{ form.name.errors }}
+                </div>
+                <div class="mb-3">
+                    {{ form.jersey_number.label_tag }}
+                    {{ form.jersey_number }}
+                    {{ form.jersey_number.errors }}
+                </div>
+                <div class="mb-3">
+                    {{ form.photo.label_tag }}
+                    {{ form.photo }}
+                    {% if form.photo.help_text %}<div class="form-text">{{ form.photo.help_text }}</div>{% endif %}
+                    {{ form.photo.errors }}
+                </div>
+                {{ form.starting_goals.as_hidden }}
+
+                <button type="submit" class="btn btn-primary">Add Player</button>
+                <a class="btn btn-outline-secondary" href="{% url 'dashboard' %}">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

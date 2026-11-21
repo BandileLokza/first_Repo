@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ player.full_name }} | 8-Ball Pool | EsportsLive{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'pool/css/pool.css' %}">
+{% endblock %}
+
+{% block content %}
+<main class="pool-page pool-profile-page">
+    {% if player_stats_competition %}
+        {% url 'pool:competition_detail' player_stats_competition.slug as player_back_url %}
+    {% else %}
+        {% url 'pool:home' as player_back_url %}
+    {% endif %}
+    {% include "pool/_page_navigation.html" with back_fallback=player_back_url show_pool_home=True %}
+
+    <header class="pool-profile-hero">
+        {% if player.profile_picture %}
+        <img src="{{ player.profile_picture.url }}" alt="{{ player.full_name }}" class="pool-profile-photo" decoding="async">
+        {% else %}
+        <span class="pool-profile-photo pool-profile-photo--fallback" aria-hidden="true">8</span>
+        {% endif %}
+        <div class="pool-profile-copy">
+            <div class="pool-detail-status-row">
+                <span class="pool-status {% if player.is_active %}pool-status--published{% else %}pool-status--cancelled{% endif %}">{% if player.is_active %}Active{% else %}Inactive{% endif %}</span>
+            </div>
+            <h1>{{ player.full_name }}</h1>
+            {% if player.nickname %}<p class="pool-profile-nickname">“{{ player.nickname }}”</p>{% endif %}
+            <dl class="pool-profile-meta">
+                <div>
+                    <dt>Player ID</dt>
+                    <dd><code>{{ player.public_id }}</code></dd>
+                </div>
+                <div>
+                    <dt>Region</dt>
+                    <dd>{{ player.region|default:"Not listed" }}</dd>
+                </div>
+                <div>
+                    <dt>Country</dt>
+                    <dd>{{ player.country|default:"Not listed" }}</dd>
+                </div>
+            </dl>
+        </div>
+    </header>
+
+    <section class="pool-section" aria-labelledby="pool-player-performance-title">
+        <div class="pool-section-heading">
+            <div>
+                {% if is_singles_competition_scope %}
+                <p class="pool-eyebrow">Singles competition</p>
+                <h2 id="pool-player-performance-title">Competition Performance · {{ player_stats_competition.name }}</h2>
+                {% elif is_team_competition_scope %}
+                <p class="pool-eyebrow">Team competition</p>
+                <h2 id="pool-player-performance-title">Individual Team Performance · {{ player_stats_competition.name }}</h2>
+                {% else %}
+                <p class="pool-eyebrow">Recorded rack performance</p>
+                <h2 id="pool-player-performance-title">Recorded Rack Performance</h2>
+                {% endif %}
+            </div>
+            {% if is_singles_competition_scope %}
+            <p class="pool-section-note">Completed singles matches and their recorded racks in this competition.</p>
+            {% elif is_team_competition_scope %}
+            <p class="pool-section-note">Individual rack performance from team matches where player attribution was recorded. Player-versus-player results are shown only for fully recorded team races. {% if player_stats_team_entry %}Representing {{ player_stats_team_entry.team.name }}.{% endif %}</p>
+            {% else %}
+            <p class="pool-section-note">Recorded rack wins across published competition history, including live play.</p>
+            {% endif %}
+        </div>
+        {% if is_singles_competition_scope %}
+        <dl class="pool-stat-grid">
+            <div><dt>Matches played</dt><dd>{{ player_competition_stats.matches_played|default:0 }}</dd></div>
+            <div><dt>Won</dt><dd>{{ player_competition_stats.won|default:0 }}</dd></div>
+            <div><dt>Lost</dt><dd>{{ player_competition_stats.lost|default:0 }}</dd></div>
+            <div><dt>Match win rate</dt><dd>{% if player_competition_stats.match_win_percentage is not None %}{{ player_competition_stats.match_win_percentage|floatformat:"-1" }}%{% else %}—{% endif %}</dd></div>
+            <div><dt>Racks won</dt><dd>{{ player_competition_stats.racks_won|default:0 }}</dd></div>
+            <div><dt>Racks lost</dt><dd>{{ player_competition_stats.racks_lost|default:0 }}</dd></div>
+            <div><dt>Rack win rate</dt><dd>{% if player_competition_stats.rack_win_percentage is not None %}{{ player_competition_stats.rack_win_percentage|floatformat:"-1" }}%{% else %}—{% endif %}</dd></div>
+            <div><dt>Normal rack wins</dt><dd>{{ player_competition_stats.normal_wins|default:0 }}</dd></div>
+            <div><dt>Green apples</dt><dd>{{ player_competition_stats.green_apples|default:0 }}</dd></div>
+            <div><dt>Red apples</dt><dd>{{ player_competition_stats.red_apples|default:0 }}</dd></div>
+            <div><dt>One visits</dt><dd>{{ player_competition_stats.one_visits|default:0 }}</dd></div>
+        </dl>
+        {% elif is_team_competition_scope %}
+        <dl class="pool-stat-grid">
+            <div><dt>Racks won</dt><dd>{{ player_rack_stats.racks_won|default:0 }}</dd></div>
+            {% comment %}Internal team-attribution integrity fields are not public statistics.{% endcomment %}
+            {% comment %}
+            <div><dt>Tracked wins</dt><dd>{{ player_rack_stats.tracked_racks_won|default:0 }}</dd></div>
+            <div><dt>Tracked losses</dt><dd>{{ player_rack_stats.tracked_racks_lost|default:0 }}</dd></div>
+            <div><dt>Tracked win rate</dt><dd>{% if player_rack_stats.tracked_rack_win_percentage is not None %}{{ player_rack_stats.tracked_rack_win_percentage|floatformat:"-1" }}%{% else %}—{% endif %}</dd></div>
+            {% endcomment %}
+            {% for outcome in player_rack_stats.outcome_values %}<div><dt>{{ outcome.label }}</dt><dd>{{ outcome.value }}</dd></div>{% endfor %}
+        </dl>
+        {% else %}
+        <dl class="pool-stat-grid">
+            <div><dt>Racks won</dt><dd>{{ player_rack_stats.racks_won|default:0 }}</dd></div>
+            {% for outcome in player_rack_stats.outcome_values %}<div><dt>{{ outcome.label }}</dt><dd>{{ outcome.value }}</dd></div>{% endfor %}
+        </dl>
+        {% endif %}
+    </section>
+
+    <section class="pool-section" aria-labelledby="pool-player-money-match-title">
+        <div class="pool-section-heading">
+            <div>
+                <p class="pool-eyebrow">Money Matches</p>
+                <h2 id="pool-player-money-match-title">Money Match Record</h2>
+            </div>
+            <p class="pool-section-note">Completed singles Money Matches.</p>
+        </div>
+        <dl class="pool-stat-grid">
+            <div><dt>Money Matches played</dt><dd>{{ player_money_match_stats.money_matches_played|default:0 }}</dd></div>
+            <div><dt>Money Match wins</dt><dd>{{ player_money_match_stats.money_match_wins|default:0 }}</dd></div>
+            <div><dt>Money Match losses</dt><dd>{{ player_money_match_stats.money_match_losses|default:0 }}</dd></div>
+        </dl>
+    </section>
+
+    {% if player_entries %}
+    <section class="pool-section" aria-labelledby="pool-player-stats-title">
+        <div class="pool-section-heading">
+            <div>
+                <p class="pool-eyebrow">Singles career</p>
+                <h2 id="pool-player-stats-title">Singles Career Record</h2>
+            </div>
+            <p class="pool-section-note">Across published singles competitions recorded on eSportsLive.</p>
+        </div>
+        <dl class="pool-stat-grid">
+            <div><dt>Matches played</dt><dd>{{ player_stats.matches_played|default:0 }}</dd></div>
+            <div><dt>Won</dt><dd>{{ player_stats.won|default:0 }}</dd></div>
+            <div><dt>Lost</dt><dd>{{ player_stats.lost|default:0 }}</dd></div>
+            <div><dt>Match win rate</dt><dd>{% if player_stats.match_win_percentage is not None %}{{ player_stats.match_win_percentage|floatformat:"-1" }}%{% else %}—{% endif %}</dd></div>
+            <div><dt>Racks won</dt><dd>{{ player_stats.racks_won|default:0 }}</dd></div>
+            <div><dt>Racks lost</dt><dd>{{ player_stats.racks_lost|default:0 }}</dd></div>
+            <div><dt>Rack win rate</dt><dd>{% if player_stats.rack_win_percentage is not None %}{{ player_stats.rack_win_percentage|floatformat:"-1" }}%{% else %}—{% endif %}</dd></div>
+            <div><dt>Normal rack wins</dt><dd>{{ player_stats.normal_wins|default:0 }}</dd></div>
+            <div><dt>Green apples</dt><dd>{{ player_stats.green_apples|default:0 }}</dd></div>
+            <div><dt>Red apples</dt><dd>{{ player_stats.red_apples|default:0 }}</dd></div>
+            <div><dt>One visits</dt><dd>{{ player_stats.one_visits|default:0 }}</dd></div>
+        </dl>
+    </section>
+    {% endif %}
+
+    <div class="row g-4">
+        <section class="col-12 col-xl-5 pool-section" aria-labelledby="pool-player-competitions-title">
+            <div class="pool-section-heading">
+                <div>
+                    <p class="pool-eyebrow">Participation</p>
+                    <h2 id="pool-player-competitions-title">Competitions entered</h2>
+                </div>
+            </div>
+            <div class="pool-stacked-cards">
+                {% for entry in player_entries %}
+                <a class="pool-entry-card" href="{% url 'pool:competition_detail' entry.competition.slug %}">
+                    <span class="pool-entry-card-title">{{ entry.competition.name }}</span>
+                    <span class="pool-entry-card-meta">{{ entry.competition.get_format_type_display }} · {{ entry.competition.get_status_display }}</span>
+                </a>
+                {% empty %}
+                <div class="pool-empty-state pool-empty-state--compact"><p>This player has not been entered into a published competition.</p></div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="col-12 col-xl-7 pool-section" aria-labelledby="pool-player-recent-title">
+            <div class="pool-section-heading">
+                <div>
+                    <p class="pool-eyebrow">Latest results</p>
+                    <h2 id="pool-player-recent-title">Recent completed matches</h2>
+                </div>
+            </div>
+            <div class="pool-stacked-cards">
+                {% for pool_match in player_recent_matches %}
+                <a class="pool-match-card pool-match-card--compact" href="{% url 'pool:match_detail' pool_match.pk %}">
+                    <div class="pool-match-card-topline">
+                        <span class="pool-status pool-status--finished">{{ pool_match.get_result_method_display }}</span>
+                        <span class="pool-match-context">{% if pool_match.competition.is_money_match %}Money Match &middot; Race to {{ pool_match.race_target }}{% else %}{{ pool_match.competition.name }}{% endif %}</span>
+                    </div>
+                    <div class="pool-match-row">
+                        <span class="pool-participant pool-participant--home">{{ pool_match.home_participant_display_name }}</span>
+                        <strong class="pool-score">{{ pool_match.home_score }} <span>–</span> {{ pool_match.away_score }}</strong>
+                        <span class="pool-participant pool-participant--away">{{ pool_match.away_participant_display_name }}</span>
+                    </div>
+                    <span class="pool-match-card-footer"><time datetime="{{ pool_match.scheduled_at|date:'c' }}">{{ pool_match.scheduled_at|date:"M j, Y" }}</time></span>
+                </a>
+                {% empty %}
+                <div class="pool-empty-state pool-empty-state--compact"><p>No completed matches are available for this player.</p></div>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+</main>
+{% endblock %}

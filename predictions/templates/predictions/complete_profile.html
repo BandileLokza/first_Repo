@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+{% block title %}Complete Prediction Profile{% endblock %}
+
+{% block content %}
+<style>
+    .profile-page-wrap {
+        min-height: calc(100vh - 140px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px 12px;
+    }
+
+    .profile-card {
+        width: 100%;
+        max-width: 520px;
+        border: 0;
+        border-radius: 18px;
+        overflow: hidden;
+    }
+
+    .profile-card-body {
+        padding: 28px;
+    }
+
+    .profile-step-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: #dcfce7;
+        color: #166534;
+        font-size: 0.85rem;
+        font-weight: 700;
+        margin-bottom: 14px;
+    }
+
+    .profile-title {
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin-bottom: 8px;
+        color: #111827;
+    }
+
+    .profile-subtitle {
+        color: #6b7280;
+        font-size: 0.98rem;
+        line-height: 1.5;
+        margin-bottom: 22px;
+    }
+
+    .profile-info-box {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        color: #166534;
+        border-radius: 14px;
+        padding: 14px 16px;
+        margin-bottom: 20px;
+        font-size: 0.95rem;
+    }
+
+    .profile-card label {
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 6px;
+    }
+
+    .profile-card input,
+    .profile-card select,
+    .profile-card textarea {
+        width: 100%;
+        border-radius: 12px !important;
+        border: 1px solid #d1d5db;
+        padding: 12px 14px;
+        font-size: 1rem;
+        outline: none;
+    }
+
+    .profile-card input:focus,
+    .profile-card select:focus,
+    .profile-card textarea:focus {
+        border-color: #22c55e;
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18);
+    }
+
+    .profile-help-text {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-top: 6px;
+    }
+
+    .profile-submit-btn {
+        border: 0;
+        border-radius: 14px;
+        padding: 13px 16px;
+        font-weight: 800;
+        background: #16a34a;
+        color: white;
+        width: 100%;
+        margin-top: 6px;
+    }
+
+    .profile-submit-btn:hover {
+        background: #15803d;
+        color: white;
+    }
+
+    .profile-error-box {
+        border-radius: 14px;
+        font-size: 0.92rem;
+    }
+
+    @media (max-width: 576px) {
+        .profile-page-wrap {
+            align-items: flex-start;
+            padding: 16px 10px;
+        }
+
+        .profile-card {
+            border-radius: 16px;
+        }
+
+        .profile-card-body {
+            padding: 22px 16px;
+        }
+
+        .profile-title {
+            font-size: 1.45rem;
+        }
+
+        .profile-subtitle {
+            font-size: 0.93rem;
+        }
+
+        .profile-info-box {
+            font-size: 0.9rem;
+            padding: 12px 13px;
+        }
+
+        .profile-card input,
+        .profile-card select,
+        .profile-card textarea {
+            font-size: 0.95rem;
+            padding: 11px 12px;
+        }
+
+        .profile-submit-btn {
+            padding: 12px 14px;
+            font-size: 0.95rem;
+        }
+    }
+
+    body.dark-mode .profile-card,
+    html.dark-mode .profile-card {
+        background: #111827;
+        color: #f9fafb;
+    }
+
+    body.dark-mode .profile-title,
+    body.dark-mode .profile-card label,
+    html.dark-mode .profile-title,
+    html.dark-mode .profile-card label {
+        color: #f9fafb;
+    }
+
+    body.dark-mode .profile-subtitle,
+    body.dark-mode .profile-help-text,
+    html.dark-mode .profile-subtitle,
+    html.dark-mode .profile-help-text {
+        color: #cbd5e1;
+    }
+
+    body.dark-mode .profile-card input,
+    body.dark-mode .profile-card select,
+    body.dark-mode .profile-card textarea,
+    html.dark-mode .profile-card input,
+    html.dark-mode .profile-card select,
+    html.dark-mode .profile-card textarea {
+        background: #020617;
+        border-color: #334155;
+        color: #f9fafb;
+    }
+
+    body.dark-mode .profile-card input::placeholder,
+    html.dark-mode .profile-card input::placeholder {
+        color: #94a3b8;
+    }
+</style>
+
+<div class="profile-page-wrap">
+    <div class="card shadow-sm profile-card">
+        <div class="profile-card-body">
+
+            <div class="profile-step-badge">
+                ✅ Step 2 of 2
+            </div>
+
+            <h2 class="profile-title">Final Step</h2>
+
+            <p class="profile-subtitle">
+                You are almost done. Add the name that will appear on the prediction standings and the phone number we can use for payout if you win.
+            </p>
+
+            <div class="profile-info-box">
+                <strong>Complete your prediction profile.</strong><br>
+                After this, you will be taken straight to the predictions page.
+            </div>
+
+            {% if form.errors %}
+                <div class="alert alert-danger profile-error-box">
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <div>{{ error }}</div>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <div>{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label class="form-label">Display Name for Standings</label>
+                    {{ form.display_name }}
+                    <div class="profile-help-text">
+                        This is the name fans will see on the prediction table.
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Phone Number for Payout</label>
+                    {{ form.phone_number }}
+                    <div class="profile-help-text">
+                        This will only be used to contact you if you win.
+                    </div>
+                </div>
+
+                <button type="submit" class="profile-submit-btn">
+                    Finish and Start Predicting
+                </button>
+            </form>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

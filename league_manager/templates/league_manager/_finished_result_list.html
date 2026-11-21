@@ -1,0 +1,46 @@
+<div class="vstack gap-2">
+    {% for row in finished_rows %}
+        {% with match=row.match %}
+            <article class="card" aria-labelledby="finished-match-{{ match.pk }}">
+                <div class="card-body py-3">
+                    <div class="row align-items-center g-3">
+                        <div class="col-12 col-lg">
+                            <div class="small text-muted d-flex flex-wrap gap-2 mb-1">
+                                {% if match.match_date %}
+                                    <time datetime="{{ match.match_date|date:'c' }}">{{ match.match_date|date:"M j, Y H:i" }}</time>
+                                {% endif %}
+                                <span>{{ match.get_stage_label }}</span>
+                                {% if match.gameweek %}<span>Gameweek {{ match.gameweek }}</span>{% endif %}
+                                {% if match.stage.stage_type == "KNOCKOUT" or match.leg > 1 %}<span>Leg {{ match.leg }}</span>{% endif %}
+                            </div>
+                            <h3 id="finished-match-{{ match.pk }}" class="fs-6 fw-semibold mb-0 d-flex flex-wrap align-items-baseline gap-2">
+                                <span class="text-break">{{ match.home_team }}</span>
+                                <span class="badge text-bg-secondary fs-6">{{ match.home_score }} &ndash; {{ match.away_score }}</span>
+                                <span class="text-break">{{ match.away_team }}</span>
+                            </h3>
+                            {% if match.penalty_home_score is not None %}
+                                <div class="small text-muted mt-1">Penalties {{ match.penalty_home_score }} &ndash; {{ match.penalty_away_score }}</div>
+                            {% endif %}
+                            {% if row.official_decision %}
+                                <div class="small text-warning mt-1">Official Abandonment Decision</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-12 col-lg-auto d-flex flex-wrap gap-2">
+                            {% if row.can_edit %}
+                                <a class="btn btn-success btn-sm"
+                                   href="{% url 'league_manager:edit_finished_match' league.slug match.pk %}">Edit Result</a>
+                                <a class="btn btn-outline-success btn-sm"
+                                   href="{% url 'league_manager:finished_goal_scorers' league.slug match.pk %}">Manage Scorers</a>
+                            {% elif row.official_decision and row.can_review %}
+                                <a class="btn btn-outline-warning btn-sm"
+                                   href="{% url 'league_manager:resolve_abandoned_match' league.slug match.pk %}">Review Decision</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </article>
+        {% endwith %}
+    {% empty %}
+        <p class="text-muted">There are no finished matches to correct.</p>
+    {% endfor %}
+</div>

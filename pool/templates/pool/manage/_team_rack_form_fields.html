@@ -1,0 +1,54 @@
+{% if form.non_field_errors %}
+<div class="alert alert-danger" role="alert">{{ form.non_field_errors }}</div>
+{% endif %}
+
+<fieldset class="pool-team-rack-winner-picker mb-3"{% if form.winning_player.errors %} aria-describedby="{{ form.winning_player.id_for_label }}-errors"{% endif %}>
+    <legend>Rack winner</legend>
+    <p class="pool-manager-help">Choose the player who won the rack. Their registered team is assigned automatically.</p>
+    {% if form.winning_player.errors %}
+    <div id="{{ form.winning_player.id_for_label }}-errors" class="invalid-feedback d-block">{% for error in form.winning_player.errors %}{{ error }}{% if not forloop.last %} {% endif %}{% endfor %}</div>
+    {% endif %}
+    <div class="pool-team-rack-roster-groups">
+        {% for group in form.roster_groups %}
+        <section class="pool-team-rack-roster-group{% if not group.entry %} pool-team-rack-roster-group--historic{% endif %}" aria-label="{% if group.entry %}{{ group.entry.display_name }} roster{% else %}{{ group.label }}{% endif %}">
+            <h3>{% if group.entry %}{{ group.entry.display_name }}{% else %}{{ group.label }}{% endif %}</h3>
+            {% if group.players %}
+            <div class="pool-team-rack-player-options">
+                {% for option in group.players %}
+                <div class="pool-team-rack-player-choice">
+                    <input class="pool-team-rack-player-input" type="radio" name="{{ form.winning_player.html_name }}" id="{{ option.input_id }}" value="{{ option.value }}"{% if option.selected %} checked{% endif %}{% if not form.allows_legacy_unattributed_choice %} required{% endif %}>
+                    <label for="{{ option.input_id }}">
+                        {% if option.player.profile_picture %}<img src="{{ option.player.profile_picture.url }}" alt="" class="pool-participant-image">{% else %}<span class="pool-participant-fallback" aria-hidden="true">8</span>{% endif %}
+                        <span>{% if option.label %}{{ option.label }}{% else %}{{ option.player.full_name }}{% endif %}</span>
+                        {% if option.is_preserved %}<small>Historical attribution</small>{% endif %}
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="pool-manager-empty">No active registered players are available.</p>
+            {% endif %}
+        </section>
+        {% endfor %}
+    </div>
+</fieldset>
+
+{% for field in form %}
+    {% if field.name != "winning_player" %}
+        {% if field.field.widget.input_type == 'checkbox' %}
+        <div class="form-check mb-3">
+            {{ field }}
+            <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+            {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+        </div>
+        {% else %}
+        <div class="mb-3">
+            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+            {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+        </div>
+        {% endif %}
+    {% endif %}
+{% endfor %}

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}{% if editing_card %}Correct{% else %}Add{% endif %} {{ card_kind|title }} Card{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-7">
+        <div class="mb-3"><a href="{% url 'match_detail' match.id %}" class="back-btn">&larr; BACK</a></div>
+        <div class="card shadow-sm"><div class="card-body">
+            <h2 class="mb-1">{% if editing_card %}Correct{% else %}Add{% endif %} {% if card_kind == "red" %}Red{% else %}Yellow{% endif %} Card</h2>
+            <p class="text-muted">{{ match.home_team }} vs {{ match.away_team }}</p>
+            {% if editing_card and editing_card.card_type == "SECOND_YELLOW_RED" %}<div class="alert alert-info py-2">This second-yellow status is recalculated safely whenever card history changes.</div>{% endif %}
+            <form method="post" data-card-form>
+                {% csrf_token %}{{ form.idempotency_key }}{{ form.new_player_requested }}
+                {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+                <div class="mb-3">{{ form.team.label_tag }}{{ form.team }}{% for error in form.team.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}</div>
+                <div class="mb-3">
+                    {{ form.player.label_tag }}{{ form.player }}
+                    {% for error in form.player.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                    <div class="form-text">Choose a registered player or select Add New Player.</div>
+                </div>
+                <div class="mb-3 card-new-player" hidden>{{ form.player_name.label_tag }}{{ form.player_name }}{% for error in form.player_name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}</div>
+                <div class="mb-4">{{ form.minute.label_tag }}{{ form.minute }}{% for error in form.minute.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}<div class="form-text">Leave blank to use the current match minute.</div></div>
+                <button type="submit" class="btn {% if card_kind == 'red' %}btn-danger{% else %}btn-warning{% endif %}" data-save-card>{% if editing_card %}Save Correction{% else %}Save Card{% endif %}</button>
+            </form>
+        </div></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(() => {
+    const form = document.querySelector("[data-card-form]");
+    if (!form) return;
+    const team = form.querySelector("select[name='team']");
+    const player = form.querySelector("select[name='player']");
+    const newPlayer = form.querySelector(".card-new-player");
+    const nameInput = form.querySelector("input[name='player_name']");
+    const requested = form.querySelector("input[name='new_player_requested']");
+    Array.from(player.options).forEach(option => {
+        const text = option.textContent;
+        const teamId = option.getAttribute("data-team-id");
+        if (teamId) option.dataset.teamId = teamId;
+    });
+    const add = document.createElement("option");
+    add.value = "__new__"; add.textContent = "+ Add New Player"; player.appendChild(add);
+    const update = () => {
+        Array.from(player.options).forEach(option => {
+            if (!option.dataset.teamId) return;
+            const allowed = option.dataset.teamId === team.value;
+            option.hidden = !allowed; option.disabled = !allowed;
+        });
+        if (player.selectedOptions[0] && player.selectedOptions[0].disabled) player.value = "";
+        const adding = player.value === "__new__" || requested.value === "1";
+        newPlayer.hidden = !adding; nameInput.disabled = !adding; requested.value = adding ? "1" : "";
+    };
+    team.addEventListener("change", update); player.addEventListener("change", update);
+    form.addEventListener("submit", () => {
+        if (player.value === "__new__") player.value = "";
+        const button = form.querySelector("[data-save-card]");
+        if (button) { button.disabled = true; button.textContent = "Saving..."; }
+    });
+    update();
+})();
+</script>
+{% endblock %}

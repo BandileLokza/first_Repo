@@ -1,0 +1,4 @@
+<h2 class="section-title"><span class="section-icon organisation-heading-icon">{% if ple_organisation and ple_organisation.logo %}<img src="{{ ple_organisation.logo.url }}" alt="{{ ple_organisation.name }} logo" class="organisation-heading-logo" onerror="this.hidden=true;this.nextElementSibling.hidden=false;">{% endif %}<span class="organisation-heading-fallback" aria-hidden="true" {% if ple_organisation and ple_organisation.logo %}hidden{% endif %}>&#127942;</span></span> Premier League of Eswatini (PLE)</h2>
+{% for item in ple_league_data %}
+{% include "leagues/partials/league_card.html" with item=item %}
+{% empty %}<p class="text-muted">No PLE leagues have been added yet.</p>{% endfor %}

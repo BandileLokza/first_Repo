@@ -1,0 +1,49 @@
+{% extends "pool/manage/base.html" %}
+
+{% block manager_title %}{{ entry.team.name }} staff{% endblock %}
+
+{% block manager_content %}
+<section class="pool-manager-panel">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <div>
+            <p class="pool-eyebrow">Competition entry</p>
+            <h2 class="mb-1">{{ entry.team.name }} staff</h2>
+            <p class="pool-manager-help mb-0">Coaches and captains can submit lineups only for this team in {{ competition.name }}. They cannot manage fixtures, score racks, or access other teams.</p>
+        </div>
+        <a class="btn btn-outline-secondary" href="{% url 'pool:manage_competition_teams' competition.slug %}">Back to teams</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table pool-manager-table">
+            <thead><tr><th>Account</th><th>Role</th><th>Active</th><th class="text-end">Action</th></tr></thead>
+            <tbody>
+                {% for assignment in assignments %}
+                <tr>
+                    <th scope="row">{{ assignment.user.get_full_name|default:assignment.user.username }}<br><span class="pool-muted">{{ assignment.user.username }}</span></th>
+                    <td>{{ assignment.get_role_display }}</td>
+                    <td>{% if assignment.is_active %}Yes{% else %}No{% endif %}</td>
+                    <td class="text-end">
+                        <form method="post" action="{% url 'pool:manage_competition_team_staff_toggle' competition.slug entry.pk assignment.pk %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm {% if assignment.is_active %}btn-outline-warning{% else %}btn-outline-success{% endif %}">{% if assignment.is_active %}Deactivate{% else %}Reactivate{% endif %}</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" class="text-center">No coach or captain has been assigned to this competition team.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="pool-manager-panel mt-3" aria-labelledby="team-staff-add-title">
+    <h2 id="team-staff-add-title">Assign coach or captain</h2>
+    <p class="pool-manager-help">The person must already have an active EsportsLive account. This assignment is limited to {{ entry.team.name }} in this competition.</p>
+    <form method="post" action="{% url 'pool:manage_competition_team_staff_add' competition.slug entry.pk %}" class="pool-manager-form" novalidate>
+        {% csrf_token %}
+        {% include "pool/manage/_form_fields.html" with form=form %}
+        <div class="pool-manager-actions"><button class="btn btn-primary" type="submit">Assign staff member</button></div>
+    </form>
+</section>
+{% endblock %}

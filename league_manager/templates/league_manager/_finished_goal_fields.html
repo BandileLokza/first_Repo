@@ -1,0 +1,30 @@
+{{ form.non_field_errors }}
+<div class="row g-3">
+    <div class="col-12 col-md-5">
+        <label class="form-label" for="{{ form.player.id_for_label }}">Scorer</label>
+        {{ form.player }}
+        <div class="text-danger small">{{ form.player.errors }}</div>
+    </div>
+    <div class="col-7 col-md-4">
+        <div class="form-label">{{ form.goal_type.label }}</div>
+        {{ form.goal_type }}
+        <div class="text-danger small">{{ form.goal_type.errors }}</div>
+    </div>
+    <div class="col-5 col-md-3">
+        <label class="form-label" for="{{ form.minute.id_for_label }}">Minute</label>
+        {{ form.minute }}
+        <div class="text-danger small">{{ form.minute.errors }}</div>
+    </div>
+    <div class="col-12" data-new-player>
+        <label class="form-label" for="{{ form.player_name.id_for_label }}">{{ form.player_name.label }}</label>
+        {{ form.player_name }}
+        <div class="text-danger small">{{ form.player_name.errors }}</div>
+    </div>
+    {% if not row.goal or not row.goal.player_id and row.saved_name %}
+        <div class="col-12">
+            {{ form.record_unknown }}
+            <label for="{{ form.record_unknown.id_for_label }}">{{ form.record_unknown.label }}</label>
+            <div class="text-danger small">{{ form.record_unknown.errors }}</div>
+        </div>
+    {% endif %}
+</div>

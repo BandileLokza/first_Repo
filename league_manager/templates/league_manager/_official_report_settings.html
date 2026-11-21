@@ -1,0 +1,37 @@
+{% if official_form %}
+<input type="hidden" name="official_settings" value="1">
+{{ official_form.non_field_errors }}
+<fieldset class="border-top pt-3 mt-4 mb-4">
+    <legend class="float-none w-auto h5">Authorised signatory</legend>
+    <p class="form-text">Applies to fixture and result Word and PDF reports. Uploaded artwork is private and each final download requires separate approval to include it.</p>
+    <div class="form-check mb-3">{{ official_form.signoff_enabled }} {{ official_form.signoff_enabled.label_tag }} {{ official_form.signoff_enabled.errors }}</div>
+    <div class="row g-3">
+        <div class="col-12 col-md-4">{{ official_form.signoff_heading.label_tag }} {{ official_form.signoff_heading }} {{ official_form.signoff_heading.errors }}</div>
+        <div class="col-12 col-md-4">{{ official_form.signatory_name.label_tag }} {{ official_form.signatory_name }} {{ official_form.signatory_name.errors }}</div>
+        <div class="col-12 col-md-4">{{ official_form.signatory_position.label_tag }} {{ official_form.signatory_position }} {{ official_form.signatory_position.errors }}</div>
+        <div class="col-12 col-md-6">
+            {{ official_form.signature_upload.label_tag }} {{ official_form.signature_upload }} {{ official_form.signature_upload.errors }}
+            {% if has_signature %}<div class="form-check mt-2">{{ official_form.remove_signature }} {{ official_form.remove_signature.label_tag }} {{ official_form.remove_signature.errors }}</div>{% endif %}
+        </div>
+        <div class="col-12 col-md-6">
+            {{ official_form.stamp_upload.label_tag }} {{ official_form.stamp_upload }} {{ official_form.stamp_upload.errors }}
+            {% if has_stamp %}<div class="form-check mt-2">{{ official_form.remove_stamp }} {{ official_form.remove_stamp.label_tag }} {{ official_form.remove_stamp.errors }}</div>{% endif %}
+        </div>
+    </div>
+    <p class="form-text mb-0 mt-2">PNG or JPEG, up to 2 MB and 4 megapixels per image. Transparent PNG works well for signatures and stamps.</p>
+</fieldset>
+<fieldset class="border-top pt-3 mb-4">
+    <legend class="float-none w-auto h5">Executive committee</legend>
+    <div class="form-check mb-2">{{ official_form.committee_enabled }} {{ official_form.committee_enabled.label_tag }} {{ official_form.committee_enabled.errors }}</div>
+    <p class="form-text">Lower display numbers come first. Use Remove and save to delete a member. Leave any unused row blank.</p>
+    {{ committee_formset.management_form }}
+    {{ committee_formset.non_form_errors }}
+    <div id="committee-rows">
+        {% for member in committee_formset %}
+            {% include "league_manager/_report_committee_member.html" %}
+        {% endfor %}
+    </div>
+    <template id="committee-row-template">{% include "league_manager/_report_committee_member.html" with member=committee_formset.empty_form %}</template>
+    <button type="button" class="btn btn-outline-primary btn-sm" id="add-committee-member" hidden>Add committee member</button>
+</fieldset>
+{% endif %}

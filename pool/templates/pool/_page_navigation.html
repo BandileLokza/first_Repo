@@ -1,0 +1,16 @@
+{% load static %}
+{% url 'pool:home' as pool_home_url %}
+<nav class="pool-page-navigation" aria-label="Pool page navigation">
+    <button
+        class="pool-page-navigation__back"
+        type="button"
+        data-pool-history-back
+        data-pool-fallback="{% if back_fallback %}{{ back_fallback }}{% else %}{{ pool_home_url }}{% endif %}"
+    >
+        <span aria-hidden="true">←</span> Back
+    </button>
+    {% if show_pool_home %}
+    <a class="pool-page-navigation__home" href="{{ pool_home_url }}">Pool Home</a>
+    {% endif %}
+</nav>
+<script src="{% static 'pool/js/page_navigation.js' %}" defer></script>

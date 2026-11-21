@@ -1,0 +1,50 @@
+<div class="pool-table-wrap" role="region" aria-label="{% if group %}{{ group.name }} standings{% else %}{{ stage.name }} standings{% endif %}" tabindex="0">
+    <table class="table table-hover align-middle pool-standings-table">
+        <thead>
+            <tr>
+                <th scope="col" class="pool-standings-position">#</th>
+                <th scope="col" class="pool-standings-participant">
+                    {% if competition.participant_mode == 'SINGLES' %}Player{% else %}Team{% endif %}
+                </th>
+                <th scope="col">P</th>
+                <th scope="col">W</th>
+                <th scope="col">L</th>
+                <th scope="col">RF</th>
+                <th scope="col">RA</th>
+                <th scope="col">RD</th>
+                <th scope="col">Pts</th>
+                <th scope="col">Form</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td class="pool-standings-position">{{ row.position }}</td>
+                <th scope="row" class="pool-standings-participant">
+                    {% if competition.participant_mode == 'SINGLES' %}
+                    <a href="{% url 'pool:player_detail' row.entry.player.public_id %}">{{ row.display_name }}</a>
+                    {% else %}
+                    <a href="{% url 'pool:team_detail' row.entry.team.pk %}?competition={{ competition.slug }}">{{ row.display_name }}</a>
+                    {% endif %}
+                </th>
+                <td>{{ row.played }}</td>
+                <td>{{ row.won }}</td>
+                <td>{{ row.lost }}</td>
+                <td>{{ row.racks_for }}</td>
+                <td>{{ row.racks_against }}</td>
+                <td>{% if row.rack_difference > 0 %}+{% endif %}{{ row.rack_difference }}</td>
+                <td><strong>{{ row.points }}</strong></td>
+                <td>
+                    {% if row.recent_form %}
+                        <span class="pool-form" aria-label="Recent form: {{ row.recent_form|join:', ' }}">
+                        {% for result in row.recent_form %}<span class="pool-form-result pool-form-result--{{ result|lower }}">{{ result }}</span>{% endfor %}
+                        </span>
+                    {% else %}<span class="pool-muted">—</span>{% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="10" class="text-center pool-muted">No entries are assigned to this table yet. Standings will appear once competition play begins.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

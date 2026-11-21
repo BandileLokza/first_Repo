@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}Update Results - {{ league.name }}{% endblock %}
+
+{% block content %}
+<div class="mb-3">
+    <a href="{% url 'league_detail' league.slug %}" class="back-btn">← BACK</a>
+</div>
+
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
+    <div>
+        <p style="color:red; font-weight:bold;">TEMPLATE TEST 12345</p>
+        <h2>Update Results</h2>
+        <p class="text-muted mb-0">{{ league.name }} • Season {{ league.season }}</p>
+    </div>
+</div>
+
+<div class="mb-4">
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{% url 'update_results_for_league' league.slug %}?filter=pending"
+           class="btn {% if current_filter == 'pending' %}btn-success{% else %}btn-outline-success{% endif %}">
+            Fixtures / Pending Results
+        </a>
+
+        <a href="{% url 'update_results_for_league' league.slug %}?filter=finished"
+           class="btn {% if current_filter == 'finished' %}btn-dark{% else %}btn-outline-dark{% endif %}">
+            Finished Results
+        </a>
+    </div>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} shadow-sm">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        {% if result_forms %}
+            <form method="post" action="{% url 'update_results_for_league' league.slug %}?filter={{ current_filter }}">
+                {% csrf_token %}
+                {% if result_version %}
+                    <input type="hidden" name="result_version" value="{{ result_version }}">
+                {% endif %}
+
+                <div class="d-flex flex-column gap-3">
+                    {% for item in result_forms %}
+                        <div class="border rounded p-3">
+                            <div class="mb-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                <div>
+                                    <strong>{{ item.match.home_team }} vs {{ item.match.away_team }}</strong>
+                                    <div class="text-muted small">
+                                        {{ item.match.get_stage_label }} • {{ item.match.match_date|date:"M d, Y H:i" }}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    {% if item.match.status == "FINISHED" %}
+                                        <span class="badge bg-secondary">FT</span>
+                                    {% elif item.match.status == "ABANDONED" %}
+                                        <span class="badge bg-danger">ABANDONED</span>
+                                    {% elif item.match.status == "LIVE" %}
+                                        <span class="badge bg-danger">LIVE</span>
+                                    {% else %}
+                                        <span class="badge bg-info">SCHEDULED</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="row g-2 align-items-end">
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label">{{ item.match.home_team }}</label>
+                                    <input
+                                        type="number"
+                                        name="home_score_{{ item.match.id }}"
+                                        min="0"
+                                        class="form-control"
+                                        value="{% if current_filter == 'finished' %}{{ item.match.home_score }}{% endif %}"
+                                        placeholder="Home score"
+                                    >
+                                </div>
+
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label">{{ item.match.away_team }}</label>
+                                    <input
+                                        type="number"
+                                        name="away_score_{{ item.match.id }}"
+                                        min="0"
+                                        class="form-control"
+                                        value="{% if current_filter == 'finished' %}{{ item.match.away_score }}{% endif %}"
+                                        placeholder="Away score"
+                                    >
+                                </div>
+                            </div>
+
+                            {% if item.match.stage.stage_type == "KNOCKOUT" %}
+                                <div class="border-top mt-3 pt-3">
+                                    <div class="small text-muted mb-2">
+                                        Knockout details (score after 90 minutes and shootout score)
+                                    </div>
+                                    <div class="row g-2">
+                                        <div class="col-6 col-md-3">
+                                            <label class="form-label small">Home after 90</label>
+                                            <input type="number" min="0" class="form-control"
+                                                   name="regulation_home_score_{{ item.match.id }}"
+                                                   value="{% if current_filter == 'finished' %}{{ item.match.regulation_home_score|default_if_none:'' }}{% endif %}">
+                                        </div>
+                                        <div class="col-6 col-md-3">
+                                            <label class="form-label small">Away after 90</label>
+                                            <input type="number" min="0" class="form-control"
+                                                   name="regulation_away_score_{{ item.match.id }}"
+                                                   value="{% if current_filter == 'finished' %}{{ item.match.regulation_away_score|default_if_none:'' }}{% endif %}">
+                                        </div>
+                                        <div class="col-6 col-md-3">
+                                            <label class="form-label small">Home penalties</label>
+                                            <input type="number" min="0" class="form-control"
+                                                   name="penalty_home_score_{{ item.match.id }}"
+                                                   value="{% if current_filter == 'finished' %}{{ item.match.penalty_home_score|default_if_none:'' }}{% endif %}">
+                                        </div>
+                                        <div class="col-6 col-md-3">
+                                            <label class="form-label small">Away penalties</label>
+                                            <input type="number" min="0" class="form-control"
+                                                   name="penalty_away_score_{{ item.match.id }}"
+                                                   value="{% if current_filter == 'finished' %}{{ item.match.penalty_away_score|default_if_none:'' }}{% endif %}">
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-success w-100">
+                        Save All Results
+                    </button>
+                </div>
+            </form>
+        {% else %}
+            {% if current_filter == "finished" %}
+                <p class="mb-0">No finished matches found for this league.</p>
+            {% else %}
+                <p class="mb-0">No pending fixtures found for this league.</p>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

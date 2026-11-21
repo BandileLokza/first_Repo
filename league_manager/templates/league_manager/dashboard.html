@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}League Manager{% endblock %}
+
+{% block content %}
+
+<div class="mb-4 league-manager-dashboard-heading">
+    <h2 class="mb-1">League Manager</h2>
+    <p class="text-muted mb-0">
+        Manage the leagues assigned to your account.
+    </p>
+</div>
+
+<form method="get" class="league-manager-search mb-4" role="search">
+    <label for="league-search" class="visually-hidden">Search authorized leagues</label>
+    <div class="input-group">
+        <input
+            id="league-search"
+            name="q"
+            type="search"
+            class="form-control"
+            value="{{ league_search_query }}"
+            placeholder="Search your leagues"
+            autocomplete="off"
+        >
+        <button type="submit" class="btn btn-primary">Search</button>
+        {% if league_search_query %}
+            <a href="{% url 'league_manager:dashboard' %}" class="btn btn-outline-secondary">Clear</a>
+        {% endif %}
+    </div>
+</form>
+
+<div class="row g-3">
+    {% for league in managed_leagues %}
+        <div class="col-12 col-md-6 col-xl-4">
+            <div class="card shadow-sm h-100 league-manager-league-card">
+                <div class="card-body">
+
+                    <h4 class="card-title league-manager-league-title">
+                        {{ league.name }}
+                    </h4>
+
+                    <p class="text-muted">
+                        Season {{ league.season }}
+                    </p>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <div class="border rounded p-2 text-center">
+                                <strong class="d-block">
+                                    {{ league.team_count }}
+                                </strong>
+                                <small>Teams</small>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="border rounded p-2 text-center">
+                                <strong class="d-block">
+                                    {{ league.match_count }}
+                                </strong>
+                                <small>Matches</small>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="border rounded p-2 text-center">
+                                <strong class="d-block">
+                                    {{ league.live_match_count }}
+                                </strong>
+                                <small>Live</small>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="border rounded p-2 text-center">
+                                <strong class="d-block">
+                                    {{ league.agent_count }}
+                                </strong>
+                                <small>Agents</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+
+                        <a
+                            href="{% url 'league_manager:league_dashboard' league.slug %}"
+                            class="btn btn-primary"
+                        >
+                            Manage League
+                        </a>
+
+                        <a
+                            href="{% url 'league_detail' league.slug %}"
+                            class="btn btn-outline-primary"
+                        >
+                            View Public League Page
+                        </a>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                {% if league_search_query %}
+                    No authorized leagues match “{{ league_search_query }}”.
+                {% else %}
+                    No leagues are assigned to this account.
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+{% if regional_regions %}
+<section class="mt-5" aria-labelledby="regional-administration-heading">
+    <div class="mb-3">
+        <h3 id="regional-administration-heading" class="h4 mb-1">Regional Administration</h3>
+        <p class="text-muted mb-0">Manage leagues through the cards above. Use these region-wide tools for league owners and reports.</p>
+    </div>
+
+    <div class="row g-3">
+        {% for region in regional_regions %}
+            <div class="col-12 col-md-6 col-xl-4">
+                <article class="card shadow-sm h-100">
+                    <div class="card-body d-flex flex-column">
+                        <h4 class="h5 card-title mb-2">
+                            {{ region.name }}{% if region.report_abbreviation %} <span class="text-muted">&ndash; {{ region.report_abbreviation }}</span>{% endif %}
+                        </h4>
+                        <p class="card-text text-muted small">League owners and downloadable fixture, results, and standings reports for this region.</p>
+
+                        <div class="d-grid gap-2 mt-auto">
+                            <a href="{% url 'league_manager:regional_league_owners' region.slug %}" class="btn btn-outline-primary">League Owners</a>
+                            <a href="{% url 'league_manager:regional_report_export' region.slug 'fixtures' %}" class="btn btn-outline-secondary">Export Fixtures</a>
+                            <a href="{% url 'league_manager:regional_report_export' region.slug 'results' %}" class="btn btn-outline-secondary">Export Results</a>
+                            <a href="{% url 'league_manager:regional_report_export' region.slug 'standings' %}" class="btn btn-outline-secondary">Download Standings</a>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+{% if organisation_scopes %}
+<section class="mt-5" aria-labelledby="organisation-administration-heading">
+    <div class="mb-3">
+        <h3 id="organisation-administration-heading" class="h4 mb-1">Section Administration</h3>
+        <p class="text-muted mb-0">Choose an authorized EWFA, PLE, or Zonal section to manage its leagues, owners, and league-wide reports.</p>
+    </div>
+
+    <div class="row g-3">
+        {% for scope in organisation_scopes %}
+            <div class="col-12 col-md-6 col-xl-4">
+                <article class="card shadow-sm h-100">
+                    <div class="card-body d-flex flex-column">
+                        <h4 class="h5 card-title mb-2">{{ scope.dashboard_title }}</h4>
+                        <p class="card-text text-muted small">{{ scope.description }}</p>
+
+                        <div class="d-grid gap-2 mt-auto">
+                            <a href="{% url 'league_manager:organisation_league_owners' scope.key %}" class="btn btn-outline-primary">League Owners</a>
+                            <a href="{% url 'league_manager:organisation_report_export' scope.key 'fixtures' %}" class="btn btn-outline-secondary">Export Fixtures</a>
+                            <a href="{% url 'league_manager:organisation_report_export' scope.key 'results' %}" class="btn btn-outline-secondary">Export Results</a>
+                            <a href="{% url 'league_manager:organisation_report_export' scope.key 'standings' %}" class="btn btn-outline-secondary">Download Standings</a>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+{% endblock %}

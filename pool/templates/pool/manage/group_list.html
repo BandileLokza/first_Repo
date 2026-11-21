@@ -1,0 +1,25 @@
+{% extends "pool/manage/base.html" %}
+
+{% block manager_title %}Groups · {{ competition.name }}{% endblock %}
+
+{% block manager_content %}
+<section class="pool-manager-panel">
+    <div class="pool-manager-section-heading">
+        <div>
+            <p class="pool-eyebrow">Group stages</p>
+            <h2>Groups and memberships</h2>
+            <p class="pool-manager-help mb-0">Assign each entered participant to one group per group stage.</p>
+        </div>
+    </div>
+    <div class="pool-manager-card-grid">
+        {% for stage in group_stages %}
+        <a class="pool-entry-card pool-manager-panel pool-manager-link-card" href="{% url 'pool:manage_competition_group_stage' competition.slug stage.pk %}">
+            <span class="pool-entry-card-title">{{ stage.name }}</span>
+            <span class="pool-entry-card-meta">{{ stage.group_count }} group{{ stage.group_count|pluralize }} · {{ stage.membership_count }} assigned participant{{ stage.membership_count|pluralize }}</span>
+        </a>
+        {% empty %}
+        <div class="pool-manager-empty">No group stages have been configured. Add a group stage from <a href="{% url 'pool:manage_competition_stages' competition.slug %}">Stages</a> first.</div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

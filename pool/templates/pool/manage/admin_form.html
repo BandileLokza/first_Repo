@@ -1,0 +1,7 @@
+{% extends "pool/manage/base.html" %}
+
+{% block manager_title %}Add competition administrator{% endblock %}
+
+{% block manager_content %}
+<section class="pool-manager-panel"><h2>Add competition administrator</h2><p class="pool-manager-help">Enter an exact existing username or email. This does not create or expose a global user directory.</p><form method="post" class="pool-manager-form" novalidate>{% csrf_token %}{% include "pool/manage/_form_fields.html" with form=form %}<div class="pool-manager-actions"><button class="btn btn-primary" type="submit">Add administrator</button><a class="btn btn-outline-secondary" href="{% url 'pool:manage_competition_admins' competition.slug %}">Cancel</a></div></form></section>
+{% endblock %}

@@ -1,0 +1,36 @@
+<h2 class="section-title">
+    <span class="section-icon">🏆</span>
+    Regions
+</h2>
+
+<div class="row g-3 mb-4">
+{% for region in regions %}
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card shadow-sm h-100 position-relative region-preview-card region-card">
+            <a href="{% url 'region_detail' region.slug %}" class="stretched-link region-card-overlay" aria-label="View {{ region.name }} region"></a>
+            <div class="card-body">
+                <div class="region-brand mb-3 position-relative region-card-foreground">
+                    {% if region.logo %}
+                        <img src="{{ region.logo.url }}" alt="{{ region.name }} logo" class="region-logo" loading="lazy" decoding="async">
+                    {% else %}
+                        <span class="region-logo region-logo--fallback" aria-hidden="true">🏆</span>
+                    {% endif %}
+                    <h4 class="m-0 region-title"><a href="{% url 'region_detail' region.slug %}" class="text-decoration-none">{{ region.name }}</a></h4>
+                </div>
+                <div class="region-league-list mb-3">
+                    {% for league in region.preview_leagues %}
+                        <a href="{% url 'league_detail' league.slug %}" class="region-league-link position-relative region-card-foreground">
+                            {% include "leagues/partials/league_identity.html" with variant="row" %}
+                            <span aria-hidden="true">&rarr;</span>
+                        </a>
+                    {% endfor %}
+                    {% if region.extra_league_count %}<div class="region-secondary-text pt-1">+ {{ region.extra_league_count }} more league{{ region.extra_league_count|pluralize }}</div>{% endif %}
+                </div>
+                <a href="{% url 'region_detail' region.slug %}" class="btn btn-sm btn-outline-primary position-relative region-card-foreground">View Region &rarr;</a>
+            </div>
+        </div>
+    </div>
+{% empty %}
+    <div class="col-12"><p class="text-muted">No public regions are available.</p></div>
+{% endfor %}
+</div>

@@ -1,0 +1,444 @@
+<!-- = Base html file ===== -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WVH8EKQTQS"></script>
+<link rel="icon" type="image/png" href="{% static 'images/esportslive-favicon.png' %}">
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-WVH8EKQTQS');
+</script>
+    <script>
+        (function () {
+            try {
+                const savedTheme = localStorage.getItem("theme") || "dark";
+                const root = document.documentElement;
+
+                root.classList.remove("dark-theme", "light-theme");
+
+                if (savedTheme === "dark") {
+                    root.classList.add("dark-theme");
+                    root.style.backgroundColor = "#121212";
+                } else {
+                    root.classList.add("light-theme");
+                    root.style.backgroundColor = "#f5f6fa";
+                }
+            } catch (e) {
+                document.documentElement.classList.add("dark-theme");
+                document.documentElement.style.backgroundColor = "#121212";
+            }
+        })();
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EsportsLive{% endblock %}</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=20261110">
+    
+    {% block extra_css %}{% endblock %}
+        
+    <style>
+        
+        /* 1. BASE BODY STYLES */
+        html,
+        body {
+            min-height: 100%;
+        }
+        
+        html,
+        body {
+            min-height: 100%;
+        }
+        
+        html.light-theme,
+        html.light-theme body,
+        body.light-theme {
+            background-color: #f5f6fa !important;
+            color: #121212 !important;
+        }
+        
+        html.dark-theme,
+        html.dark-theme body,
+        body.dark-theme {
+            background-color: #121212 !important;
+            color: #e0e0e0 !important;
+        }
+        
+        /* Light theme */
+        html.light-theme,
+        html.light-theme body,
+        body.light-theme {
+            background-color: #f5f6fa !important;
+            color: #121212 !important;
+        }
+        
+        /* Dark theme */
+        html.dark-theme,
+        html.dark-theme body,
+        body.dark-theme {
+            background-color: #121212 !important;
+            color: #e0e0e0 !important;
+        }
+
+        /* Target text specifically inside dark cards */
+        body.dark-theme .team-name {
+            color: #ffffff !important;
+        }
+        /* =========================
+   DARK MODE FOR PREDICTIONS
+   ========================= */
+
+    /* Make the prediction card itself dark */
+    body.dark-theme .prediction-card {
+        background-color: #1e1e1e !important;
+        border: 1px solid #333 !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    /* Fix the Team Names visibility */
+    body.dark-theme .prediction-card .team-name {
+        color: #ffffff !important;
+        font-weight: 700;
+    }
+
+    /* Style the Countdown and "Your Prediction" labels */
+    body.dark-theme .kickoff-countdown,
+    body.dark-theme .locked-box strong,
+    body.dark-theme .prediction-form label {
+        color: #cccccc !important;
+    }
+
+    /* Fix the Prediction Locked box */
+    body.dark-theme .locked-box {
+        background-color: #2b2b2b !important;
+        border: 1px solid #444 !important;
+        color: #e0e0e0 !important;
+    }
+
+    /* Fix Input fields in Dark Mode */
+    body.dark-theme .goals-group input {
+        background-color: #333 !important;
+        border: 1px solid #555 !important;
+        color: #ffffff !important;
+    }
+
+    /* Style for the "Actual Score" text */
+    body.dark-theme .actual-score {
+        color: #00d4ff !important; /* Cyan blue for visibility */
+    }
+
+        /* 3. THEME TOGGLE BUTTON STYLING */
+        .theme-toggle-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            color: white;
+            font-size: 1.1rem;
+        }
+        .theme-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05) rotate(15deg);
+        }
+
+        /* 4. YOUR EXISTING ANIMATIONS */
+        .league-card:hover, .match-card:hover {
+            transform: scale(1.02);
+            transition: 0.2s ease-in-out;
+        }
+        .live-badge {
+            background-color: red;
+            color: white;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 10px;
+        }
+    </style>
+    <!-- ===== NEW: GOOGLE ANALYTICS PLACEHOLDER ===== -->
+    <!-- Replace G-XXXXXXXXXX with your real GA4 Measurement ID -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-VN72GV4BH1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-VN72GV4BH1');
+    </script>
+</head>
+
+<body>
+<script>
+    (function () {
+        try {
+            const savedTheme = localStorage.getItem("theme") || "dark";
+            document.body.classList.remove("dark-theme", "light-theme");
+
+            if (savedTheme === "dark") {
+                document.body.classList.add("dark-theme");
+                document.body.style.backgroundColor = "#121212";
+            } else {
+                document.body.classList.add("light-theme");
+                document.body.style.backgroundColor = "#f5f6fa";
+            }
+        } catch (e) {
+            document.body.classList.add("dark-theme");
+            document.body.style.backgroundColor = "#121212";
+        }
+    })();
+</script>
+
+<nav class="navbar esports-mobile-navbar">
+    <div class="container esports-nav-container">
+
+        <!-- LEFT: menu icon -->
+        <button class="navbar-toggler esports-menu-btn" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- CENTER: emblem, site name, account control, and theme toggle -->
+        <div class="esports-header-identity">
+            <a class="navbar-brand esports-brand-centered" href="/">
+                <span class="brand-emblem">
+                    {% if site_identity and site_identity.emblem %}
+                    <img src="{{ site_identity.emblem.url }}" alt="" decoding="async" onerror="this.classList.add('d-none'); this.nextElementSibling.classList.remove('d-none');">
+                    <span class="brand-emblem-fallback d-none" aria-hidden="true">E</span>
+                    {% else %}
+                    <span class="brand-emblem-fallback" aria-hidden="true">E</span>
+                    {% endif %}
+                </span>
+                <span class="brand-text">{% if site_identity %}{{ site_identity.site_name }}{% else %}EsportsLive{% endif %}</span>
+            </a>
+        </div>
+
+        <div class="d-flex align-items-center gap-2 esports-nav-actions">
+            {% if user.is_authenticated %}
+            <div class="dropdown">
+                <button class="btn auth-avatar-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    {{ user.get_username|first|upper }}
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li class="px-3 py-2 user-menu-identity">
+                        <div class="fw-semibold text-truncate">
+                            {% if user.username %}{{ user.username }}{% else %}{{ user.email }}{% endif %}
+                        </div>
+                        {% if user.email %}
+                        <div class="small text-muted text-truncate">{{ user.email }}</div>
+                        {% endif %}
+                    </li>
+                    {% if user.is_superuser or has_league_management_access %}
+                    <li><hr class="dropdown-divider my-1"></li>
+                    {% endif %}
+                    {% if user.is_superuser %}
+                    <li><a class="dropdown-item" href="/admin/">Admin Panel</a></li>
+                    {% endif %}
+                    {% if has_league_management_access %}
+                    <li><a class="dropdown-item" href="{% url 'league_manager:dashboard' %}">League Manager</a></li>
+                    {% endif %}
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#logoutConfirmModal">
+                            Sign Out
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            {% else %}
+            <button class="btn auth-signin-btn" type="button" data-bs-toggle="modal" data-bs-target="#signInModal" aria-controls="signInModal">
+                👤 Sign In
+            </button>
+            {% endif %}
+
+            <button id="themeToggle" class="theme-toggle-btn" type="button" aria-label="Toggle Dark Mode">
+                <span id="themeIcon">🌙</span>
+            </button>
+        </div>
+
+        <!-- COLLAPSED MENU -->
+        <div class="collapse navbar-collapse esports-collapse" id="mainNavbar">
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link" href="/">🏆 Leagues</a></li>
+            </ul>
+        </div>
+
+    </div>
+</nav>
+
+<div class="container mt-4 mb-4">
+    {% block content %}
+    {% endblock %}
+</div>
+
+{% if not user.is_authenticated %}
+<section class="auth-footer-cta" aria-labelledby="auth-footer-cta-title">
+    <div class="container auth-footer-cta-content">
+        <div>
+            <h2 id="auth-footer-cta-title">Join the action</h2>
+            <p>Sign in to follow the leagues, teams and players you love, all in one place.</p>
+        </div>
+        <div class="auth-footer-cta-actions">
+            <button class="btn auth-footer-signin" type="button" data-bs-toggle="modal" data-bs-target="#signInModal">
+                Sign In
+            </button>
+            <button class="btn auth-footer-signup" type="button" data-bs-toggle="modal" data-bs-target="#signUpModal">
+                Create Account
+            </button>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<footer class="bg-dark text-white mt-5 p-3 text-center">
+    <small>© 2026 EsportsLive</small>
+</footer>
+<!-- ===== AUTH MODALS (ADDED) ===== -->
+{% if not user.is_authenticated %}
+{% include "accounts/_modals.html" %}
+{% endif %}
+
+{% if user.is_authenticated %}
+<div class="modal fade" id="logoutConfirmModal" tabindex="-1" aria-labelledby="logoutConfirmTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content logout-confirm-modal">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="logoutConfirmTitle">Sign out of EsportsLive?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="mb-0">Are you sure you want to sign out? You will need to sign in again before you can submit predictions.</p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Stay Signed In</button>
+                <form method="post" action="{% url 'account_logout' %}" class="m-0">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Log Out</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const toggleBtn = document.getElementById("themeToggle");
+        const themeIcon = document.getElementById("themeIcon");
+        const html = document.documentElement;
+        const body = document.body;
+
+        function applyTheme(theme) {
+            html.classList.remove("dark-theme", "light-theme");
+            body.classList.remove("dark-theme", "light-theme");
+
+            if (theme === "dark") {
+                html.classList.add("dark-theme");
+                body.classList.add("dark-theme");
+
+                html.style.backgroundColor = "#121212";
+                body.style.backgroundColor = "#121212";
+
+                localStorage.setItem("theme", "dark");
+
+                if (themeIcon) {
+                    themeIcon.textContent = "☀️";
+                }
+            } else {
+                html.classList.add("light-theme");
+                body.classList.add("light-theme");
+
+                html.style.backgroundColor = "#f5f6fa";
+                body.style.backgroundColor = "#f5f6fa";
+
+                localStorage.setItem("theme", "light");
+
+                if (themeIcon) {
+                    themeIcon.textContent = "🌙";
+                }
+            }
+        }
+
+        const savedTheme = localStorage.getItem("theme") || "dark";
+        applyTheme(savedTheme);
+
+        if (toggleBtn) {
+            toggleBtn.addEventListener("click", () => {
+                const isDark = html.classList.contains("dark-theme");
+                applyTheme(isDark ? "light" : "dark");
+            });
+        }
+    });
+</script>
+<!-- ===== AUTH MODAL SUBMIT HANDLING (ADDED) ===== -->
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        function clearErrors(form) {
+            form.querySelectorAll("[data-error-for]").forEach(el => el.textContent = "");
+        }
+
+        function showErrors(form, errors) {
+            clearErrors(form);
+            for (const field in errors) {
+                const key = field === "__all__" ? "__all__" : field;
+                const el = form.querySelector(`[data-error-for="${key}"]`);
+                if (el) {
+                    el.textContent = errors[field].map(e => e.message || e).join(" ");
+                } else {
+                    const fallback = form.querySelector('[data-error-for="__all__"]');
+                    if (fallback) fallback.textContent = errors[field].map(e => e.message || e).join(" ");
+                }
+            }
+        }
+
+        function bindAjaxForm(formId) {
+            const form = document.getElementById(formId);
+            if (!form) return;
+
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                clearErrors(form);
+
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) submitBtn.disabled = true;
+
+                try {
+                    const response = await fetch(form.action, {
+                        method: "POST",
+                        headers: { "X-Requested-With": "XMLHttpRequest" },
+                        body: new FormData(form),
+                    });
+                    const data = await response.json();
+
+                    if (data.success) {
+                        window.location.href = data.redirect || "/";
+                    } else {
+                        showErrors(form, data.errors || {});
+                        if (submitBtn) submitBtn.disabled = false;
+                    }
+                } catch (err) {
+                    const fallback = form.querySelector('[data-error-for="__all__"]');
+                    if (fallback) fallback.textContent = "Something went wrong. Please try again.";
+                    if (submitBtn) submitBtn.disabled = false;
+                }
+            });
+        }
+
+        bindAjaxForm("signInForm");
+        bindAjaxForm("signUpForm");
+    });
+</script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

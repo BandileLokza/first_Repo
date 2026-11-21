@@ -1,0 +1,8 @@
+{% if can_approve_artwork and report_kind != 'STANDINGS' %}
+<fieldset class="border rounded p-3 mb-4">
+    <legend class="float-none w-auto px-1 h6">Approved artwork for this download</legend>
+    <p class="form-text mt-0" id="report-artwork-help">Only select artwork you are authorised to use on this release. The choices apply to this download only and to each selected league with the corresponding artwork configured. Previews are unsigned.</p>
+    <div class="form-check"><input class="form-check-input" type="checkbox" name="include_signature" id="include-signature" value="1" aria-describedby="report-artwork-help" autocomplete="off"><label class="form-check-label" for="include-signature">Include approved signature</label></div>
+    <div class="form-check"><input class="form-check-input" type="checkbox" name="include_stamp" id="include-stamp" value="1" aria-describedby="report-artwork-help" autocomplete="off"><label class="form-check-label" for="include-stamp">Include approved stamp</label></div>
+</fieldset>
+{% endif %}

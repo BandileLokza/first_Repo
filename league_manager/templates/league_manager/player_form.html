@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_title }} - {{ league.name }}{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-7">
+
+        <div class="mb-3">
+            <a
+                href="{% url 'league_manager:player_list' league.slug %}"
+                class="back-btn"
+            >
+                ← BACK
+            </a>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+
+                <h2 class="mb-1">
+                    {{ page_title }}
+                </h2>
+
+                <p class="text-muted">
+                    {{ league.name }}
+                </p>
+
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label
+                            for="{{ form.name.id_for_label }}"
+                            class="form-label"
+                        >
+                            Player Name
+                        </label>
+
+                        {{ form.name }}
+
+                        {% for error in form.name.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label
+                            for="{{ form.photo.id_for_label }}"
+                            class="form-label"
+                        >
+                            Player Photo
+                        </label>
+
+                        {% if player.photo %}
+                            <div class="mb-2">
+                                <img
+                                    src="{{ player.photo.url }}"
+                                    alt="Current photo of {{ player.name }}"
+                                    class="player-form-photo"
+                                >
+                            </div>
+                        {% endif %}
+
+                        {{ form.photo }}
+
+                        {% for error in form.photo.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+
+                        <div class="form-text">
+                            Optional. You may add, replace or clear the photo later.
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label
+                            for="{{ form.team.id_for_label }}"
+                            class="form-label"
+                        >
+                            Team
+                        </label>
+
+                        {{ form.team }}
+
+                        {% for error in form.team.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label
+                            for="{{ form.jersey_number.id_for_label }}"
+                            class="form-label"
+                        >
+                            Jersey Number
+                        </label>
+
+                        {{ form.jersey_number }}
+
+                        {% for error in form.jersey_number.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label
+                            for="{{ form.starting_goals.id_for_label }}"
+                            class="form-label"
+                        >
+                            Starting Goals
+                        </label>
+
+                        {{ form.starting_goals }}
+
+                        {% for error in form.starting_goals.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+
+                        <div class="form-text">
+                            Use this only when importing goals scored before the league started using EsportsLive.
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                        >
+                            {{ submit_text }}
+                        </button>
+
+                        {% if is_create %}
+                            <button
+                                type="submit"
+                                name="save_and_add_another"
+                                value="1"
+                                class="btn btn-outline-primary"
+                            >
+                                Save &amp; Add Another
+                            </button>
+                        {% endif %}
+
+                        <a
+                            href="{% url 'league_manager:player_list' league.slug %}"
+                            class="btn btn-outline-secondary"
+                        >
+                            Cancel
+                        </a>
+
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,48 @@
+{% if match.status == 'UPCOMING' or match.status == 'POSTPONED' %}
+<section class="pool-manager-panel mb-3">
+    <h2>Start match</h2>
+    <p class="pool-manager-help">Starting the fixture opens live rack scoring. Scores will be derived from rack history.</p>
+    <form method="post" action="{% url 'pool:manage_match_start' competition.slug match.pk %}">{% csrf_token %}{% include "pool/manage/_scoring_surface_field.html" %}<button class="btn btn-success btn-lg" type="submit">Start match</button></form>
+</section>
+{% endif %}
+
+{% if team_rack_scoring and missing_roster_entries %}
+<section class="pool-manager-panel mb-3" aria-labelledby="team-rack-roster-required-title">
+    <h2 id="team-rack-roster-required-title">Team roster required</h2>
+    <p class="pool-manager-help">A player must be recorded for every new team rack. Add active registered players before recording racks.</p>
+    <ul class="pool-manager-list mb-0">
+        {% for entry in missing_roster_entries %}
+        <li><strong>{{ entry.display_name }}</strong> has no active registered players. {% if scorer_mode %}Contact a competition manager to add an active registered player.{% else %}<a href="{% url 'pool:manage_competition_team_roster' competition.slug entry.pk %}">Manage {{ entry.display_name }} roster</a>{% endif %}</li>
+        {% endfor %}
+    </ul>
+</section>
+{% endif %}
+
+{% if team_rack_scoring and ambiguous_roster_players %}
+<div class="alert alert-warning" role="status"><strong>Roster check needed.</strong> {% for player in ambiguous_roster_players %}{{ player.full_name }}{% if not forloop.last %}, {% endif %}{% endfor %} is registered to both competing teams and cannot be selected until the roster is corrected.</div>
+{% endif %}
+
+{% if can_record_racks %}
+<section class="pool-manager-panel mb-3">
+    <h2>Record next rack</h2>
+    <p class="pool-manager-help">The next rack number is assigned automatically. Reaching the race target completes the played match and derives its winner.</p>
+    <form method="post" action="{% url 'pool:manage_match_record_rack' competition.slug match.pk %}" class="pool-manager-form" data-pool-rack-score-form novalidate>{% csrf_token %}{% include "pool/manage/_scoring_surface_field.html" %}{% if team_rack_scoring %}{% include "pool/manage/_team_rack_form_fields.html" with form=rack_form %}{{ rack_form.request_token }}{% else %}{% include "pool/manage/_form_fields.html" with form=rack_form %}{% endif %}<button class="btn btn-primary btn-lg" type="submit">Record rack</button><p class="pool-rack-save-status mt-2 mb-0" data-pool-rack-save-status role="status" aria-live="polite" hidden></p><p class="pool-manager-help mt-2 mb-0" data-pool-latest-rack hidden></p></form>
+</section>
+{% endif %}
+
+<section class="pool-manager-panel">
+    <div class="d-flex flex-wrap justify-content-between gap-2 mb-3"><div><h2 class="mb-1">Rack history</h2><p class="pool-manager-help mb-0">{{ rack_summary.racks_played }} rack{{ rack_summary.racks_played|pluralize }} recorded &middot; Green apples {{ rack_summary.green_apples }}, red apples {{ rack_summary.red_apples }}, one visits {{ rack_summary.one_visits }}.</p></div>{% if not inline_scoring %}<a class="btn btn-outline-secondary" href="{% url 'pool:match_detail' match.pk %}">View public match page</a>{% endif %}</div>
+    <div class="table-responsive"><table class="table pool-manager-table"><thead><tr><th>Rack</th><th>{% if team_rack_scoring %}Team{% else %}Winner{% endif %}</th>{% if team_rack_scoring %}<th>Player</th>{% endif %}<th>Outcome</th><th>Breaker</th><th class="text-end">Correction</th></tr></thead><tbody>
+        {% for row in rack_rows %}
+        <tr><td>{{ row.rack.rack_number }}</td><td>{{ row.rack.winner.display_name }}</td>{% if team_rack_scoring %}<td>{% if row.rack.winning_player %}{{ row.rack.winning_player.full_name }}{% else %}<span class="pool-muted">Player not recorded</span>{% endif %}</td>{% endif %}<td>{{ row.rack.get_outcome_type_display }}</td><td>{% if row.rack.breaker %}{{ row.rack.breaker.display_name }}{% else %}&mdash;{% endif %}</td><td class="text-end">
+            {% if correction_is_open and not scorer_mode %}
+            <details><summary class="btn btn-sm btn-outline-secondary">Correct</summary><form method="post" action="{% url 'pool:manage_match_correct_rack' competition.slug match.pk row.rack.pk %}" class="pool-manager-form text-start mt-2">{% csrf_token %}{% include "pool/manage/_scoring_surface_field.html" %}{% if row.correction_form.is_team_match %}{% include "pool/manage/_team_rack_form_fields.html" with form=row.correction_form %}{% else %}{% include "pool/manage/_form_fields.html" with form=row.correction_form %}{% endif %}<button class="btn btn-sm btn-primary" type="submit">Save correction</button></form></details>
+            {% if latest_rack_id == row.rack.pk %}<form class="d-inline mt-1" method="post" action="{% url 'pool:manage_match_undo_rack' competition.slug match.pk row.rack.pk %}">{% csrf_token %}{% include "pool/manage/_scoring_surface_field.html" %}<input type="hidden" name="reason" value=""><button class="btn btn-sm btn-outline-danger" type="submit">Undo latest</button></form>{% endif %}
+            {% elif match.status == 'LIVE' %}
+            <details><summary class="btn btn-sm btn-outline-secondary">Correct</summary><form method="post" action="{% url 'pool:manage_match_correct_rack' competition.slug match.pk row.rack.pk %}" class="pool-manager-form text-start mt-2">{% csrf_token %}{% include "pool/manage/_scoring_surface_field.html" %}{% if row.correction_form.is_team_match %}{% include "pool/manage/_team_rack_form_fields.html" with form=row.correction_form %}{% else %}{% include "pool/manage/_form_fields.html" with form=row.correction_form %}{% endif %}<button class="btn btn-sm btn-primary" type="submit">Save correction</button></form></details>
+            {% if latest_rack_id == row.rack.pk %}<form class="d-inline mt-1" method="post" action="{% url 'pool:manage_match_undo_rack' competition.slug match.pk row.rack.pk %}">{% csrf_token %}{% include "pool/manage/_scoring_surface_field.html" %}<input type="hidden" name="reason" value=""><button class="btn btn-sm btn-outline-danger" type="submit">Undo latest</button></form>{% endif %}
+            {% else %}<span class="text-muted">Read-only</span>{% endif %}
+        </td></tr>
+        {% empty %}<tr><td colspan="{% if team_rack_scoring %}6{% else %}5{% endif %}" class="text-center">No racks have been recorded.</td></tr>{% endfor %}
+    </tbody></table></div>
+</section>

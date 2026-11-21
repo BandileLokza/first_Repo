@@ -1,0 +1,487 @@
+{% if active_tab == "entrants" %}
+<div class="pool-section-heading">
+    <div>
+        <p class="pool-eyebrow">Competition entrants</p>
+        <h2 id="pool-entrants-title">Entrants</h2>
+    </div>
+    <p class="pool-section-note">
+        {{ entrant_count }} {{ entrant_noun }}{{ entrant_count|pluralize }} registered.
+        {% if tournament_life_count %}{{ tournament_life_count }} tournament {% if tournament_life_count == 1 %}life{% else %}lives{% endif %}.{% endif %}
+    </p>
+</div>
+
+<form class="pool-entrant-search" method="get" action="{% url 'pool:competition_detail' competition.slug %}">
+    <input type="hidden" name="tab" value="entrants">
+    <div>
+        <label for="pool-entrant-search">Search {{ entrant_noun }}s</label>
+        <input
+            id="pool-entrant-search"
+            class="form-control"
+            type="search"
+            name="q"
+            value="{{ entrant_query }}"
+            placeholder="{% if competition.participant_mode == 'SINGLES' %}Name or nickname{% else %}Team name{% endif %}"
+        >
+    </div>
+    {% if competition.participant_mode == 'SINGLES' %}
+    <div>
+        <label for="pool-entrant-region">Region</label>
+        <select id="pool-entrant-region" class="form-select" name="region">
+            <option value="">All regions</option>
+            {% for region in entrant_regions %}
+            <option value="{{ region }}"{% if entrant_region == region %} selected{% endif %}>{{ region }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    {% endif %}
+    <div class="pool-entrant-search-actions">
+        <button class="btn btn-primary" type="submit">Filter entrants</button>
+        {% if entrant_has_filters %}<a class="btn btn-outline-secondary" href="{% url 'pool:competition_detail' competition.slug %}?tab=entrants">Clear</a>{% endif %}
+    </div>
+</form>
+
+{% if not entrant_count %}
+<div class="pool-empty-state">
+    <h3>No entrants have been published yet.</h3>
+    <p>Registered {{ entrant_noun }}s will appear here when they are added to the competition.</p>
+</div>
+{% elif entrants %}
+    {% include "pool/_entrants.html" with entrants=entrants %}
+{% else %}
+<div class="pool-empty-state">
+    <h3>No entrants match your search.</h3>
+    <p>{% if competition.participant_mode == 'SINGLES' %}Try another name, nickname, or region.{% else %}Try another team name.{% endif %}</p>
+</div>
+{% endif %}
+
+{% elif active_tab == "fixtures" %}
+<div class="pool-section-heading">
+    <div>
+        <p class="pool-eyebrow">Schedule</p>
+        <h2 id="pool-fixtures-title">Fixtures</h2>
+    </div>
+</div>
+<div class="pool-stacked-cards">
+    {% if fixture_gameweek_sections %}
+    {% for section in fixture_gameweek_sections %}
+    <section class="pool-gameweek-section">
+        <h3>{% if section.gameweek %}{{ section.round_term }} {{ section.gameweek }}{% else %}Other fixtures{% endif %}</h3>
+        {% if section.groups %}
+        {% for group_section in section.groups %}
+        <h4>{{ group_section.group.name }}</h4>
+        {% for pool_match in group_section.matches %}
+    <a class="pool-match-card" href="{% url 'pool:match_detail' pool_match.pk %}">
+        <div class="pool-match-card-topline">
+            <span class="pool-status pool-status--{{ pool_match.status|lower }}">{{ pool_match.get_status_display }}</span>
+            <span class="pool-match-card-meta"><span class="pool-match-context">{{ pool_match.stage_context_label }}</span>{% if pool_match.has_stream %}<span class="pool-stream-badge">Stream available</span>{% endif %}</span>
+        </div>
+        <div class="pool-match-row">
+            <div class="pool-participant pool-participant--home">{% if pool_match.home_entry.display_image %}<img src="{{ pool_match.home_entry.display_image.url }}" alt="" class="pool-participant-image" loading="lazy" decoding="async">{% else %}<span class="pool-participant-fallback" aria-hidden="true">8</span>{% endif %}<span>{{ pool_match.home_participant_display_name }}</span></div>
+            {% if pool_match.status == 'LIVE' or pool_match.status == 'FINISHED' or pool_match.status == 'ABANDONED' %}<strong class="pool-score">{{ pool_match.home_score }} <span>&ndash;</span> {{ pool_match.away_score }}</strong>{% else %}<strong class="pool-versus">vs</strong>{% endif %}
+            <div class="pool-participant pool-participant--away"><span>{{ pool_match.away_participant_display_name }}</span>{% if pool_match.away_entry.display_image %}<img src="{{ pool_match.away_entry.display_image.url }}" alt="" class="pool-participant-image" loading="lazy" decoding="async">{% else %}<span class="pool-participant-fallback" aria-hidden="true">8</span>{% endif %}</div>
+        </div>
+        <div class="pool-match-card-footer"><time datetime="{{ pool_match.scheduled_at|date:'c' }}">{{ pool_match.scheduled_at|date:"D, M j, Y" }} &middot; {{ pool_match.scheduled_at|date:"H:i" }}</time>{% if pool_match.venue %}<span>{{ pool_match.venue }}</span>{% endif %}</div>
+    </a>
+        {% endfor %}
+        {% endfor %}
+        {% else %}
+        {% for pool_match in section.matches %}
+    <a class="pool-match-card" href="{% url 'pool:match_detail' pool_match.pk %}">
+        <div class="pool-match-card-topline">
+            <span class="pool-status pool-status--{{ pool_match.status|lower }}">{{ pool_match.get_status_display }}</span>
+            <span class="pool-match-card-meta"><span class="pool-match-context">{{ pool_match.stage_context_label }}</span>{% if pool_match.has_stream %}<span class="pool-stream-badge">Stream available</span>{% endif %}</span>
+        </div>
+        <div class="pool-match-row">
+            <div class="pool-participant pool-participant--home">
+                {% if pool_match.home_entry.display_image %}<img src="{{ pool_match.home_entry.display_image.url }}" alt="" class="pool-participant-image" loading="lazy" decoding="async">{% else %}<span class="pool-participant-fallback" aria-hidden="true">8</span>{% endif %}
+                <span>{{ pool_match.home_participant_display_name }}</span>
+            </div>
+            {% if pool_match.status == 'LIVE' or pool_match.status == 'FINISHED' or pool_match.status == 'ABANDONED' %}
+            <strong class="pool-score">{{ pool_match.home_score }} <span>&ndash;</span> {{ pool_match.away_score }}</strong>
+            {% else %}
+            <strong class="pool-versus">vs</strong>
+            {% endif %}
+            <div class="pool-participant pool-participant--away">
+                <span>{{ pool_match.away_participant_display_name }}</span>
+                {% if pool_match.away_entry.display_image %}<img src="{{ pool_match.away_entry.display_image.url }}" alt="" class="pool-participant-image" loading="lazy" decoding="async">{% else %}<span class="pool-participant-fallback" aria-hidden="true">8</span>{% endif %}
+            </div>
+        </div>
+        <div class="pool-match-card-footer">
+            <time datetime="{{ pool_match.scheduled_at|date:'c' }}">
+                {{ pool_match.scheduled_at|date:"D, M j, Y" }} &middot; {{ pool_match.scheduled_at|date:"H:i" }}
+            </time>
+            {% if pool_match.venue %}<span>{{ pool_match.venue }}</span>{% endif %}
+            {% include "pool/_money_match_prize_pot.html" with prize_competition=pool_match.competition %}
+        </div>
+    </a>
+        {% endfor %}
+        {% endif %}
+    </section>
+    {% endfor %}
+    {% else %}
+    {% for pool_match in fixtures %}
+    <a class="pool-match-card" href="{% url 'pool:match_detail' pool_match.pk %}">
+        <div class="pool-match-card-topline">
+            <span class="pool-status pool-status--{{ pool_match.status|lower }}">{{ pool_match.get_status_display }}</span>
+            <span class="pool-match-card-meta"><span class="pool-match-context">{{ pool_match.stage_context_label }}</span>{% if pool_match.has_stream %}<span class="pool-stream-badge">Stream available</span>{% endif %}</span>
+        </div>
+        <div class="pool-match-row">
+            <div class="pool-participant pool-participant--home">
+                {% if pool_match.home_entry.display_image %}<img src="{{ pool_match.home_entry.display_image.url }}" alt="" class="pool-participant-image" loading="lazy" decoding="async">{% else %}<span class="pool-participant-fallback" aria-hidden="true">8</span>{% endif %}
+                <span>{{ pool_match.home_participant_display_name }}</span>
+            </div>
+            {% if pool_match.status == 'LIVE' or pool_match.status == 'FINISHED' or pool_match.status == 'ABANDONED' %}
+            <strong class="pool-score">{{ pool_match.home_score }} <span>&ndash;</span> {{ pool_match.away_score }}</strong>
+            {% else %}
+            <strong class="pool-versus">vs</strong>
+            {% endif %}
+            <div class="pool-participant pool-participant--away">
+                <span>{{ pool_match.away_participant_display_name }}</span>
+                {% if pool_match.away_entry.display_image %}<img src="{{ pool_match.away_entry.display_image.url }}" alt="" class="pool-participant-image" loading="lazy" decoding="async">{% else %}<span class="pool-participant-fallback" aria-hidden="true">8</span>{% endif %}
+            </div>
+        </div>
+        <div class="pool-match-card-footer">
+            <time datetime="{{ pool_match.scheduled_at|date:'c' }}">
+                {{ pool_match.scheduled_at|date:"D, M j, Y" }} &middot; {{ pool_match.scheduled_at|date:"H:i" }}
+            </time>
+            {% if pool_match.venue %}<span>{{ pool_match.venue }}</span>{% endif %}
+            {% include "pool/_money_match_prize_pot.html" with prize_competition=pool_match.competition %}
+        </div>
+    </a>
+    {% empty %}
+    <div class="pool-empty-state"><h3>No fixtures are available yet.</h3><p>Scheduled, live, and postponed matches will appear here.</p></div>
+    {% endfor %}
+    {% endif %}
+</div>
+
+{% elif active_tab == "results" %}
+<div class="pool-section-heading">
+    <div>
+        <p class="pool-eyebrow">Completed play</p>
+        <h2 id="pool-results-title">Results</h2>
+    </div>
+</div>
+<div class="pool-stacked-cards">
+    {% if result_gameweek_sections %}
+    {% for section in result_gameweek_sections %}
+    <section class="pool-gameweek-section">
+        <h3>{% if section.gameweek %}{{ section.round_term }} {{ section.gameweek }}{% else %}Other fixtures{% endif %}</h3>
+        {% if section.groups %}
+        {% for group_section in section.groups %}
+        <h4>{{ group_section.group.name }}</h4>
+        {% for pool_match in group_section.matches %}
+    <a class="pool-match-card" href="{% url 'pool:match_detail' pool_match.pk %}">
+        <div class="pool-match-card-topline"><span class="pool-status pool-status--finished">{{ pool_match.get_result_method_display }}</span><span class="pool-match-card-meta"><span class="pool-match-context">{{ pool_match.stage_context_label }}</span>{% if pool_match.has_stream %}<span class="pool-stream-badge">Stream available</span>{% endif %}</span></div>
+        <div class="pool-match-row"><div class="pool-participant pool-participant--home">{% if pool_match.home_entry.display_image %}<img src="{{ pool_match.home_entry.display_image.url }}" alt="" class="pool-participant-image" loading="lazy" decoding="async">{% else %}<span class="pool-participant-fallback" aria-hidden="true">8</span>{% endif %}<span>{{ pool_match.home_participant_display_name }}</span></div><strong class="pool-score">{{ pool_match.home_score }} <span>&ndash;</span> {{ pool_match.away_score }}</strong><div class="pool-participant pool-participant--away"><span>{{ pool_match.away_participant_display_name }}</span>{% if pool_match.away_entry.display_image %}<img src="{{ pool_match.away_entry.display_image.url }}" alt="" class="pool-participant-image" loading="lazy" decoding="async">{% else %}<span class="pool-participant-fallback" aria-hidden="true">8</span>{% endif %}</div></div>
+        <div class="pool-match-card-footer"><time datetime="{{ pool_match.scheduled_at|date:'c' }}">{{ pool_match.scheduled_at|date:"M j, Y" }}</time>{% if pool_match.winner %}<span>Winner: {{ pool_match.winner_participant_display_name }}</span>{% endif %}</div>
+    </a>
+        {% endfor %}
+        {% endfor %}
+        {% else %}
+        {% for pool_match in section.matches %}
+    <a class="pool-match-card" href="{% url 'pool:match_detail' pool_match.pk %}">
+        <div class="pool-match-card-topline">
+            <span class="pool-status pool-status--finished">{{ pool_match.get_result_method_display }}</span>
+            <span class="pool-match-card-meta"><span class="pool-match-context">{{ pool_match.stage_context_label }}</span>{% if pool_match.has_stream %}<span class="pool-stream-badge">Stream available</span>{% endif %}</span>
+        </div>
+        <div class="pool-match-row">
+            <div class="pool-participant pool-participant--home">
+                {% if pool_match.home_entry.display_image %}<img src="{{ pool_match.home_entry.display_image.url }}" alt="" class="pool-participant-image" loading="lazy" decoding="async">{% else %}<span class="pool-participant-fallback" aria-hidden="true">8</span>{% endif %}
+                <span>{{ pool_match.home_participant_display_name }}</span>
+            </div>
+            <strong class="pool-score">{{ pool_match.home_score }} <span>&ndash;</span> {{ pool_match.away_score }}</strong>
+            <div class="pool-participant pool-participant--away">
+                <span>{{ pool_match.away_participant_display_name }}</span>
+                {% if pool_match.away_entry.display_image %}<img src="{{ pool_match.away_entry.display_image.url }}" alt="" class="pool-participant-image" loading="lazy" decoding="async">{% else %}<span class="pool-participant-fallback" aria-hidden="true">8</span>{% endif %}
+            </div>
+        </div>
+        <div class="pool-match-card-footer">
+            <time datetime="{{ pool_match.scheduled_at|date:'c' }}">{{ pool_match.scheduled_at|date:"M j, Y" }}</time>
+            {% if pool_match.winner %}<span>Winner: {{ pool_match.winner_participant_display_name }}</span>{% endif %}
+            {% include "pool/_money_match_prize_pot.html" with prize_competition=pool_match.competition %}
+        </div>
+    </a>
+        {% endfor %}
+        {% endif %}
+    </section>
+    {% endfor %}
+    {% else %}
+    {% for pool_match in results %}
+    <a class="pool-match-card" href="{% url 'pool:match_detail' pool_match.pk %}">
+        <div class="pool-match-card-topline">
+            <span class="pool-status pool-status--finished">{{ pool_match.get_result_method_display }}</span>
+            <span class="pool-match-card-meta"><span class="pool-match-context">{{ pool_match.stage_context_label }}</span>{% if pool_match.has_stream %}<span class="pool-stream-badge">Stream available</span>{% endif %}</span>
+        </div>
+        <div class="pool-match-row">
+            <div class="pool-participant pool-participant--home">
+                {% if pool_match.home_entry.display_image %}<img src="{{ pool_match.home_entry.display_image.url }}" alt="" class="pool-participant-image" loading="lazy" decoding="async">{% else %}<span class="pool-participant-fallback" aria-hidden="true">8</span>{% endif %}
+                <span>{{ pool_match.home_participant_display_name }}</span>
+            </div>
+            <strong class="pool-score">{{ pool_match.home_score }} <span>&ndash;</span> {{ pool_match.away_score }}</strong>
+            <div class="pool-participant pool-participant--away">
+                <span>{{ pool_match.away_participant_display_name }}</span>
+                {% if pool_match.away_entry.display_image %}<img src="{{ pool_match.away_entry.display_image.url }}" alt="" class="pool-participant-image" loading="lazy" decoding="async">{% else %}<span class="pool-participant-fallback" aria-hidden="true">8</span>{% endif %}
+            </div>
+        </div>
+        <div class="pool-match-card-footer">
+            <time datetime="{{ pool_match.scheduled_at|date:'c' }}">{{ pool_match.scheduled_at|date:"M j, Y" }}</time>
+            {% if pool_match.winner %}<span>Winner: {{ pool_match.winner_participant_display_name }}</span>{% endif %}
+            {% include "pool/_money_match_prize_pot.html" with prize_competition=pool_match.competition %}
+        </div>
+    </a>
+    {% empty %}
+    <div class="pool-empty-state"><h3>No results yet.</h3><p>Completed match results will appear here once competition play begins.</p></div>
+    {% endfor %}
+    {% endif %}
+</div>
+
+{% elif active_tab == "standings" %}
+<div class="pool-section-heading">
+    <div>
+        <p class="pool-eyebrow">Calculated from eligible completed results</p>
+        <h2 id="pool-standings-title">Standings</h2>
+    </div>
+</div>
+{% if standings_error %}
+<div class="alert alert-warning" role="status">{{ standings_error }}</div>
+{% else %}
+{% for section in standings_sections %}
+<section class="pool-standings-section" aria-labelledby="pool-table-{{ section.stage.pk }}{% if section.group %}-{{ section.group.pk }}{% endif %}">
+    <h3 id="pool-table-{{ section.stage.pk }}{% if section.group %}-{{ section.group.pk }}{% endif %}">{% if section.group %}{{ section.group.name }}{% else %}{{ section.stage.name }}{% endif %}</h3>
+    {% include "pool/_standings_table.html" with stage=section.stage group=section.group rows=section.rows %}
+</section>
+{% empty %}
+<div class="pool-empty-state"><h3>No league tables are configured yet.</h3><p>Standings appear once the organiser creates the relevant league or group stage.</p></div>
+{% endfor %}
+{% endif %}
+{% if competition_rules %}
+<section class="pool-rules pool-rules--compact" aria-labelledby="pool-ranking-rules-title">
+    <h3 id="pool-ranking-rules-title">Competition ranking rules</h3>
+    {% if competition_rules.is_margin_based and competition_rules.margin_rules_valid %}
+    <p>Played matches use margin-based table points:</p>
+    <ul class="pool-points-rule-list">
+        {% for rule in competition_rules.margin_rules %}
+        <li>Winning margin {{ rule.minimum_margin }}&ndash;{% if rule.maximum_margin %}{{ rule.maximum_margin }}{% else %}{{ competition_rules.maximum_meaningful_margin }}{% endif %}: winner {{ rule.winner_points }} point{{ rule.winner_points|pluralize }}, loser {{ rule.loser_points }} point{{ rule.loser_points|pluralize }}.</li>
+        {% endfor %}
+    </ul>
+    <p>Walkovers, withdrawals and disqualifications use the default allocation: win {{ competition_rules.points_for_win }} point{{ competition_rules.points_for_win|pluralize }}, loss {{ competition_rules.points_for_loss }} point{{ competition_rules.points_for_loss|pluralize }}.</p>
+    {% elif competition_rules.is_margin_based %}
+    <p>Played-match margin points need attention from the competition manager before they can be applied. Default non-played allocation: win {{ competition_rules.points_for_win }} point{{ competition_rules.points_for_win|pluralize }}, loss {{ competition_rules.points_for_loss }} point{{ competition_rules.points_for_loss|pluralize }}.</p>
+    {% else %}
+    <p>Win: {{ competition_rules.points_for_win }} table point{{ competition_rules.points_for_win|pluralize }} &middot; Loss: {{ competition_rules.points_for_loss }} table point{{ competition_rules.points_for_loss|pluralize }}.</p>
+    {% endif %}
+    <p class="mb-0">Ranking: table points, then {% for criterion in competition_rules.tie_breakers %}{{ criterion }}{% if not forloop.last %}, {% endif %}{% endfor %}; remaining ties use a stable technical fallback.</p>
+</section>
+{% endif %}
+
+{% elif active_tab == "bracket" %}
+<div class="pool-section-heading"><div><p class="pool-eyebrow">Persistent knockout topology</p><h2 id="pool-bracket-title">Bracket</h2></div></div>
+{% include "pool/_bracket.html" with bracket_displays=bracket_displays %}
+
+{% elif active_tab == "stats" %}
+<div class="pool-section-heading">
+    <div>
+        <p class="pool-eyebrow">Team performance</p>
+        <h2 id="pool-stats-title">Stats</h2>
+    </div>
+    <p class="pool-section-note">Rack-win contribution updates from recorded racks, including live play. Match records remain shown separately.</p>
+</div>
+{% if competition.participant_mode == 'TEAMS' %}
+    {% if team_rack_stats %}
+    <p class="pool-section-note">Recorded winner contribution includes historic racks. Played, won, lost, and win-rate figures use only newer fully player-attributed team races, so historic results never invent a loss.</p>
+    <div class="pool-table-wrap">
+        <table class="table table-hover align-middle pool-stats-table">
+            <thead>
+                <tr>
+                    <th scope="col">Team</th>
+                    <th scope="col">Team Racks</th>
+                    <th scope="col">Racks Won</th>
+                    <th scope="col">Racks Lost</th>
+                    <th scope="col">Rack Win %</th>
+                    {% for column in rack_outcome_columns %}<th scope="col">{{ column.short_label }}</th>{% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for stat in team_rack_stats %}
+                <tr>
+                    <th scope="row" class="pool-stats-participant"><a href="{% url 'pool:team_detail' stat.team.pk %}{% if competition.visibility == 'PUBLISHED' %}?competition={{ competition.slug }}{% endif %}">{{ stat.team.name }}</a></th>
+                    <td>{{ stat.team_racks }}</td>
+                    <td>{{ stat.racks_won }}</td>
+                    <td>{{ stat.racks_lost }}</td>
+                    <td>{% if stat.rack_win_percentage is not None %}{{ stat.rack_win_percentage }}%{% else %}&mdash;{% endif %}</td>
+                    {% for outcome in stat.outcome_values %}<td>{{ outcome.value }}</td>{% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="pool-empty-state"><h3>No team statistics yet.</h3><p>Team entries will appear here once the competition is configured.</p></div>
+    {% endif %}
+{% elif stats %}
+<div class="pool-table-wrap">
+    <table class="table table-hover align-middle pool-stats-table">
+        <thead>
+            <tr>
+                <th scope="col">{% if competition.participant_mode == 'SINGLES' %}Player{% else %}Team{% endif %}</th>
+                <th scope="col">MP</th>
+                <th scope="col">W</th>
+                <th scope="col">L</th>
+                <th scope="col">RW</th>
+                <th scope="col">RL</th>
+                <th scope="col">Normal</th>
+                <th scope="col">Green apples</th>
+                <th scope="col">Red apples</th>
+                <th scope="col">One visits</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stat in stats %}
+            <tr>
+                <th scope="row" class="pool-stats-participant">
+                    {% if competition.participant_mode == 'SINGLES' %}
+                    <a href="{% url 'pool:player_detail' stat.participant.public_id %}{% if competition.visibility == 'PUBLISHED' %}?competition={{ competition.slug }}{% endif %}">{{ stat.participant }}</a>
+                    {% else %}
+                    <a href="{% url 'pool:team_detail' stat.participant.pk %}{% if competition.visibility == 'PUBLISHED' %}?competition={{ competition.slug }}{% endif %}">{{ stat.participant }}</a>
+                    {% endif %}
+                </th>
+                <td>{{ stat.matches_played }}</td>
+                <td>{{ stat.won }}</td>
+                <td>{{ stat.lost }}</td>
+                <td>{{ stat.rack_win_stats.racks_won }}</td>
+                <td>{{ stat.racks_lost }}</td>
+                <td>{{ stat.rack_win_stats.normal_wins }}</td>
+                <td>{{ stat.rack_win_stats.green_apples }}</td>
+                <td>{{ stat.rack_win_stats.red_apples }}</td>
+                <td>{{ stat.rack_win_stats.one_visits }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="pool-empty-state"><h3>No competition statistics yet.</h3><p>Statistics will be shown once recorded rack results are available.</p></div>
+{% endif %}
+
+{% else %}
+<div class="pool-overview">
+    <details class="pool-details pool-competition-overview-disclosure" data-pool-competition-overview>
+        <summary class="pool-details-summary">
+            <div>
+                <p class="pool-eyebrow mb-1">About this competition</p>
+                <h2 id="pool-overview-title">Competition overview</h2>
+                <small>View competition details</small>
+            </div>
+            <span class="pool-details-toggle-text">View details</span>
+        </summary>
+        <div class="pool-details-content">
+            <div class="pool-overview-copy">
+                {% if competition.description %}<p>{{ competition.description|linebreaksbr }}</p>{% else %}<p>No description has been published for this competition.</p>{% endif %}
+                {% if competition.rules %}
+                <div class="pool-rules">
+                    <h3>Rules</h3>
+                    <div>{{ competition.rules|linebreaksbr }}</div>
+                </div>
+                {% endif %}
+                {% if competition_rules %}
+                <section class="pool-rules pool-rules--compact" aria-labelledby="pool-overview-ranking-rules-title">
+                    <h3 id="pool-overview-ranking-rules-title">Competition rules</h3>
+                    {% if competition_rules.is_margin_based and competition_rules.margin_rules_valid %}
+                    <p>Played matches use points by winning rack margin:</p>
+                    <ul class="pool-points-rule-list">
+                        {% for rule in competition_rules.margin_rules %}
+                        <li>{{ rule.minimum_margin }}–{% if rule.maximum_margin %}{{ rule.maximum_margin }}{% else %}{{ competition_rules.maximum_meaningful_margin }}{% endif %} racks: winner {{ rule.winner_points }}, loser {{ rule.loser_points }}.</li>
+                        {% endfor %}
+                    </ul>
+                    <p>Walkovers, withdrawals and disqualifications use default points: win {{ competition_rules.points_for_win }}, loss {{ competition_rules.points_for_loss }}.</p>
+                    {% elif competition_rules.is_margin_based %}
+                    <p>Played-match margin points need attention from the competition manager before they can be applied. Default non-played allocation: win {{ competition_rules.points_for_win }}, loss {{ competition_rules.points_for_loss }}.</p>
+                    {% else %}
+                    <p>Win: {{ competition_rules.points_for_win }} table point{{ competition_rules.points_for_win|pluralize }} &middot; Loss: {{ competition_rules.points_for_loss }} table point{{ competition_rules.points_for_loss|pluralize }}.</p>
+                    {% endif %}
+                    <p class="mb-0">Table points are always first. Then: {% for criterion in competition_rules.tie_breakers %}{{ criterion }}{% if not forloop.last %}, {% endif %}{% endfor %}.</p>
+                </section>
+                {% endif %}
+            </div>
+
+            {% if competition.operational_state == 'UPCOMING' %}
+            <section class="pool-overview-entrants" aria-labelledby="pool-overview-entrants-title">
+                <div class="pool-subsection-heading">
+                    <div>
+                        <p class="pool-eyebrow">Registration</p>
+                        <h3 id="pool-overview-entrants-title">{% if competition.participant_mode == 'SINGLES' %}Who's playing?{% else %}Registered teams{% endif %}</h3>
+                    </div>
+                    <a href="{% url 'pool:competition_detail' competition.slug %}?tab=entrants">View all {{ entrant_count }} {{ entrant_noun }}{{ entrant_count|pluralize }} <span aria-hidden="true">&rarr;</span></a>
+                </div>
+                <p class="pool-entrant-summary">
+                    {{ entrant_count }} {{ entrant_noun }}{{ entrant_count|pluralize }} registered.
+                    {% if tournament_life_count %}{{ tournament_life_count }} tournament {% if tournament_life_count == 1 %}life{% else %}lives{% endif %}.{% endif %}
+                </p>
+                {% if entrant_count %}
+                    {% include "pool/_entrants.html" with entrants=entrant_preview entrant_preview_mode=True %}
+                {% else %}
+                <div class="pool-empty-state pool-empty-state--compact"><p>No entrants have been published yet.</p></div>
+                {% endif %}
+            </section>
+            {% endif %}
+        </div>
+    </details>
+
+    <div class="row g-4">
+        <section class="col-12 col-xl-6" aria-labelledby="pool-overview-fixtures-title">
+            <div class="pool-subsection-heading">
+                <h3 id="pool-overview-fixtures-title">Live and next matches</h3>
+                <a class="pool-subsection-action" href="{% url 'pool:competition_detail' competition.slug %}?tab=fixtures">All fixtures <span aria-hidden="true">&rarr;</span></a>
+            </div>
+            <div class="pool-stacked-cards">
+                {% for pool_match in fixtures %}
+                <a class="pool-match-card pool-match-card--compact" href="{% url 'pool:match_detail' pool_match.pk %}">
+                    <div class="pool-match-card-topline">
+                        <span class="pool-status pool-status--{{ pool_match.status|lower }}">{{ pool_match.get_status_display }}</span>
+                        <span class="pool-match-card-meta"><span class="pool-match-context">{{ pool_match.stage_context_label }}</span>{% if pool_match.has_stream %}<span class="pool-stream-badge">Stream available</span>{% endif %}</span>
+                    </div>
+                    <div class="pool-match-row">
+                        <span class="pool-participant pool-participant--home">{{ pool_match.home_participant_display_name }}</span>
+                        {% if pool_match.status == 'LIVE' %}<strong class="pool-score">{{ pool_match.home_score }} <span>&ndash;</span> {{ pool_match.away_score }}</strong>{% else %}<strong class="pool-versus">vs</strong>{% endif %}
+                        <span class="pool-participant pool-participant--away">{{ pool_match.away_participant_display_name }}</span>
+                    </div>
+                    <span class="pool-match-card-footer">
+                        <time datetime="{{ pool_match.scheduled_at|date:'c' }}">
+                            {{ pool_match.scheduled_at|date:"M j" }} &middot; {{ pool_match.scheduled_at|date:"H:i" }}
+                        </time>
+                        {% include "pool/_money_match_prize_pot.html" with prize_competition=pool_match.competition %}
+                    </span>
+                </a>
+                {% empty %}
+                <div class="pool-empty-state pool-empty-state--compact"><p>No live or upcoming fixtures have been published.</p></div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="col-12 col-xl-6" aria-labelledby="pool-overview-results-title">
+            <div class="pool-subsection-heading">
+                <h3 id="pool-overview-results-title">Recent results</h3>
+                <a class="pool-subsection-action" href="{% url 'pool:competition_detail' competition.slug %}?tab=results">All results <span aria-hidden="true">&rarr;</span></a>
+            </div>
+            <div class="pool-stacked-cards">
+                {% for pool_match in results %}
+                <a class="pool-match-card pool-match-card--compact" href="{% url 'pool:match_detail' pool_match.pk %}">
+                    <div class="pool-match-card-topline">
+                        <span class="pool-status pool-status--finished">{{ pool_match.get_result_method_display }}</span>
+                        <span class="pool-match-card-meta"><span class="pool-match-context">{{ pool_match.stage_context_label }}</span>{% if pool_match.has_stream %}<span class="pool-stream-badge">Stream available</span>{% endif %}</span>
+                    </div>
+                    <div class="pool-match-row">
+                        <span class="pool-participant pool-participant--home">{{ pool_match.home_participant_display_name }}</span>
+                        <strong class="pool-score">{{ pool_match.home_score }} <span>&ndash;</span> {{ pool_match.away_score }}</strong>
+                        <span class="pool-participant pool-participant--away">{{ pool_match.away_participant_display_name }}</span>
+                    </div>
+                    <span class="pool-match-card-footer"><time datetime="{{ pool_match.scheduled_at|date:'c' }}">{{ pool_match.scheduled_at|date:"M j" }}</time>{% include "pool/_money_match_prize_pot.html" with prize_competition=pool_match.competition %}</span>
+                </a>
+                {% empty %}
+                <div class="pool-empty-state pool-empty-state--compact"><p>No completed matches have been recorded.</p></div>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+</div>
+{% endif %}

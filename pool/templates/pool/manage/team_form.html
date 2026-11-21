@@ -1,0 +1,14 @@
+{% extends "pool/manage/base.html" %}
+
+{% block manager_title %}{{ page_title }}{% endblock %}
+
+{% block manager_content %}
+<section class="pool-manager-panel">
+    <h2>{{ page_title }}</h2>
+    <form method="post" enctype="multipart/form-data" class="pool-manager-form" novalidate>
+        {% csrf_token %}
+        {% include "pool/manage/_form_fields.html" with form=form %}
+        <div class="pool-manager-actions"><button class="btn btn-primary" type="submit">Save team</button>{% if can_save_and_add_another %}<button class="btn btn-outline-primary" type="submit" name="save_and_add_another" value="1">Save &amp; add another</button>{% endif %}<a class="btn btn-outline-secondary" href="{% url 'pool:manage_competition_teams' competition.slug %}">Cancel</a></div>
+    </form>
+</section>
+{% endblock %}

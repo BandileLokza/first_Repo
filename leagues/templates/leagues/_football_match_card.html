@@ -1,0 +1,29 @@
+<div class="{{ card_class|default:'card shadow-sm mb-3' }} match-card match-item p-2 p-md-3 football-match-card"
+     role="link" tabindex="0" data-match-url="{% url 'match_detail' match.id %}"
+     aria-label="Open match: {{ match.home_team }} versus {{ match.away_team }}">
+    <div class="mb-2 text-start">
+        <span class="badge bg-primary me-1">{{ match.get_stage_label }}</span>
+        {% if match.status == "LIVE" %}<span class="badge bg-danger">LIVE {{ match.get_display_minute }}</span>
+        {% elif match.status == "ABANDONED" %}<span class="badge {% if match.abandonment_resolution == 'VOID' %}bg-secondary{% else %}bg-danger{% endif %}">{% if match.abandonment_resolution == "VOID" %}VOIDED{% else %}ABANDONED{% endif %}</span>
+        {% elif match.status == "FINISHED" %}<span class="badge bg-secondary">FT</span>
+        {% else %}<span class="badge bg-info">Scheduled</span>{% endif %}
+        <small class="text-muted ms-2">{{ match.match_date|date:"M d, Y H:i" }}</small>
+    </div>
+    <div class="fixture-line">
+        <div class="fixture-team home">
+            {% if match.home_team.logo %}<img src="{{ match.home_team.logo.url }}" class="team-logo ms-1 me-0" alt="" loading="lazy" decoding="async">{% endif %}
+            {% if league.format_type == "TABLE" %}<a class="team-name-text football-team-link" href="{% url 'team_profile' league.slug match.home_team.id %}">{{ match.home_team }}</a>{% else %}<span class="team-name-text">{{ match.home_team }}</span>{% endif %}
+        </div>
+        <div class="score-or-vs">
+            {% if match.status == "ABANDONED" %}<span class="text-danger">{% if match.abandonment_resolution == "VOID" %}VOID{% else %}{{ match.abandoned_home_score|default:match.home_score }} - {{ match.abandoned_away_score|default:match.away_score }}{% endif %}</span>
+            {% elif match.status == "LIVE" or match.status == "FINISHED" %}{{ match.home_score }} - {{ match.away_score }}
+            {% else %}vs{% endif %}
+        </div>
+        <div class="fixture-team away">
+            {% if match.away_team.logo %}<img src="{{ match.away_team.logo.url }}" class="team-logo me-1" alt="" loading="lazy" decoding="async">{% endif %}
+            {% if league.format_type == "TABLE" %}<a class="team-name-text football-team-link" href="{% url 'team_profile' league.slug match.away_team.id %}">{{ match.away_team }}</a>{% else %}<span class="team-name-text">{{ match.away_team }}</span>{% endif %}
+        </div>
+    </div>
+    {% include "leagues/partials/fixture_location.html" %}
+    {% if match.result_note %}<div class="small text-muted text-center mt-1">{{ match.result_note }}</div>{% endif %}
+</div>

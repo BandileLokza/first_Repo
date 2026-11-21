@@ -1,0 +1,73 @@
+{% extends "pool/manage/base.html" %}
+
+{% block manager_title %}Manage {{ competition.name }}{% endblock %}
+
+{% block manager_content %}
+<section class="row g-2 mb-3" aria-label="Competition totals">
+    <div class="col-6 col-md-3"><div class="pool-manager-metric"><strong>{{ entry_count }}</strong><span>Entries</span></div></div>
+    <div class="col-6 col-md-3"><div class="pool-manager-metric"><strong>{{ match_count }}</strong><span>Matches</span></div></div>
+    <div class="col-6 col-md-3"><div class="pool-manager-metric"><strong>{{ upcoming_count }}</strong><span>Upcoming</span></div></div>
+    <div class="col-6 col-md-3"><div class="pool-manager-metric"><strong>{{ live_count }}</strong><span>Live</span></div></div>
+</section>
+
+{% if competition.is_archived %}
+<section class="pool-manager-panel mb-3" aria-label="Season archive status">
+    <h2>Archived season</h2>
+    <p class="pool-manager-help mb-0">Historical season &mdash; read-only.</p>
+    {% if request.user.is_superuser %}
+    <p class="mt-3 mb-0"><a class="btn btn-primary" href="{% url 'pool:manage_season_next' competition.slug %}">Create next season</a></p>
+    {% endif %}
+</section>
+{% elif request.user.is_superuser %}
+<section class="pool-manager-panel mb-3" aria-label="Season archive controls">
+    <h2>Season lifecycle</h2>
+    {% if can_archive_season %}
+    <p class="pool-manager-help">This completed league can be archived without changing its history.</p>
+    <form method="post" action="{% url 'pool:manage_season_archive' competition.slug %}">
+        {% csrf_token %}
+        <button class="btn btn-outline-danger" type="submit">Archive season</button>
+    </form>
+    {% elif archive_season_errors %}
+    <p class="pool-manager-help mb-0">{{ archive_season_errors|join:" " }}</p>
+    {% endif %}
+</section>
+{% endif %}
+
+<section class="row g-3 mb-3" aria-label="Management areas">
+    {% if competition.is_money_match %}
+    {% if recent_matches %}
+    {% for match in recent_matches %}
+    <div class="col-12 col-md-6"><a class="pool-entry-card pool-manager-panel h-100" href="{% url 'pool:manage_money_match_edit' competition.slug %}"><span class="pool-entry-card-title">Match information</span><span class="pool-entry-card-meta">{{ match.home_participant_display_name }} vs {{ match.away_participant_display_name }} &middot; Race to {{ match.race_target }}.</span></a></div>
+    <div class="col-12 col-md-6"><a class="pool-entry-card pool-manager-panel h-100" href="{% url 'pool:manage_match' competition.slug match.pk %}"><span class="pool-entry-card-title">Manage / score match</span><span class="pool-entry-card-meta">Open the protected scoring controls for this Money Match.</span></a></div>
+    {% endfor %}
+    {% else %}
+    <div class="col-12 col-md-6"><a class="pool-entry-card pool-manager-panel h-100" href="{% url 'pool:manage_money_match_edit' competition.slug %}"><span class="pool-entry-card-title">Configure opponents</span><span class="pool-entry-card-meta">Choose Player 1 and Player 2 before this Money Match can be scored.</span></a></div>
+    {% endif %}
+    {% if is_owner %}<div class="col-12 col-md-6"><a class="pool-entry-card pool-manager-panel h-100" href="{% url 'pool:manage_competition_admins' competition.slug %}"><span class="pool-entry-card-title">Competition administrators</span><span class="pool-entry-card-meta">Give existing users administration access for this Money Match only.</span></a></div>{% endif %}
+    {% else %}
+    <div class="col-12 col-md-6"><a class="pool-entry-card pool-manager-panel h-100" href="{% url 'pool:manage_competition_information' competition.slug %}"><span class="pool-entry-card-title">Competition information</span><span class="pool-entry-card-meta">Visibility, dates, race target, venue and rules. Competition status activates when play begins.</span></a></div>
+    <div class="col-12 col-md-6"><a class="pool-entry-card pool-manager-panel h-100" href="{% url 'pool:manage_competition_entries' competition.slug %}"><span class="pool-entry-card-title">Entries</span><span class="pool-entry-card-meta">Add and seed the participants entered in this competition.</span></a></div>
+    <div class="col-12 col-md-6"><a class="pool-entry-card pool-manager-panel h-100" href="{% url 'pool:manage_competition_stages' competition.slug %}"><span class="pool-entry-card-title">Stages</span><span class="pool-entry-card-meta">Maintain the explicit league, group or knockout stages.</span></a></div>
+    {% if competition.has_league_or_group_stage %}<div class="col-12 col-md-6"><a class="pool-entry-card pool-manager-panel h-100" href="{% url 'pool:manage_competition_standings' competition.slug %}"><span class="pool-entry-card-title">Standings</span><span class="pool-entry-card-meta">Configure points and tie-breakers, then inspect derived tables.</span></a></div>{% endif %}
+    {% if competition.format_type == 'LEAGUE_KNOCKOUT' %}<div class="col-12 col-md-6"><a class="pool-entry-card pool-manager-panel h-100" href="{% url 'pool:manage_competition_groups' competition.slug %}"><span class="pool-entry-card-title">Groups</span><span class="pool-entry-card-meta">Create groups and assign competition entries to each group stage.</span></a></div><div class="col-12 col-md-6"><a class="pool-entry-card pool-manager-panel h-100" href="{% url 'pool:manage_competition_qualifications' competition.slug %}"><span class="pool-entry-card-title">Qualification</span><span class="pool-entry-card-meta">Map group finishing places to knockout slots.</span></a></div>{% endif %}
+    {% if competition.has_knockout_stage %}<div class="col-12 col-md-6"><a class="pool-entry-card pool-manager-panel h-100" href="{% url 'pool:manage_competition_bracket' competition.slug %}"><span class="pool-entry-card-title">Knockout bracket</span><span class="pool-entry-card-meta">Preview, generate and review the protected knockout draw.</span></a></div>{% endif %}
+    <div class="col-12 col-md-6"><a class="pool-entry-card pool-manager-panel h-100" href="{% url 'pool:manage_competition_fixtures' competition.slug %}"><span class="pool-entry-card-title">Fixtures &amp; results</span><span class="pool-entry-card-meta">Schedule fixtures and open the protected match manager.</span></a></div>
+    {% if competition.participant_mode == 'TEAMS' %}<div class="col-12 col-md-6"><a class="pool-entry-card pool-manager-panel h-100" href="{% url 'pool:manage_competition_teams' competition.slug %}"><span class="pool-entry-card-title">Teams &amp; rosters</span><span class="pool-entry-card-meta">Manage teams and competition-specific player rosters.</span></a></div>{% endif %}
+    {% if is_owner %}<div class="col-12 col-md-6"><a class="pool-entry-card pool-manager-panel h-100" href="{% url 'pool:manage_competition_admins' competition.slug %}"><span class="pool-entry-card-title">Competition administrators</span><span class="pool-entry-card-meta">Give existing users administration access for this competition only.</span></a></div>{% endif %}
+    {% endif %}
+</section>
+
+<section class="pool-manager-panel">
+    <h2>Recently changed fixtures</h2>
+    <div class="table-responsive">
+        <table class="table pool-manager-table">
+            <thead><tr><th>Fixture</th><th>Stage</th><th>Status</th><th>Score</th><th></th></tr></thead>
+            <tbody>
+                {% for match in recent_matches %}
+                <tr><td>{{ match.home_participant_display_name }} vs {{ match.away_participant_display_name }}</td><td>{{ match.stage_context_label }}</td><td>{{ match.get_status_display }}</td><td>{{ match.home_score }} – {{ match.away_score }}</td><td><a href="{% url 'pool:manage_match' competition.slug match.pk %}">Manage</a></td></tr>
+                {% empty %}<tr><td colspan="5" class="text-center">No fixtures have been created.</td></tr>{% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

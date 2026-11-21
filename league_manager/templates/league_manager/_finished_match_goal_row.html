@@ -1,0 +1,24 @@
+<details class="border rounded p-2 mb-2" data-goal-prefix="{{ form.prefix }}"{% if form.is_bound or row.remove %} open{% endif %}>
+    <summary class="fw-semibold text-break">
+        {% if row.goal %}
+            {{ row.saved_name|default:"Unknown Scorer" }}
+            {% if row.goal.minute is not None %}&middot; {{ row.goal.minute }}&prime;{% endif %}
+            &middot; {{ row.goal_type_label }}
+            <span class="small text-muted fw-normal">Edit goal</span>
+        {% else %}
+            Add goal
+        {% endif %}
+    </summary>
+    <div class="pt-2" data-goal-row data-team-id="{{ section.team.pk }}" data-opposing-team-id="{{ section.opposing_team_id }}">
+        <fieldset data-goal-edit-fields>
+            {% include "league_manager/_finished_goal_fields.html" %}
+        </fieldset>
+        {% if row.goal %}
+            <div class="form-check mt-3">
+                <input type="checkbox" class="form-check-input" id="{{ form.prefix }}-remove"
+                       name="{{ form.prefix }}-remove" value="1" data-remove-goal{% if row.remove %} checked{% endif %}>
+                <label class="form-check-label" for="{{ form.prefix }}-remove">Confirm removal of this goal on save</label>
+            </div>
+        {% endif %}
+    </div>
+</details>

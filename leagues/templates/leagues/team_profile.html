@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}{{ team.name }} — {{ league.name }}{% endblock %}
+
+{% block content %}
+<div class="mb-3"><a href="{% url 'league_detail' league.slug %}" class="back-btn">← Back to league</a></div>
+
+{% if league.is_archived %}<div class="alert alert-secondary">Archived season — historical team profile.</div>{% endif %}
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body d-flex align-items-center gap-3">
+        {% if team.logo %}<img src="{{ team.logo.url }}" alt="{{ team.name }} logo" class="team-profile-logo" decoding="async">{% endif %}
+        <div><h2 class="mb-1">{{ team.name }}</h2><div class="text-muted">{% include "leagues/partials/league_identity.html" with variant="inline" %} · {{ league.season }}</div></div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3"><div class="card h-100"><div class="card-body"><small class="text-muted">League position</small><div class="fs-4 fw-bold">{% if team_position %}{{ team_position }}{% else %}—{% endif %}</div></div></div></div>
+    <div class="col-6 col-md-3"><div class="card h-100"><div class="card-body"><small class="text-muted">Points</small><div class="fs-4 fw-bold">{{ team_totals.points }}</div></div></div></div>
+    <div class="col-6 col-md-3"><div class="card h-100"><div class="card-body"><small class="text-muted">Played</small><div class="fs-4 fw-bold">{{ team_totals.played }}</div></div></div></div>
+    <div class="col-6 col-md-3"><div class="card h-100"><div class="card-body"><small class="text-muted">Win percentage</small><div class="fs-4 fw-bold">{{ team_totals.win_percentage|floatformat:1 }}%</div></div></div></div>
+</div>
+
+<div class="card shadow-sm mb-4"><div class="card-body">
+    <h4>League summary</h4>
+    <div class="team-summary-grid"><span>Wins <strong>{{ team_totals.won }}</strong></span><span>Draws <strong>{{ team_totals.drawn }}</strong></span><span>Losses <strong>{{ team_totals.lost }}</strong></span><span>GF <strong>{{ team_totals.goals_for }}</strong></span><span>GA <strong>{{ team_totals.goals_against }}</strong></span><span>GD <strong>{{ team_totals.goal_difference }}</strong></span></div>
+    <h5 class="mt-3">Recent form</h5><div class="form-badges">{% for result in recent_form %}<span class="form-badge form-{{ result|lower }}">{{ result }}</span>{% empty %}<span class="text-muted">No completed league matches yet.</span>{% endfor %}</div>
+</div></div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6"><div class="card h-100"><div class="card-body"><h4>Home record</h4><p class="mb-0">P {{ home_record.played }} · W {{ home_record.won }} · D {{ home_record.drawn }} · L {{ home_record.lost }} · GF {{ home_record.goals_for }} · GA {{ home_record.goals_against }}</p></div></div></div>
+    <div class="col-md-6"><div class="card h-100"><div class="card-body"><h4>Away record</h4><p class="mb-0">P {{ away_record.played }} · W {{ away_record.won }} · D {{ away_record.drawn }} · L {{ away_record.lost }} · GF {{ away_record.goals_for }} · GA {{ away_record.goals_against }}</p></div></div></div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6"><div class="card h-100"><div class="card-body"><h4>Last result</h4>{% if last_result %}<a href="{% url 'match_detail' last_result.id %}">{{ last_result.home_team }} {{ last_result.home_score }}–{{ last_result.away_score }} {{ last_result.away_team }}</a>{% else %}<span class="text-muted">No result yet.</span>{% endif %}</div></div></div>
+    <div class="col-md-6"><div class="card h-100"><div class="card-body"><h4>Next fixture</h4>{% if next_fixture %}<a href="{% url 'match_detail' next_fixture.id %}">{{ next_fixture.home_team }} vs {{ next_fixture.away_team }}</a>{% if next_fixture.match_date %}<small class="d-block text-muted">{{ next_fixture.match_date|date:"M d, Y H:i" }}</small>{% else %}<small class="d-block text-muted">Unscheduled</small>{% endif %}{% else %}<span class="text-muted">No upcoming fixture.</span>{% endif %}</div></div></div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-6"><div class="card shadow-sm"><div class="card-body"><h4>Home results</h4>{% for match in home_results %}<div class="border-bottom py-2"><a href="{% url 'match_detail' match.id %}">{{ match.home_team }} {{ match.home_score }}–{{ match.away_score }} {{ match.away_team }}</a><small class="d-block text-muted">{% if match.gameweek %}GW{{ match.gameweek }} · {% endif %}{{ match.match_date|date:"M d, Y" }}</small></div>{% empty %}<span class="text-muted">No home results.</span>{% endfor %}</div></div></div>
+    <div class="col-lg-6"><div class="card shadow-sm"><div class="card-body"><h4>Away results</h4>{% for match in away_results %}<div class="border-bottom py-2"><a href="{% url 'match_detail' match.id %}">{{ match.home_team }} {{ match.home_score }}–{{ match.away_score }} {{ match.away_team }}</a><small class="d-block text-muted">{% if match.gameweek %}GW{{ match.gameweek }} · {% endif %}{{ match.match_date|date:"M d, Y" }}</small></div>{% empty %}<span class="text-muted">No away results.</span>{% endfor %}</div></div></div>
+</div>
+
+<div class="card shadow-sm mt-4"><div class="card-body"><h4>Squad</h4><div class="table-responsive"><table class="table mb-0"><thead><tr><th>#</th><th>Player</th><th>Goals</th></tr></thead><tbody>{% for player in squad %}<tr><td>{{ player.jersey_number|default:"—" }}</td><td>{{ player.name }}</td><td>{{ player.total_goals }}</td></tr>{% empty %}<tr><td colspan="3" class="text-muted">No players registered.</td></tr>{% endfor %}</tbody></table></div></div></div>
+{% endblock %}

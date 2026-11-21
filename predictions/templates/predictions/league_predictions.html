@@ -1,0 +1,440 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'predictions/css/predictions.css' %}">
+{% endblock %}
+
+{% block content %}
+
+{% if request.user.is_superuser %}
+<div class="mb-3 text-end">
+    <a href="/admin/" class="btn btn-dark">
+        ⚙️ Admin Panel
+    </a>
+</div>
+{% endif %}
+
+<div class="predictions-page">
+<h2 class="league-predictions-title">{% include "leagues/partials/league_identity.html" with league=competition variant="inline" %} Predictions</h2>
+
+<div class="header-actions">
+   <div class="mb-3">
+        <a href="{% url 'league_detail' competition.slug %}" class="back-btn">
+            ← Back to League
+        </a>
+    </div>
+    {% if request.user.is_staff %}
+    <form method="POST" action="{% url 'reset_predictions' competition.slug %}">
+        {% csrf_token %}
+        <button class="reset-btn" onclick="return confirm('Reset predictions and archive current round?')">
+            Reset Gameweek
+        </button>
+    </form>
+    {% endif %}
+</div>
+
+{% if sponsor %}
+    {% if sponsor.sponsor_link %}
+        <a href="{{ sponsor.sponsor_link }}" target="_blank" rel="noopener noreferrer" class="prediction-sponsor-strip">
+    {% else %}
+        <div class="prediction-sponsor-strip no-link">
+    {% endif %}
+
+        <div class="prediction-sponsor-content">
+            <div class="prediction-sponsor-text-wrap">
+                <span class="prediction-sponsor-label">{{ sponsor.sponsor_text }}</span>
+                <span class="prediction-sponsor-name">{{ sponsor.sponsor_name }}</span>
+            </div>
+
+            {% if sponsor.sponsor_logo %}
+                <img src="{{ sponsor.sponsor_logo.url }}" alt="{{ sponsor.sponsor_name }}" class="prediction-sponsor-logo" decoding="async">
+            {% endif %}
+        </div>
+
+    {% if sponsor.sponsor_link %}
+        </a>
+    {% else %}
+        </div>
+    {% endif %}
+{% endif %}
+
+<div class="tabs">
+    <button id="btn-predictions" class="tab-btn active" onclick="showTab('predictions')">Predictions</button>
+    <button id="btn-standings" class="tab-btn" onclick="showTab('standings')">Standings</button>
+    <button id="btn-info" class="tab-btn" onclick="showTab('info')">Read Me</button>
+    <!-- ===== CHANGED ===== -->
+    <button id="btn-history" class="tab-btn" onclick="showTab('history')">History</button>
+</div>
+
+<div id="predictions">
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="locked-box" style="margin-bottom:15px;">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+{% if request.user.is_authenticated and profile and has_open_unpredicted_matches %}
+<form method="POST" class="bulk-predictions-form">
+    {% csrf_token %}
+{% endif %}
+
+{% for pm in prediction_matches %}
+    <div class="prediction-card" data-kickoff="{{ pm.match.match_date|date:'Y-m-d H:i:s' }}">
+
+        <h4 class="match-header">
+            <div class="team">
+                {% if pm.match.home_team.logo %}
+                    <img src="{{ pm.match.home_team.logo.url }}" class="pred-team-logo" loading="lazy" decoding="async">
+                {% endif %}
+                <span class="team-name">{{ pm.match.home_team }}</span>
+            </div>
+
+            <span class="score-or-vs">vs</span>
+
+            <div class="team">
+                {% if pm.match.away_team.logo %}
+                    <img src="{{ pm.match.away_team.logo.url }}" class="pred-team-logo" loading="lazy" decoding="async">
+                {% endif %}
+                <span class="team-name">{{ pm.match.away_team }}</span>
+            </div>
+        </h4>
+
+        <p class="kickoff-countdown">
+            ⏳ Time left: <span class="countdown">Loading...</span>
+        </p>
+
+        {% if pm.user_prediction %}
+            <div class="locked-box 
+                {% if pm.match.status == 'FINISHED' %}
+                    {% if pm.user_prediction.points_awarded == 20 %}perfect
+                    {% elif pm.user_prediction.points_awarded > 0 %}partial
+                    {% else %}wrong{% endif %}
+                {% endif %}">
+
+                <strong>Your Prediction</strong><br>
+
+                <span class="
+                {% if pm.match.status == 'FINISHED' %}
+                    {% if pm.match.prediction_home_score == pm.user_prediction.predicted_home_goals %}correct{% else %}incorrect{% endif %}
+                {% endif %}
+                ">
+                    {{ pm.user_prediction.predicted_home_goals }}
+                </span>
+                -
+                <span class="
+                {% if pm.match.status == 'FINISHED' %}
+                    {% if pm.match.prediction_away_score == pm.user_prediction.predicted_away_goals %}correct{% else %}incorrect{% endif %}
+                {% endif %}
+                ">
+                    {{ pm.user_prediction.predicted_away_goals }}
+                </span>
+
+                <span class="
+                {% if pm.match.status == 'FINISHED' %}
+                    {% if pm.match.prediction_home_score > pm.match.prediction_away_score and pm.user_prediction.predicted_result == 'H' %}correct
+                    {% elif pm.match.prediction_home_score < pm.match.prediction_away_score and pm.user_prediction.predicted_result == 'A' %}correct
+                    {% elif pm.match.prediction_home_score == pm.match.prediction_away_score and pm.user_prediction.predicted_result == 'D' %}correct
+                    {% else %}incorrect{% endif %}
+                {% endif %}
+                ">
+                    ({{ pm.user_prediction.get_predicted_result_display }})
+                </span>
+
+                {% if pm.match.status == "FINISHED" %}
+                    <p class="actual-score">
+                        After 90 minutes: {{ pm.match.prediction_home_score }} - {{ pm.match.prediction_away_score }}
+                    </p>
+                    <p class="points">Points: {{ pm.user_prediction.points_awarded }}</p>
+                {% else %}
+                    <p class="pending">Prediction submitted and locked</p>
+                {% endif %}
+            </div>
+
+        {% elif pm.is_open %}
+
+            {% if not request.user.is_authenticated %}
+                <div class="locked-box">
+                    <strong>Want to participate?</strong>
+                    <p>Create an account to submit your prediction.</p>
+                    <a href="{% url 'join_predictions' competition.slug %}" class="submit-btn" style="display:inline-block; text-decoration:none;">
+                        Join Predictions
+                    </a>
+                </div>
+
+            {% elif not profile %}
+                <div class="locked-box">
+                    <strong>Complete your profile first</strong>
+                    <p>You need a display name and phone number before submitting predictions.</p>
+                    <a href="{% url 'complete_profile' competition.slug %}" class="submit-btn" style="display:inline-block; text-decoration:none;">
+                        Complete Profile
+                    </a>
+                </div>
+
+            {% else %}
+                <div class="prediction-form">
+
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="predicted_result_{{ pm.id }}" value="H">
+                            Home
+                        </label>
+
+                        <label>
+                            <input type="radio" name="predicted_result_{{ pm.id }}" value="D">
+                            Draw
+                        </label>
+
+                        <label>
+                            <input type="radio" name="predicted_result_{{ pm.id }}" value="A">
+                            Away
+                        </label>
+                    </div>
+
+                    <div class="goals-group">
+                        <input type="number" name="home_goals_{{ pm.id }}" min="0" placeholder="Home Goals">
+                        <span>-</span>
+                        <input type="number" name="away_goals_{{ pm.id }}" min="0" placeholder="Away Goals">
+                    </div>
+
+                </div>
+            {% endif %}
+
+        {% endif %}
+    </div>
+{% empty %}
+    <p>No prediction matches available.</p>
+{% endfor %}
+
+{% if request.user.is_authenticated and profile and has_open_unpredicted_matches %}
+    <button type="submit" class="submit-btn bulk-submit-btn">
+        Submit All Predictions
+    </button>
+</form>
+{% endif %}
+
+</div>
+<div id="standings" style="display:none;">
+    <h3>Standings</h3>
+    
+    <div class="pred-table-wrap">
+        <table class="pred-standings-table">
+            <thead>
+                <tr>
+                    <th class="col-rank">#</th>
+                    <th class="col-user">Username</th>
+                    <th class="col-perfect">Perfect</th>
+                    <th class="col-points">Points</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for user in standings %}
+                <tr class="
+                    {% if forloop.counter == 1 %}first-place{% endif %}
+                    {% if forloop.counter == 2 %}second-place{% endif %}
+                    {% if forloop.counter == 3 %}third-place{% endif %}
+                    {% if user.user__id == request.user.id %}highlight{% endif %}">
+                    <td class="col-rank">
+                        {% if forloop.counter == 1 %}<span class="medal gold">🥇</span>
+                        {% elif forloop.counter == 2 %}<span class="medal silver">🥈</span>
+                        {% elif forloop.counter == 3 %}<span class="medal bronze">🥉</span>
+                        {% else %}{{ forloop.counter }}{% endif %}
+                    </td>
+                    <td class="col-user">{{ user.user__userprofile__display_name|default:"User" }}</td>
+                    <td class="col-perfect">{{ user.perfect_predictions|default:0 }}</td>
+                    <td class="col-points">{{ user.total_points|default:0 }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4" style="text-align:center;">No predictions submitted yet.</td>
+                </tr>        
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="info" style="display:none;">
+    <div class="prediction-readme">
+
+        <h3>🏆 Prize Breakdown — Let’s Play for Real!</h3>
+
+        <p>
+            This is where predictions meet competition... and competition brings 
+            <strong>airtime rewards</strong> 📱🔥
+        </p>
+
+        <div class="prize-box">
+            <h4>📱 Current Prize Pool: E40 Airtime</h4>
+
+            <ul class="prize-list">
+                <li>🏆 <strong>1st Place:</strong> E20 Airtime</li>
+                <li>🥈 <strong>2nd Place:</strong> E10 Airtime</li>
+                <li>🥉 <strong>3rd Place:</strong> E10 Airtime</li>
+            </ul>
+
+            <p class="payout-note">
+                Winners receive airtime every Monday before 10 AM — fast, simple and easy.
+            </p>
+        </div>
+
+        <h4>💸 The More Players... The Bigger the Rewards!</h4>
+
+        <p>
+            As our prediction community grows, the prize pool can grow too. More players means more excitement, more competition and bigger rewards on the table.
+        </p>
+
+        <ul>
+            <li>⭐ <strong>E40 Airtime Pool:</strong> 1st E20 | 2nd E10 | 3rd E10</li>
+            <li>⭐ <strong>Future Bigger Pools:</strong> The sky is the limit!</li>
+        </ul>
+
+        <h4>🎯 It’s Not Just About Winning Airtime</h4>
+
+        <p>
+            Predictions make every match more exciting. Every score you enter gives you a chance to climb the standings and compete with other fans.
+        </p>
+
+        <ul>
+            <li>🔥 Enjoy the thrill of predicting correctly</li>
+            <li>🔥 Compete with other league fans</li>
+            <li>🔥 Earn bragging rights</li>
+            <li>🔥 Make every match more fun and interactive</li>
+        </ul>
+
+        <h4>📣 Spread the Fun!</h4>
+
+        <p>
+            Don’t play alone. Tell a friend — who tells another friend — who brings even more competition.
+        </p>
+
+        <p>
+            The bigger the community, the bigger the rewards, and the better the experience for everyone.
+        </p>
+
+        <hr>
+
+        <h4>📌 How Points Work</h4>
+
+        <p>
+            For every match, you predict three things: the result after 90 minutes,
+            Team A goals and Team B goals after 90 minutes. Extra time and penalty
+            shootouts are not included.
+        </p>
+
+        <ul>
+            <li><strong>5 points</strong> for correctly predicting which team wins, or if the match ends in a draw</li>
+            <li><strong>5 points</strong> for correctly predicting Team A goals</li>
+            <li><strong>5 points</strong> for correctly predicting Team B goals</li>
+            <li><strong>Extra 5 bonus points</strong> if all your predictions are correct</li>
+        </ul>
+
+        <div class="points-example-box">
+            <strong>Perfect prediction = 20 points</strong><br>
+            5 for correct result + 5 for Team A goals + 5 for Team B goals + 5 bonus points.
+        </div>
+
+        <p class="final-note">
+            Make your predictions early, because once a match starts, predictions for that match are locked.
+        </p>
+
+    </div>
+</div>
+<div id="history" style="display:none;">
+    <h3>Your Prediction History</h3>
+
+    {% if not request.user.is_authenticated %}
+        <!-- ===== NEW ===== -->
+        <div class="locked-box">
+            <strong>Login required</strong>
+            <p>Login to view your personal prediction history.</p>
+            <a href="{% url 'account_login' %}?next={% url 'league_predictions' competition.slug %}" class="submit-btn" style="display:inline-block; text-decoration:none;">
+                Login
+            </a>
+        </div>
+
+    {% else %}
+        <div class="pred-table-wrap">
+            <table class="pred-history-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Match</th>
+                        <th>Your Prediction</th>
+                        <th>Points</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for h in history %}
+                    <tr>
+                        <td class="hist-date">{{ h.saved_at|date:"M d, Y" }}</td>
+                        <td class="hist-match">{{ h.home_team }} vs {{ h.away_team }}</td>
+                        <td class="hist-pred">{{ h.predicted_home_goals }} - {{ h.predicted_away_goals }}</td>
+                        <td class="hist-points">{{ h.points_awarded }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4" style="text-align: center;">No prediction history yet</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    function showTab(tab) {
+        // Hide/Show div sections
+        const tabs = ["predictions","standings","info","history"];
+        tabs.forEach(t => {
+            document.getElementById(t).style.display = (t === tab) ? "block" : "none";
+        });
+
+        // Update active class on buttons
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.getElementById('btn-' + tab).classList.add('active');
+    }
+
+    /* KICKOFF COUNTDOWN TIMER */
+    document.addEventListener("DOMContentLoaded", function () {
+        
+        // Ensure the correct tab is highlighted on initial load
+        showTab('predictions');
+
+        function updateCountdowns() {
+            const cards = document.querySelectorAll(".prediction-card");
+            cards.forEach(card => {
+                const kickoffStr = card.getAttribute("data-kickoff");
+                const display = card.querySelector(".countdown");
+                if (!kickoffStr || !display) return;
+                
+                const kickoff = new Date(kickoffStr.replace(" ", "T"));
+                const now = new Date();
+                const diff = kickoff - now;
+
+                if (diff <= 0) {
+                    display.innerHTML = "Kickoff started";
+                    display.style.color = "red";
+                    return;
+                }
+
+                const days = Math.floor(diff / (1000*60*60*24));
+                const hours = Math.floor((diff % (1000*60*60*24))/(1000*60*60));
+                const minutes = Math.floor((diff % (1000*60*60))/(1000*60));
+                const seconds = Math.floor((diff % (1000*60))/1000);
+                
+                display.innerHTML = days+"d "+hours+"h "+minutes+"m "+seconds+"s";
+            });
+        }
+        updateCountdowns();
+        setInterval(updateCountdowns, 1000);
+    });
+</script>
+</div>
+{%endblock%}

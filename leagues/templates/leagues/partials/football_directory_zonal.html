@@ -1,0 +1,4 @@
+<h2 class="section-title"><span class="section-icon">🏆</span> Zonal Leagues</h2>
+{% for item in zonal_league_data %}
+{% include "leagues/partials/league_card.html" with item=item %}
+{% empty %}<p class="text-muted">No public zonal leagues are available.</p>{% endfor %}

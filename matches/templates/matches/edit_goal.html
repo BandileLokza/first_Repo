@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Goal{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-7">
+        <div class="mb-3">
+            <a href="{% url 'match_detail' match.id %}" class="back-btn">&larr; BACK</a>
+        </div>
+
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <h2 class="mb-1">Edit Goal - {{ team.name }}</h2>
+                <p class="text-muted">Changing the goal type or player does not change the match score.</p>
+
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.idempotency_key }}
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                    {% endif %}
+
+                    <fieldset class="mb-3">
+                        <legend class="form-label mb-2">{{ form.goal_type.label }}</legend>
+                        <div class="d-flex flex-column gap-2">
+                            {% for radio in form.goal_type %}
+                                <div class="form-check">
+                                    {{ radio.tag }}
+                                    <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        {% for error in form.goal_type.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                    </fieldset>
+
+                    <div class="alert alert-info py-2 small">
+                        {{ team.name }} remains the team benefiting from this goal. For an own goal, choose or enter a player from {{ opposing_team.name }}.
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.player.id_for_label }}" class="form-label">{{ form.player.label }}</label>
+                        {{ form.player }}
+                        {% for error in form.player.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="{{ form.player_name.id_for_label }}" class="form-label">{{ form.player_name.label }}</label>
+                        {{ form.player_name }}
+                        {% for error in form.player_name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="{{ form.minute.id_for_label }}" class="form-label">{{ form.minute.label }}</label>
+                        {{ form.minute }}
+                        {% for error in form.minute.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                        <div class="form-text">Leave blank to keep the existing goal minute.</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+            </div>
+        </div>
+
+        {% if not goal.canceled %}
+            <form method="post" action="{% url 'cancel_goal' goal.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Cancel this goal?');">Cancel Goal</button>
+            </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

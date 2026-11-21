@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Delete Fixture - {{ league.name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-7">
+        <div class="mb-3">
+            <a href="{% url 'league_manager:fixture_list' league.slug %}" class="back-btn">← BACK</a>
+        </div>
+
+        <section class="card shadow-sm border-danger">
+            <div class="card-body">
+                <h2 class="h3 text-danger">Delete fixture?</h2>
+                <p class="mb-1"><strong>{{ fixture.home_team.name }}</strong> vs <strong>{{ fixture.away_team.name }}</strong></p>
+                <p class="text-muted">
+                    {{ fixture.competition.name }}
+                    {% if fixture.gameweek %} · GW{{ fixture.gameweek }}{% endif %}
+                    {% if fixture.match_date %} · {{ fixture.match_date|date:"M d, Y H:i" }}{% else %} · Unscheduled{% endif %}
+                    · Status: {{ fixture.get_status_display }}
+                </p>
+                {% if deletion_block_reason %}
+                    <div class="alert alert-danger">{{ deletion_block_reason }}</div>
+                    <a href="{% url 'league_manager:fixture_list' league.slug %}" class="btn btn-outline-secondary">Back to Fixtures</a>
+                {% else %}
+                    <div class="alert alert-warning">
+                        This permanently removes the fixture and its dependent match records. The action is recorded in the league audit history, and standings will be rebuilt from the remaining results.
+                    </div>
+                    <form method="post" class="d-flex flex-wrap gap-2">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Delete Fixture</button>
+                        <a href="{% url 'league_manager:fixture_list' league.slug %}" class="btn btn-outline-secondary">Cancel</a>
+                    </form>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

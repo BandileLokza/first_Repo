@@ -1,0 +1,216 @@
+{% extends "pool/manage/base.html" %}
+
+{% block manager_title %}{{ page_title }} · {{ competition.name }}{% endblock %}
+
+{% block manager_content %}
+<section class="pool-manager-panel pool-manager-form-panel">
+    <p class="pool-eyebrow">{{ stage.name }} · {{ group.name }}</p>
+    <h2>{{ page_title }}</h2>
+    <form method="post" class="pool-manager-form" novalidate>
+        {% csrf_token %}
+        {% if entry_search_url %}
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger" role="alert">{{ form.non_field_errors }}</div>
+            {% endif %}
+            {% for hidden in form.hidden_fields %}
+                {{ hidden }}
+                {% for error in hidden.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+            {% endfor %}
+            <div id="pool-group-entry-picker" data-search-url="{{ entry_search_url }}">
+                <label class="form-label" for="pool-group-entry-search">Eligible competition entrants</label>
+                <input
+                    class="form-control"
+                    id="pool-group-entry-search"
+                    type="search"
+                    autocomplete="off"
+                    placeholder="Search player or team name"
+                    aria-describedby="pool-group-entry-search-help"
+                >
+                <div id="pool-group-entry-search-help" class="form-text">Only entrants not yet assigned to this group stage are shown.</div>
+                <div id="pool-group-entry-results" class="list-group mt-2" role="listbox" aria-label="Eligible competition entrants"></div>
+            </div>
+            <section class="mt-3" aria-labelledby="pool-selected-group-entries-title">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                    <h3 id="pool-selected-group-entries-title" class="h5 mb-0">Selected entrants</h3>
+                    <p id="pool-group-entry-selected-count" class="pool-manager-help mb-0" aria-live="polite">No entrants selected.</p>
+                </div>
+                <div id="pool-group-entry-selected" class="list-group mt-2"></div>
+                {% for error in form.entry_ids.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+            </section>
+        {% else %}
+        {% include "pool/manage/_form_fields.html" with form=form %}
+        {% endif %}
+        <div class="pool-manager-actions">
+            {% if entry_search_url %}
+            <button class="btn btn-primary" type="submit"><span id="pool-group-entry-submit-label">Save assignments</span></button>
+            {% else %}
+            <button class="btn btn-primary" type="submit">Save assignment</button>
+            {% endif %}
+            {% if can_save_and_add_another %}<button class="btn btn-outline-primary" type="submit" name="save_and_add_another" value="1">Save &amp; add another</button>{% endif %}
+            <a class="btn btn-outline-secondary" href="{% url 'pool:manage_competition_group_stage' competition.slug stage.pk %}">Cancel</a>
+        </div>
+    </form>
+</section>
+{% if entry_search_url %}
+{{ selected_entries|json_script:"pool-selected-group-entries-data" }}
+<script>
+(function () {
+    const picker = document.getElementById("pool-group-entry-picker");
+    if (!picker) {
+        return;
+    }
+    const form = picker.closest("form");
+    const searchInput = document.getElementById("pool-group-entry-search");
+    const baseHiddenInput = document.getElementById("{{ form.entry_ids.id_for_label }}");
+    const selectedCount = document.getElementById("pool-group-entry-selected-count");
+    const selectedList = document.getElementById("pool-group-entry-selected");
+    const submitLabel = document.getElementById("pool-group-entry-submit-label");
+    const results = document.getElementById("pool-group-entry-results");
+    const entryIdsFieldName = "{{ form.entry_ids.html_name }}";
+    const selectedEntries = new Map();
+    let debounceTimer;
+    let activeRequest;
+
+    try {
+        const initialEntries = JSON.parse(
+            document.getElementById("pool-selected-group-entries-data").textContent
+        );
+        initialEntries.forEach(function (entry) {
+            selectedEntries.set(String(entry.id), entry);
+        });
+    } catch (error) {
+        // A server-rendered validation response remains usable even if this
+        // optional restoration payload cannot be read.
+    }
+
+    function entryLabel(entry) {
+        return entry.display_name + (entry.seed ? " (seed " + entry.seed + ")" : "");
+    }
+
+    function clearResults(message) {
+        results.replaceChildren();
+        if (message) {
+            const item = document.createElement("p");
+            item.className = "pool-manager-help mb-0";
+            item.textContent = message;
+            results.appendChild(item);
+        }
+    }
+
+    function updateSubmitLabel(count) {
+        if (!count) {
+            submitLabel.textContent = "Save assignments";
+            return;
+        }
+        submitLabel.textContent = "Save " + count + (count === 1 ? " assignment" : " assignments");
+    }
+
+    function syncSelectedEntries() {
+        form.querySelectorAll("input[data-pool-selected-entry-id]").forEach(function (input) {
+            input.remove();
+        });
+        if (baseHiddenInput) {
+            baseHiddenInput.value = "";
+        }
+        selectedList.replaceChildren();
+
+        const entries = Array.from(selectedEntries.values());
+        entries.forEach(function (entry) {
+            const hiddenInput = document.createElement("input");
+            hiddenInput.type = "hidden";
+            hiddenInput.name = entryIdsFieldName;
+            hiddenInput.value = String(entry.id);
+            hiddenInput.dataset.poolSelectedEntryId = String(entry.id);
+            form.appendChild(hiddenInput);
+
+            const item = document.createElement("div");
+            item.className = "list-group-item d-flex flex-wrap align-items-center justify-content-between gap-2";
+            const name = document.createElement("strong");
+            name.textContent = entryLabel(entry);
+            item.appendChild(name);
+            const remove = document.createElement("button");
+            remove.type = "button";
+            remove.className = "btn btn-sm btn-outline-secondary";
+            remove.textContent = "Remove";
+            remove.addEventListener("click", function () {
+                selectedEntries.delete(String(entry.id));
+                syncSelectedEntries();
+                showResultsFromCurrentSearch();
+            });
+            item.appendChild(remove);
+            selectedList.appendChild(item);
+        });
+
+        selectedCount.textContent = entries.length
+            ? entries.length + (entries.length === 1 ? " entrant selected." : " entrants selected.")
+            : "No entrants selected.";
+        updateSubmitLabel(entries.length);
+    }
+
+    function showResults(entries) {
+        results.replaceChildren();
+        if (!entries.length) {
+            clearResults("No eligible entrants matched that search.");
+            return;
+        }
+        entries.forEach(function (entry) {
+            const button = document.createElement("button");
+            const isSelected = selectedEntries.has(String(entry.id));
+            button.type = "button";
+            button.className = "list-group-item list-group-item-action";
+            button.setAttribute("role", "option");
+            button.textContent = isSelected ? "Added: " + entryLabel(entry) : "+ " + entryLabel(entry);
+            button.disabled = isSelected;
+            button.addEventListener("click", function () {
+                selectedEntries.set(String(entry.id), entry);
+                syncSelectedEntries();
+                showResults(entries);
+            });
+            results.appendChild(button);
+        });
+    }
+
+    function searchEntries() {
+        const query = searchInput.value.trim();
+        if (!query) {
+            clearResults("");
+            return;
+        }
+        if (activeRequest) {
+            activeRequest.abort();
+        }
+        activeRequest = new AbortController();
+        const url = new URL(picker.dataset.searchUrl, window.location.origin);
+        url.searchParams.set("q", query);
+        fetch(url, {signal: activeRequest.signal, headers: {"Accept": "application/json"}})
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error("Entry search failed.");
+                }
+                return response.json();
+            })
+            .then(function (payload) {
+                showResults(payload.results || []);
+            })
+            .catch(function (error) {
+                if (error.name !== "AbortError") {
+                    clearResults("Entry search is temporarily unavailable.");
+                }
+            });
+    }
+
+    function showResultsFromCurrentSearch() {
+        if (searchInput.value.trim()) {
+            searchEntries();
+        }
+    }
+
+    searchInput.addEventListener("input", function () {
+        window.clearTimeout(debounceTimer);
+        debounceTimer = window.setTimeout(searchEntries, 180);
+    });
+    syncSelectedEntries();
+}());
+</script>
+{% endif %}
+{% endblock %}

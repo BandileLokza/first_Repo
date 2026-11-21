@@ -1,0 +1,608 @@
+{% extends "pool/manage/base.html" %}
+{% load static %}
+
+{% block manager_title %}Team fixture · {{ competition.name }}{% endblock %}
+
+{% block manager_content %}
+<section class="pool-manager-scoreboard mb-3" aria-labelledby="team-match-manager-title">
+    <div class="pool-match-hero-topline"><div><p class="pool-eyebrow mb-1">Team match operations</p><h2 id="team-match-manager-title" class="h5 mb-0">{{ match.stage_context_label }}</h2></div><span class="pool-status pool-status--{{ match.status|lower }}" data-pool-score-status>{{ match.get_status_display }}</span></div>
+    <div class="pool-scoreboard mt-3"><div class="pool-scoreboard-participant"><strong class="pool-scoreboard-participant-link"><span>{{ match.home_entry.display_name }}</span></strong></div><div class="pool-scoreboard-score"><span data-pool-home-score>{{ match.home_score }}</span><span>–</span><span data-pool-away-score>{{ match.away_score }}</span><small>Race to <span data-pool-race-target>{{ match.race_target }}</span></small></div><div class="pool-scoreboard-participant"><strong class="pool-scoreboard-participant-link"><span>{{ match.away_entry.display_name }}</span></strong></div></div>
+    <p class="pool-manager-help mt-3 mb-0">{{ match.table_count }} physical table{{ match.table_count|pluralize }} available{% if match.scheduled_at %} · scheduled {{ match.scheduled_at|date:"M j, Y H:i" }}{% endif %}.</p>
+</section>
+
+{% include "pool/_match_timer.html" %}
+
+<section class="pool-manager-panel mb-3">
+    <details class="pool-details">
+        <summary class="pool-details-summary">
+            <div>
+                <p class="pool-eyebrow mb-1">
+                    Team sheets
+                </p>
+
+                <strong>
+                    Match lineups
+                </strong>
+
+                <small>
+                    View starters and substitutes
+                </small>
+            </div>
+
+            <span class="pool-details-toggle-text">
+                View lineup
+            </span>
+        </summary>
+
+        <div class="pool-details-content">
+            <p class="pool-manager-help">
+                Each team submits the five numbered positions with one to five
+                eligible starters. Empty positions remain vacant until an
+                authorised scorer fills them or their scheduled rack is due.
+            </p>
+
+            <div class="row g-3">
+                {% for card in lineup_cards %}
+                <section class="col-12 col-lg-6">
+                    <div class="pool-team-operations-card h-100">
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                            <h3>{{ card.entry.display_name }}</h3>
+
+                            {% if card.is_complete %}
+                            <span class="pool-status pool-status--published">
+                                Ready
+                            </span>
+                            {% else %}
+                            <span class="pool-status pool-status--draft">
+                                Lineup needed
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        {% if card.positions %}
+                        <ol class="pool-lineup-list pool-lineup-list--compact">
+                            {% for position in card.positions %}
+                            <li>
+                                <span>
+                                    Position {{ position.position }}
+                                </span>
+
+                                {% if position.player %}
+                                <strong>{{ position.player.full_name }}</strong>
+                                {% else %}
+                                <strong class="pool-muted">Vacant</strong>
+                                {% endif %}
+                            </li>
+                            {% endfor %}
+                        </ol>
+                        {% else %}
+                        <p class="pool-manager-help">
+                            No valid team sheet has been submitted.
+                        </p>
+                        {% endif %}
+
+                        <div class="pool-manager-actions mt-3">
+                            {% if not scorer_mode %}
+                            <a
+                                class="btn btn-outline-primary"
+                                href="{% url 'pool:team_match_lineup' match.pk card.entry.pk %}"
+                            >
+                                Open lineup
+                            </a>
+                            {% endif %}
+
+                            {% if card.substitute_count %}
+                            <span class="pool-muted">
+                                {{ card.substitute_count }}
+                                substitute{{ card.substitute_count|pluralize }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </section>
+                {% endfor %}
+            </div>
+        </div>
+    </details>
+</section>
+{% if can_manage_scorers %}
+{% if schedule_rows %}
+<section
+    class="pool-manager-panel mb-3"
+    aria-labelledby="scorer-rack-history-title"
+>
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <div>
+            <h2 id="scorer-rack-history-title" class="mb-1">
+                Rack history
+            </h2>
+
+            <p class="pool-manager-help mb-0">
+                Completed racks from this fixture.
+            </p>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table pool-manager-table">
+            <thead>
+                <tr>
+                    <th>Rack</th>
+                    <th>Players</th>
+                    <th>Winner</th>
+                    <th>Outcome</th>
+                </tr>
+            </thead>
+
+            <tbody id="scorer-rack-history">
+                {% for row in schedule_rows %}
+                    {% if row.rack %}
+                    <tr class="pool-rack-history-row">
+                        <th scope="row">
+                            {{ row.scheduled_rack.sequence_number }}
+                        </th>
+
+                        <td>
+                            {% if row.home_player %}{{ row.home_player.full_name }}{% else %}Vacant{% endif %}
+                            <span class="pool-position-tag">
+                                #{{ row.scheduled_rack.home_position }}
+                            </span>
+
+                            <span class="pool-muted">vs</span>
+
+                            {% if row.away_player %}{{ row.away_player.full_name }}{% else %}Vacant{% endif %}
+                            <span class="pool-position-tag">
+                                #{{ row.scheduled_rack.away_position }}
+                            </span>
+                        </td>
+
+                        <td>
+                            {% if row.rack.winning_player %}
+                                {{ row.rack.winning_player.full_name }}
+                            {% else %}
+                                {{ row.rack.winner.display_name }}
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {{ row.rack.get_outcome_type_display }}
+                        </td>
+                    </tr>
+                    {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pool-rack-history-actions">
+        <button
+            type="button"
+            id="scorer-rack-history-toggle"
+            class="btn btn-outline-primary"
+            hidden
+        >
+            See full rack history
+        </button>
+    </div>
+</section>
+{% endif %}
+<section
+    class="pool-manager-panel mb-3"
+    aria-labelledby="team-scorers-title"
+>
+    <div
+        class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3"
+    >
+        <div>
+            <h2 id="team-scorers-title" class="mb-1">
+                Match scorers
+            </h2>
+            <p class="pool-manager-help mb-0">
+                Assign someone to operate only this fixture's live score sheet.
+                This does not make them a competition administrator.
+            </p>
+        </div>
+
+        {% if can_open_live_scorer %}
+        <a
+            class="btn btn-outline-success"
+            href="{% url 'pool:match_score' match.pk %}"
+        >
+            Open scorer view
+        </a>
+        {% endif %}
+    </div>
+
+    <form
+        method="post"
+        action="{% url 'pool:manage_match_scorer_add' competition.slug match.pk %}"
+        class="pool-manager-form"
+        novalidate
+    >
+        {% csrf_token %}
+        {% include "pool/manage/_form_fields.html" with form=scorer_form %}
+
+        <button class="btn btn-primary" type="submit">
+            Assign scorer
+        </button>
+    </form>
+
+    {% if scorer_assignments %}
+    <ul class="pool-manager-membership-list mt-3">
+        {% for assignment in scorer_assignments %}
+        <li>
+            <div>
+                <strong>{{ assignment.user.get_username }}</strong>
+                {% if assignment.user.email %}
+                <span>{{ assignment.user.email }}</span>
+                {% endif %}
+            </div>
+
+            <div class="pool-manager-actions">
+                {% if assignment.is_active %}
+                    <span class="pool-status pool-status--published">
+                        Active
+                    </span>
+                {% else %}
+                    <span class="pool-status pool-status--draft">
+                        Inactive
+                    </span>
+                {% endif %}
+
+                <form
+                    method="post"
+                    action="{% url 'pool:manage_match_scorer_toggle' competition.slug match.pk assignment.pk %}"
+                >
+                    {% csrf_token %}
+                    <button
+                        class="btn btn-sm btn-outline-secondary"
+                        type="submit"
+                    >
+                        {% if assignment.is_active %}
+                            Deactivate
+                        {% else %}
+                            Reactivate
+                        {% endif %}
+                    </button>
+                </form>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</section>
+{% endif %}
+
+{% include "pool/manage/_team_match_scorer_operations.html" %}
+{% if result_is_locked and not scorer_mode %}<section class="pool-manager-panel mb-3"><h2>Completed result</h2><p class="pool-manager-help">Open correction mode before changing a completed scheduled rack.</p><form method="post" action="{% url 'pool:manage_match_open_correction' competition.slug match.pk %}" class="pool-manager-form" novalidate>{% csrf_token %}{% include "pool/manage/_form_fields.html" with form=correction_form %}<button class="btn btn-outline-warning" type="submit">Open correction mode</button></form></section>{% endif %}
+{% if correction_is_open and not scorer_mode %}<div class="alert alert-warning" role="status"><strong>Correction mode is open.</strong> Correct a completed scheduled rack using its recorded player snapshots.</div>{% endif %}
+{% if False %}
+<section class="pool-manager-panel mb-3"><h2>Start team match</h2><p class="pool-manager-help">Starting creates the fixed 25-rack position schedule. No players are permanently attached to a future rack until it is started.</p>{% if lineups_ready %}<form method="post" action="{% url 'pool:manage_match_start' competition.slug match.pk %}">{% csrf_token %}<button class="btn btn-success btn-lg" type="submit">Start match and create schedule</button></form>{% else %}<div class="alert alert-warning mb-0" role="status">Both teams must submit a valid five-position team sheet with at least one eligible starter before this fixture can start.</div>{% endif %}</section>
+
+{% if result_is_locked and not scorer_mode %}
+<section class="pool-manager-panel mb-3"><h2>Completed result</h2><p class="pool-manager-help">Open correction mode before changing a completed scheduled rack. The immutable player snapshots stay in place.</p><form method="post" action="{% url 'pool:manage_match_open_correction' competition.slug match.pk %}" class="pool-manager-form" novalidate>{% csrf_token %}{% include "pool/manage/_form_fields.html" with form=correction_form %}<button class="btn btn-outline-warning" type="submit">Open correction mode</button></form></section>
+{% endif %}
+
+{% if correction_is_open and not scorer_mode %}<div class="alert alert-warning" role="status"><strong>Correction mode is open.</strong> Correct a completed scheduled rack using its two recorded player snapshots. The parent score and safe bracket progression will be synchronised.</div>{% endif %}
+
+{% if match.status == 'LIVE' %}
+{% if team_timer_no_live_tie %}
+<div class="alert alert-warning" role="status">
+    <strong>Time expired with no deciding team rack live.</strong>
+    No new scheduled rack may start. {% if scorer_mode %}Contact a competition manager to resolve the fixture.{% else %}Record a genuine withdrawal or disqualification if applicable{% if team_timer_no_live_tie_can_abandon %}, or abandon the fixture{% endif %}; no deciding rack result may be fabricated.{% endif %}
+</div>
+{% endif %}
+<section class="pool-manager-panel mb-3" aria-labelledby="team-live-racks-title">
+    <div class="d-flex flex-wrap align-items-end justify-content-between gap-2 mb-3"><div><h2 id="team-live-racks-title" class="mb-1">Live tables</h2><p class="pool-manager-help mb-0">A player can appear on only one live table. The next eligible original schedule position is selected automatically.</p></div>{% if no_new_racks %}<span class="pool-status pool-status--finished">No new racks</span>{% endif %}</div>
+    {% if live_rack_rows %}
+    <div class="row g-3">
+        {% for row in live_rack_rows %}
+        <section class="col-12 col-lg-6">
+            <div class="pool-team-live-rack h-100" data-pool-team-live-rack="{{ row.scheduled_rack.pk }}">
+                <div class="d-flex justify-content-between gap-2">
+                    <h3>Table {{ row.scheduled_rack.table_number }}</h3>
+                    <span class="pool-status pool-status--live">Live</span>
+                </div>
+                <p class="pool-manager-help">
+                    Session {{ row.scheduled_rack.session_number }}, scheduled rack {{ row.scheduled_rack.sequence_number }}
+                </p>
+                <p class="pool-team-rack-pairing">
+                    <strong>
+                        {{ row.home_player.full_name }}
+                        <small class="pool-position-tag">
+                            #{{ row.scheduled_rack.home_position }}
+                        </small>
+                    </strong>
+
+                    <span>vs</span>
+
+                    <strong>
+                        {{ row.away_player.full_name }}
+                        <small class="pool-position-tag">
+                            #{{ row.scheduled_rack.away_position }}
+                        </small>
+                    </strong>
+                </p>
+                <form method="post"
+                    action="{% url 'pool:manage_team_match_rack_complete' competition.slug match.pk row.scheduled_rack.pk %}"
+                    class="pool-manager-form"
+                    data-pool-team-rack-score-form
+                    novalidate>
+                    {% csrf_token %}
+                    {% include "pool/manage/_team_scheduled_rack_result_fields.html" with form=row.result_form scheduled_rack=row.scheduled_rack home_player=row.home_player away_player=row.away_player %}
+                    <button class="btn btn-primary" type="submit">Complete rack</button>
+                    <p class="pool-rack-save-status mt-2 mb-0" data-pool-rack-save-status role="status" aria-live="polite" hidden></p>
+                </form>
+            </div>
+        </section>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="pool-manager-help">No rack is currently live.</p>
+    {% endif %}
+
+    {% if available_tables %}<div class="pool-manager-inline-actions mt-3">{% for table_number in available_tables %}<form method="post" action="{% url 'pool:manage_team_match_rack_start' competition.slug match.pk %}">{% csrf_token %}<input type="hidden" name="table_number" value="{{ table_number }}"><button class="btn btn-outline-success" type="submit">Start next rack on table {{ table_number }}</button></form>{% endfor %}</div>{% elif not no_new_racks %}<p class="pool-manager-help mt-3 mb-0">No pending rack is eligible while a scheduled player is already live.</p>{% endif %}
+    <p class="pool-manager-help mt-2 mb-0" data-pool-next-scheduled-rack hidden></p>
+    <p class="pool-manager-help mt-2 mb-0" data-pool-latest-rack hidden></p>
+</section>
+{% if up_next_rows %}
+<section
+    class="pool-manager-panel mb-3"
+    aria-labelledby="manager-up-next-title"
+>
+    <h2 id="manager-up-next-title">Up next</h2>
+
+    <div class="pool-up-next-list">
+        {% for row in up_next_rows %}
+        <div class="pool-up-next-rack">
+            <div>
+                <strong>Rack {{ row.scheduled_rack.sequence_number }}</strong>
+                <span>Session {{ row.scheduled_rack.session_number }}</span>
+            </div>
+
+            <p>
+                {% if row.home_player %}
+                    {{ row.home_player.full_name }}
+                    <span class="pool-position-tag">
+                        #{{ row.scheduled_rack.home_position }}
+                    </span>
+                {% else %}
+                    Vacant
+                {% endif %}
+
+                <span class="pool-muted">vs</span>
+
+                {% if row.away_player %}
+                    {{ row.away_player.full_name }}
+                    <span class="pool-position-tag">
+                        #{{ row.scheduled_rack.away_position }}
+                    </span>
+                {% else %}
+                    Vacant
+                {% endif %}
+            </p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<section class="pool-manager-panel mb-3" aria-labelledby="team-substitution-title">
+    <h2 id="team-substitution-title">Live substitutions</h2><p class="pool-manager-help">A substitute changes only a current position for future unstarted racks. Completed and live rack snapshots never change. Re-entry is allowed when the player was in the submitted squad and is free.</p>
+    <div class="row g-3">{% for row in substitution_rows %}<section class="col-12 col-lg-6"><div class="pool-team-operations-card h-100"><h3>{{ row.entry.display_name }}</h3><form method="post" action="{% url 'pool:manage_team_match_substitute' competition.slug match.pk row.entry.pk %}" class="pool-manager-form" novalidate>{% csrf_token %}{% include "pool/manage/_form_fields.html" with form=row.form %}<button class="btn btn-outline-primary" type="submit">Save substitution</button></form></div></section>{% endfor %}</div>
+</section>
+{% if vacancy_fill_rows %}
+<section class="pool-manager-panel mb-3" aria-labelledby="team-vacancy-fill-title">
+    <h2 id="team-vacancy-fill-title">Fill vacant positions</h2>
+    <p class="pool-manager-help">An exact-match scorer may add an eligible player already on that team’s competition roster. This is not a substitution and changes only future unresolved schedule rows.</p>
+    <div class="row g-3">{% for row in vacancy_fill_rows %}<section class="col-12 col-lg-6"><div class="pool-team-operations-card h-100"><h3>{{ row.entry.display_name }}</h3><form method="post" action="{% url 'pool:manage_team_match_fill_vacancy' competition.slug match.pk row.entry.pk %}" class="pool-manager-form" novalidate>{% csrf_token %}{% include "pool/manage/_form_fields.html" with form=row.form %}<button class="btn btn-outline-primary" type="submit">Fill vacant position</button></form></div></section>{% endfor %}</div>
+</section>
+{% endif %}
+{% endif %}
+{% endif %}
+
+{% if not scorer_mode and not result_is_locked and match.status != 'CANCELLED' and match.status != 'ABANDONED' %}
+<section class="pool-manager-panel mb-3"><h2>Non-played result</h2><p class="pool-manager-help">Record a walkover, withdrawal, or disqualification without creating fake scheduled-rack results.</p><form method="post" action="{% url 'pool:manage_match_non_played_result' competition.slug match.pk %}" class="pool-manager-form" novalidate>{% csrf_token %}{% include "pool/manage/_form_fields.html" with form=non_played_form %}<button class="btn btn-outline-primary" type="submit">Save non-played result</button></form></section>
+{% endif %}
+
+{% if not scorer_mode %}
+    {% if match.status == 'UPCOMING' or match.status == 'LIVE' or match.status == 'POSTPONED' %}
+        <section class="pool-manager-panel mb-3"><h2>Fixture status</h2><p class="pool-manager-help">Use these transitions when the fixture is not being completed normally.</p><div class="pool-manager-actions">{% if match.status == 'UPCOMING' or match.status == 'LIVE' %}<form method="post" action="{% url 'pool:manage_match_transition' competition.slug match.pk 'POSTPONED' %}">{% csrf_token %}<input type="hidden" name="reason" value=""><button class="btn btn-outline-warning" type="submit">Postpone</button></form>{% endif %}{% if match.status == 'UPCOMING' or match.status == 'POSTPONED' %}<form method="post" action="{% url 'pool:manage_match_transition' competition.slug match.pk 'CANCELLED' %}">{% csrf_token %}<input type="hidden" name="reason" value=""><button class="btn btn-outline-danger" type="submit">Cancel</button></form>{% endif %}{% if match.status == 'LIVE' or match.status == 'POSTPONED' %}<form method="post" action="{% url 'pool:manage_match_transition' competition.slug match.pk 'ABANDONED' %}">{% csrf_token %}<input type="hidden" name="reason" value=""><button class="btn btn-outline-danger" type="submit">Abandon</button></form>{% endif %}</div></section>
+    {% endif %}
+{% endif %}
+
+<section class="pool-manager-panel">
+    <details class="pool-details">
+        <summary class="pool-details-summary">
+            <div>
+                <p class="pool-eyebrow mb-1">
+                    Score sheet
+                </p>
+
+                <strong>
+                    Full 25-rack schedule
+                </strong>
+
+                <small>
+                    View all scheduled, live, completed and not-required racks
+                </small>
+            </div>
+
+            <span class="pool-details-toggle-text">
+                View schedule
+            </span>
+        </summary>
+
+        <div class="pool-details-content">
+
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                <div>
+                    <p class="pool-manager-help mb-0">
+                        The schedule remains in its original sequence even when
+                        an earlier rack is temporarily blocked.
+                    </p>
+                </div>
+
+                <a
+                    class="btn btn-outline-secondary"
+                    href="{% url 'pool:match_detail' match.pk %}"
+                >
+                    View public match page
+                </a>
+            </div>
+
+            {% if schedule_rows %}
+            <div class="table-responsive">
+                <table class="table pool-manager-table pool-team-schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Rack</th>
+                            <th>Session</th>
+                            <th>Home player</th>
+                            <th>Away player</th>
+                            <th>Table</th>
+                            <th>Status</th>
+                            <th>Result</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for row in schedule_rows %}
+                        <tr>
+                            <th scope="row">
+                                {{ row.scheduled_rack.sequence_number }}
+                            </th>
+
+                            <td>
+                                {{ row.scheduled_rack.session_number }}
+                            </td>
+
+                            <td>
+                                {{ row.home_player.full_name|default:"Vacant" }}
+                            </td>
+
+                            <td>
+                                {{ row.away_player.full_name|default:"Vacant" }}
+                            </td>
+
+                            <td>
+                                {{ row.scheduled_rack.table_number|default:"—" }}
+                            </td>
+
+                            <td>
+                                <span class="pool-status pool-status--{{ row.scheduled_rack.status|lower }}">
+                                    {{ row.scheduled_rack.get_status_display }}
+                                </span>
+                            </td>
+
+                            <td>
+                                {% if row.rack %}
+                                    <strong>
+                                        {{ row.rack.winner.display_name }}
+                                    </strong>
+                                    ·
+                                    {{ row.rack.get_outcome_type_display }}
+
+                                    {% if correction_is_open and not scorer_mode and row.correction_form %}
+                                    <details class="mt-2">
+                                        <summary class="btn btn-sm btn-outline-secondary">
+                                            Correct
+                                        </summary>
+
+                                        <form
+                                            method="post"
+                                            action="{% url 'pool:manage_team_match_rack_correct' competition.slug match.pk row.scheduled_rack.pk %}"
+                                            class="pool-manager-form text-start mt-2"
+                                            novalidate
+                                        >
+                                            {% csrf_token %}
+
+                                            {% include "pool/manage/_form_fields.html" with form=row.correction_form %}
+
+                                            <button
+                                                class="btn btn-sm btn-primary"
+                                                type="submit"
+                                            >
+                                                Save correction
+                                            </button>
+                                        </form>
+                                    </details>
+                                    {% endif %}
+
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="pool-empty-state pool-empty-state--compact">
+                <p>
+                    The fixed 25-rack schedule will be created when the match starts.
+                </p>
+            </div>
+            {% endif %}
+
+        </div>
+    </details>
+</section>
+{% if result_revisions and not scorer_mode %}<section class="pool-manager-panel mt-3"><h2>Result history</h2><div class="table-responsive"><table class="table pool-manager-table"><thead><tr><th>When</th><th>Action</th><th>Reason</th></tr></thead><tbody>{% for revision in result_revisions %}<tr><td>{{ revision.created_at|date:"M j, Y H:i" }}</td><td>{{ revision.get_action_display }}</td><td>{{ revision.reason|default:"—" }}</td></tr>{% endfor %}</tbody></table></div></section>{% endif %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const history = document.getElementById(
+        "scorer-rack-history"
+    );
+
+    const toggle = document.getElementById(
+        "scorer-rack-history-toggle"
+    );
+
+    if (!history || !toggle) {
+        return;
+    }
+
+    const rows = Array.from(
+        history.querySelectorAll(
+            ".pool-rack-history-row"
+        )
+    );
+
+    const visibleLimit = 6;
+
+    if (rows.length <= visibleLimit) {
+        return;
+    }
+
+    rows
+        .slice(visibleLimit)
+        .forEach(function (row) {
+            row.hidden = true;
+        });
+
+    toggle.hidden = false;
+
+    let expanded = false;
+
+    toggle.addEventListener(
+        "click",
+        function () {
+            expanded = !expanded;
+
+            rows
+                .slice(visibleLimit)
+                .forEach(function (row) {
+                    row.hidden = !expanded;
+                });
+
+            toggle.textContent = expanded
+                ? "Show less"
+                : "See full rack history";
+        }
+    );
+});
+</script>
+<script src="{% static 'pool/js/rack_scoring.js' %}" defer></script>
+{% endblock %}

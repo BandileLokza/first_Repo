@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}{{ region.name }} Football{% endblock %}
+{% block content %}
+{% include "includes/sport_selector.html" %}
+{% url 'league_list' as directory_url %}
+{% include "includes/history_back.html" with fallback_url=directory_url only %}
+<header class="region-detail-header">
+    {% if region.logo %}
+        <img src="{{ region.logo.url }}" alt="{{ region.name }} logo" class="region-detail-logo" decoding="async">
+    {% else %}
+        <span class="region-detail-logo region-detail-logo--fallback" aria-hidden="true">🏆</span>
+    {% endif %}
+    <h2 class="m-0">{{ region.name }}</h2>
+</header>
+{% for item in league_data %}
+{% include "leagues/partials/league_card.html" with item=item %}
+{% empty %}<p class="text-muted">No public leagues are available in this region.</p>{% endfor %}
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "pool/manage/base.html" %}
+
+{% block manager_title %}Base standings · {{ competition.name }}{% endblock %}
+
+{% block manager_content %}
+<section class="pool-manager-panel mb-3" aria-labelledby="pool-base-standings-title">
+    <div class="d-flex flex-wrap align-items-start justify-content-between gap-2">
+        <div>
+            <h2 id="pool-base-standings-title">Base standings</h2>
+            <p class="pool-manager-help mb-0">
+                Enter the aggregate table from before eSportsLive began recording this league. Empty rows mean zero; recorded pool results are added on top.
+            </p>
+        </div>
+        <span class="pool-status pool-status--draft">Superuser only</span>
+    </div>
+
+    <form method="get" class="pool-manager-form mt-3" action="{% url 'pool:manage_competition_base_standings' competition.slug %}">
+        <div class="row g-3 align-items-end">
+            <div class="col-12 col-md-5">
+                <label class="form-label" for="{{ scope_form.stage.id_for_label }}">Table stage</label>
+                {{ scope_form.stage }}
+                {% for error in scope_form.stage.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+            </div>
+            <div class="col-12 col-md-5">
+                <label class="form-label" for="{{ scope_form.group.id_for_label }}">Group</label>
+                {{ scope_form.group }}
+                <div class="form-text">Choose a group only for a group stage.</div>
+                {% for error in scope_form.group.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+            </div>
+            <div class="col-12 col-md-2"><button class="btn btn-outline-primary w-100" type="submit">Open table</button></div>
+        </div>
+        {% for error in scope_form.non_field_errors %}<div class="alert alert-danger mt-3 mb-0" role="alert">{{ error }}</div>{% endfor %}
+    </form>
+</section>
+
+{% if selected_stage %}
+<section class="pool-manager-panel" aria-labelledby="pool-base-standings-edit-title">
+    <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3">
+        <div>
+            <h2 id="pool-base-standings-edit-title">{{ selected_group.name|default:selected_stage.name }}</h2>
+            <p class="pool-manager-help mb-0">Save every entrant in one action. Values cannot be negative, and wins plus losses cannot exceed played.</p>
+        </div>
+        {% if baseline_scope_has_values %}<span class="pool-status pool-status--active">Imported table in use</span>{% endif %}
+    </div>
+    {% if baseline_formset.non_form_errors %}<div class="alert alert-danger" role="alert">{{ baseline_formset.non_form_errors }}</div>{% endif %}
+    <form method="post" class="pool-manager-form" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="stage" value="{{ selected_stage.pk }}">
+        {% if selected_group %}<input type="hidden" name="group" value="{{ selected_group.pk }}">{% endif %}
+        {{ baseline_formset.management_form }}
+        <div class="table-responsive">
+            <table class="table pool-manager-table pool-manager-standings-table">
+                <thead><tr><th>Entrant</th><th>Played</th><th>Won</th><th>Lost</th><th>Racks won</th><th>Racks lost</th><th>Points</th></tr></thead>
+                <tbody>
+                    {% for row in baseline_rows %}
+                    <tr>
+                        <th scope="row">{{ row.entry.display_name }}{{ row.form.entry }}</th>
+                        <td>{{ row.form.played }}{% for error in row.form.played.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}</td>
+                        <td>{{ row.form.won }}{% for error in row.form.won.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}</td>
+                        <td>{{ row.form.lost }}{% for error in row.form.lost.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}</td>
+                        <td>{{ row.form.racks_for }}{% for error in row.form.racks_for.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}</td>
+                        <td>{{ row.form.racks_against }}{% for error in row.form.racks_against.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}</td>
+                        <td>{{ row.form.points }}{% for error in row.form.points.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}</td>
+                    </tr>
+                    {% empty %}<tr><td colspan="7" class="text-center">No entrants are assigned to this table yet.</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <button class="btn btn-primary" type="submit">Save base standings</button>
+    </form>
+</section>
+{% endif %}
+{% endblock %}

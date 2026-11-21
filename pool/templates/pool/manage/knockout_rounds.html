@@ -1,0 +1,50 @@
+{% extends "pool/manage/base.html" %}
+
+{% block manager_title %}Knockout rounds · {{ competition.name }}{% endblock %}
+
+{% block manager_content %}
+<section class="pool-manager-panel">
+    <div class="pool-manager-section-heading">
+        <div>
+            <p class="pool-eyebrow">Manual knockout structure</p>
+            <h2>Knockout rounds</h2>
+            <p class="pool-manager-help mb-0">Configure canonical round names without creating a bracket, fixtures, or results. You can still use the normal bracket manager later.</p>
+        </div>
+    </div>
+
+    {% if knockout_stages|length > 1 %}
+    <nav class="pool-filter-links mb-3" aria-label="Knockout stage selection">
+        {% for stage in knockout_stages %}
+        <a class="pool-filter-link {% if stage.pk == selected_stage.pk %}is-active{% endif %}" href="?stage={{ stage.pk }}">{{ stage.name }}</a>
+        {% endfor %}
+    </nav>
+    {% endif %}
+
+    <form method="post" class="pool-manager-form" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="stage" value="{{ selected_stage.pk }}">
+        {% include "pool/manage/_form_fields.html" with form=form %}
+        <div class="pool-manager-actions">
+            <button class="btn btn-primary" type="submit">Generate rounds</button>
+        </div>
+    </form>
+</section>
+
+<section class="pool-manager-panel">
+    <div class="pool-manager-section-heading">
+        <div>
+            <p class="pool-eyebrow">{{ selected_stage.name }}</p>
+            <h2>Configured structure</h2>
+        </div>
+    </div>
+    {% if round_definitions %}
+    <ol class="pool-manager-list mb-0">
+        {% for round_definition in round_definitions %}
+        <li><strong>{{ round_definition.name }}</strong><span class="text-muted">{{ round_definition.round_size }}-competitor round</span></li>
+        {% endfor %}
+    </ol>
+    {% else %}
+    <p class="pool-manager-empty mb-0">No manual knockout rounds are configured yet.</p>
+    {% endif %}
+</section>
+{% endblock %}

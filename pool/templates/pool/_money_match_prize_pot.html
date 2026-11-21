@@ -1,0 +1,4 @@
+{% load pool_presentation %}
+{% if prize_competition.is_money_match and prize_competition.money_match_prize_pot is not None %}
+<span class="pool-money-match-prize-pot">Prize Pot: {{ prize_competition.money_match_prize_pot|lilangeni }}</span>
+{% endif %}

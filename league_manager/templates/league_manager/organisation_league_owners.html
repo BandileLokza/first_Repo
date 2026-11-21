@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}League Owners - {{ scope.name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+    <div>
+        <a href="{% url 'league_manager:dashboard' %}" class="back-btn">&larr; BACK</a>
+        <h2 class="mt-3 mb-1">League Owners</h2>
+        <p class="text-muted mb-0">{{ scope.administration_label }}</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-primary" href="{% url 'league_manager:organisation_report_export' scope.key 'fixtures' %}">Export Fixtures</a>
+        <a class="btn btn-outline-primary" href="{% url 'league_manager:organisation_report_export' scope.key 'results' %}">Export Results</a>
+    </div>
+</div>
+
+{% if scope.organisation != 'ZONAL' %}<p><a class="btn btn-outline-primary" href="{% url 'league_manager:organisation_fixture_letterhead' scope.key %}">Report stationery</a></p>{% endif %}
+
+<div class="alert alert-info">Assignments apply to each current season in the selected permanent league. New seasons retain existing owner memberships through the established season rollover workflow.</div>
+
+{% for item in series_data %}
+<section class="card shadow-sm mb-3"><div class="card-body">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+        <div><h4 class="mb-1">{{ item.series.name }}</h4><p class="small text-muted mb-0">{% for competition in item.competitions %}{{ competition.season }}{% if not forloop.last %}, {% endif %}{% empty %}No active season{% endfor %}</p></div>
+        <form method="post" action="{% url 'league_manager:organisation_league_owner_assign' scope.key item.series.id %}" class="d-flex gap-2 flex-wrap align-items-start">
+            {% csrf_token %}{{ owner_form.identifier }}<button class="btn btn-primary" type="submit">Assign Owner</button>
+        </form>
+    </div>
+    {% if scope.organisation == 'ZONAL' %}<p class="mt-3 mb-0"><a class="btn btn-outline-primary btn-sm" href="{% url 'league_manager:zonal_fixture_letterhead' item.series.id %}">Report stationery</a></p>{% endif %}
+    <hr>
+    {% for owner in item.owners %}
+        <div class="d-flex justify-content-between align-items-center border-bottom py-2 gap-2"><span><strong>{{ owner.get_full_name|default:owner.username }}</strong><span class="small text-muted ms-2">{{ owner.email }}</span></span><form method="post" action="{% url 'league_manager:organisation_league_owner_remove' scope.key item.series.id owner.id %}" onsubmit="return confirm('Remove this League Owner?');">{% csrf_token %}<button class="btn btn-outline-danger btn-sm">Remove Owner</button></form></div>
+    {% empty %}
+        <p class="text-muted mb-0">Owner: Not assigned</p>
+    {% endfor %}
+</div></section>
+{% empty %}
+<div class="alert alert-secondary">{{ scope.empty_message }}</div>
+{% endfor %}
+{% endblock %}

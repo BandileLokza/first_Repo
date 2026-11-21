@@ -1,0 +1,23 @@
+# Generated manually for the abandoned-match resolution audit trail.
+
+from django.db import migrations, models
+
+
+class Migration(migrations.Migration):
+
+    dependencies = [
+        ("league_manager", "0013_alter_organisationreportpreference_report_kind_and_more"),
+    ]
+
+    operations = [
+        migrations.AlterField(
+            model_name="activitylog",
+            name="action",
+            field=models.CharField(
+                choices=[
+                    ("AGENT_REGISTERED", "Agent Registered"), ("AGENT_REACTIVATED", "Agent Reactivated"), ("AGENT_DEACTIVATED", "Agent Deactivated"), ("AGENT_ASSIGNED", "Agent Assigned"), ("KNOCKOUT_ROUNDS_CONFIGURED", "Knockout Rounds Configured"), ("GROUP_CREATED", "Group Created"), ("GROUP_UPDATED", "Group Updated"), ("AGENT_UNASSIGNED", "Agent Unassigned"), ("FIRST_HALF_STARTED", "First Half Started"), ("FIRST_HALF_ENDED", "First Half Ended"), ("SECOND_HALF_STARTED", "Second Half Started"), ("REGULATION_ENDED", "Regulation Ended"), ("EXTRA_TIME_STARTED", "Extra Time Started"), ("EXTRA_TIME_FIRST_HALF_ENDED", "Extra Time First Half Ended"), ("EXTRA_TIME_SECOND_HALF_STARTED", "Extra Time Second Half Started"), ("EXTRA_TIME_ENDED", "Extra Time Ended"), ("PENALTIES_STARTED", "Penalties Started"), ("PENALTIES_RECORDED", "Penalties Recorded"), ("GOAL_ADDED", "Goal Added"), ("GOAL_EDITED", "Goal Edited"), ("GOAL_CANCELLED", "Goal Cancelled"), ("YELLOW_CARD_ADDED", "Yellow Card Added"), ("CARD_ADDED", "Card Added"), ("CARD_EDITED", "Card Edited"), ("CARD_CANCELLED", "Card Cancelled"), ("MATCH_FINISHED", "Match Finished"), ("MATCH_ABANDONED", "Match Abandoned"), ("ABANDONMENT_RESOLVED", "Abandoned Match Resolved"), ("ABANDONMENT_RESOLUTION_REOPENED", "Abandoned Match Resolution Reopened"), ("RESULT_CORRECTED", "Result Corrected"), ("BRACKET_CREATED", "Bracket Created"), ("BRACKET_SEEDED", "Bracket Seeded"), ("BRACKET_LINKED", "Bracket Links Created"), ("BYE_ADVANCED", "Bye Advanced"), ("KNOCKOUT_WINNER_ADVANCED", "Knockout Winner Advanced"), ("KNOCKOUT_CHAMPION_DECLARED", "Knockout Champion Declared"), ("BRACKET_CORRECTION_BLOCKED", "Bracket Correction Blocked"), ("BRACKET_CORRECTION_RESOLVED", "Bracket Correction Resolved"), ("TEAM_CREATED", "Team Created"), ("TEAM_UPDATED", "Team Updated"), ("PLAYER_CREATED", "Player Created"), ("PLAYER_UPDATED", "Player Updated"), ("FIXTURE_CREATED", "Fixture Created"), ("FIXTURE_UPDATED", "Fixture Updated"), ("FIXTURE_DELETED", "Fixture Deleted"), ("SCHEDULE_LOCKED", "Schedule Locked"), ("SCHEDULE_UNLOCKED", "Schedule Unlocked"), ("STAFF_ADDED", "Staff Added"), ("STAFF_REMOVED", "Staff Removed"), ("COACH_ASSIGNED", "Team Coach Assigned"), ("COACH_REMOVED", "Team Coach Removed"),
+                ],
+                max_length=40,
+            ),
+        ),
+    ]
